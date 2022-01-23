@@ -1,0 +1,41 @@
+version: '3.9'
+services:
+  back:
+    build: .
+    container_name: back
+    depends_on:
+      - db
+    env_file:
+      - back/config.env
+      - db/config.env
+    links:
+      - db
+    ports:
+      - 3000:3000
+    restart: always
+    volumes:
+      - ./back:/app
+    command: sh -c 'npm install && npm run start:dev'
+
+  db:
+    image: postgres:alpine
+    container_name: db
+    env_file:
+      - db/config.env
+    ports:
+      - 5432:5432
+    restart: always
+    volumes:
+      - ./db/data:/var/lib/postgresql/data
+
+  front:
+    build: .
+    container_name: front
+    env_file:
+      - front/config.env
+    ports:
+      - 8080:8080
+    restart: always
+    volumes:
+      - ./front:/app
+    command: sh -c 'npm install && npm run serve'
