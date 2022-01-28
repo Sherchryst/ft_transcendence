@@ -1,12 +1,12 @@
 import { Controller, Get, Redirect, Request, Res, Post, UseGuards } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { FortyTwoAuthGuard } from './forty-two-auth.guard';
-import { JwtAuthGuard } from './jwt.guard';
+import { CustomJwtService } from './jwt/jwt.service';
+import { FortyTwoAuthGuard } from './42/forty-two-auth.guard';
+import { JwtAuthGuard } from './jwt/jwt.guard';
 import { Logger } from '@nestjs/common';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private customJwtService: CustomJwtService) {}
 
   @Get('login42')
   @UseGuards(FortyTwoAuthGuard)
@@ -23,7 +23,7 @@ export class AuthController {
   @Get('redirect')
   @UseGuards(FortyTwoAuthGuard)
   async redirect(@Request() req, @Res() res) {
-    const { access_token } = this.authService.login(req.user)
+    const { access_token } = this.customJwtService.login(req.user)
     res.cookie('jwt', access_token)
     res.redirect("http://localhost:8080")
   }

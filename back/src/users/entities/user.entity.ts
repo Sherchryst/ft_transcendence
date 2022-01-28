@@ -8,9 +8,6 @@ export class User {
   @Column()
   username: string;
 
-  @Column()
-  accessToken: string;
-
-  @Column()
-  refreshToken: string;
+  @Column({ nullable: true })
+  twoFactorAuthenticationSecret?: string;
 }

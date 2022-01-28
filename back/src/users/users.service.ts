@@ -28,4 +28,11 @@ export class UsersService {
   findOne(id: number): Promise<User> {
     return this.usersRepository.findOne(id);
   }
+
+  async setTwoFactorAuthenticationSecret(secret: string, userId: number) {
+    return this.usersRepository.update({id: userId}, {
+      twoFactorAuthenticationSecret: secret
+    });
+  }
+
 }

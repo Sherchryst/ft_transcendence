@@ -2,19 +2,20 @@
   <div class="LogInOut">
     <button v-on:click="login42()">Login42</button> <br>
     <button v-on:click="test_login()">Test login</button> <br>
-    <button v-on:click="logout()">Logout</button>
+    <button v-on:click="logout()">Logout</button> <br>
+    <img :src="'http://localhost:3000/2fa/generate'"/>
   </div>
 </template>
 
 <script lang="ts">
-import { Vue } from 'vue-class-component';
 import axios from 'axios';
 import router from '@/router';
+import { defineComponent } from 'vue';
 
-export default {
+export default defineComponent({
     data() {
     return {
-      isLogged: false
+      isLogged: false,
     }
   },
   methods: {
@@ -36,5 +37,5 @@ export default {
       });
     }
   }
-}
+})
 </script>

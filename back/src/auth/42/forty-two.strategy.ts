@@ -18,9 +18,7 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy) {
     let user = await this.usersService.findOne(0); 
     if (!user) {
       user = await this.usersService.create({
-        username: name,
-        accessToken: accessToken,
-        refreshToken: refreshToken
+        username: name
       });
     }
     return user
