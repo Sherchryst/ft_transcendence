@@ -35,4 +35,10 @@ export class UsersService {
     });
   }
 
+  async turnOnTwoFactorAuthentication(userId: number) {
+    return this.usersRepository.update({id: userId}, {
+      isTwoFactorAuthenticationEnabled: true
+    });
+  }
+
 }

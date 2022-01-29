@@ -10,4 +10,7 @@ export class User {
 
   @Column({ nullable: true })
   twoFactorAuthenticationSecret?: string;
+
+  @Column({ default: false })
+  public isTwoFactorAuthenticationEnabled: boolean;
 }
