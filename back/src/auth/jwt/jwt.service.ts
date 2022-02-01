@@ -7,8 +7,8 @@ export class CustomJwtService {
     private jwtService: JwtService
   ) {}
 
-  login(user: any) {
-    const payload = { sub: user.id };
+  login(user: any, isSecondFactorAuth = false) {
+    const payload = { sub: user.id, isSecondFactorAuth };
     return {
       access_token: this.jwtService.sign(payload)
     };

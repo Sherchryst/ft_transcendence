@@ -14,18 +14,12 @@ export class AuthController {
     return ;
   }
 
-  @Get('test')
-  @UseGuards(JwtAuthGuard)
-  test(@Request() req) {
-    return 'logged'
-  }
-
   @Get('redirect')
   @UseGuards(FortyTwoAuthGuard)
   async redirect(@Request() req, @Res() res) {
     const { access_token } = this.customJwtService.login(req.user)
     res.cookie('jwt', access_token)
-    res.redirect("http://localhost:8080")
+    res.redirect("http://localhost:8080")//?2fa=" + req.user.isTwoFactorAuthenticationEnabled)
   }
 
   @Post('logout')
@@ -34,5 +28,4 @@ export class AuthController {
     res.clearCookie('jwt')
     res.send("logged out")
   }
-
 }

@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { jwtConstants } from './constants';
 import { UsersService } from 'src/users/users.service';
 
-export type JwtPayload = { sub: string };
+export type JwtPayload = { sub: string, isSecondFactorAuth: boolean };
 
 @Injectable()
 export class JwtAuthStrategy extends PassportStrategy(Strategy) {
@@ -23,6 +23,9 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload) {
-    return this.usersService.findOne(Number(payload.sub))
+    const user = await this.usersService.findOne(Number(payload.sub))
+    if (!user.isTwoFactorAuthenticationEnabled || payload.isSecondFactorAuth) {
+      return user;
+    }
   }
 }
