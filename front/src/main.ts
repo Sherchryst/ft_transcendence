@@ -5,3 +5,4 @@ import axios from 'axios'
 
 createApp(App).use(router).mount('#app')
 axios.defaults.withCredentials = true
+localStorage.setItem("state", "0")
