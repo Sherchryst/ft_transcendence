@@ -1,31 +1,44 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
+import { getManager, getRepository } from 'typeorm';
+import { UserAchievement } from './entities/user-achievement.entity';
+import { UserRelationship, UserRelationshipType } from './entities/user-relationship.entity';
 import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(User)
-    private usersRepository: Repository<User>
-  ) {}
-
-  async create(userDto: CreateUserDto): Promise<User> {
-    const newUser = this.usersRepository.create(userDto);
-    await this.usersRepository.save(newUser);
+  async create(login: string): Promise<User> {
+    const repo = getRepository(User);
+    const newUser = repo.create({
+      login: login,
+      nickname: login
+    });
+    await repo.save(newUser);
     return newUser;
   }
 
   async delete(id: number): Promise<void> {
-    await this.usersRepository.delete(id);
+    await getManager().delete(User, id);
   }
 
   findAll(): Promise<User[]> {
-    return this.usersRepository.find();
+    return getRepository(User).find();
   }
 
   findOne(id: number): Promise<User> {
-    return this.usersRepository.findOne(id);
+    return getRepository(User).findOne(id);
+  }
+
+  async getFriends(userId: number): Promise<User[]> {
+    return getRepository(UserRelationship).find({
+      relations: ['to'],
+      where: { from: { id: userId }, type: UserRelationshipType.FRIEND }
+    }).then(relations => relations.map(r => r.to));
+  }
+
+  async getUserAchievements(userId: number): Promise<UserAchievement[]> {
+    return getRepository(UserAchievement).find({
+      relations: ['achievement'],
+      where: { user: { id: userId } }
+    });
   }
 }
