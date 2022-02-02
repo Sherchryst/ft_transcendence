@@ -28,6 +28,12 @@ export class UsersService {
     return getRepository(User).findOne(id);
   }
 
+  findByLogin(login: string): Promise<User> {
+    return getRepository(User).findOne({
+      where: { login: login }
+    });
+  }
+
   async getFriends(userId: number): Promise<User[]> {
     return getRepository(UserRelationship).find({
       relations: ['to'],
@@ -41,4 +47,11 @@ export class UsersService {
       where: { user: { id: userId } }
     });
   }
+
+  async turnOnTwoFactorAuthentication(userId: number, secret: string) {
+    return getRepository(User).update({id: userId}, {
+      twofa: secret
+    });
+  }
+
 }

@@ -14,9 +14,10 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(accessToken: string, refreshToken: string, profile: Profile) {
-    let user = await this.usersService.findOne(0); 
+    const {username} = profile
+    let user = await this.usersService.findByLogin(username);
     if (!user)
-      user = await this.usersService.create(profile.username);
+      user = await this.usersService.create(username);
     return user
   }
 }

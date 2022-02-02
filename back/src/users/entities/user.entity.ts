@@ -25,8 +25,8 @@ export class User {
   @Column({ default: 0 })
   mmr: number;
 
-  @Column({ length: 32, nullable: true, default: () => 'null' })
-  twofa!: string;
+  @Column({ length: 32, default: '' })
+  twofa: string;
 
   @OneToMany(() => UserAchievement, a => a.user)
   userAchievements: UserAchievement[];

@@ -1,24 +1,24 @@
-
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { CustomJwtService } from './jwt/jwt.service'
 import { UsersModule } from '../users/users.module';
-import { UsersService } from 'src/users/users.service';
 import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller';
-import { FortyTwoStrategy } from './forty-two.strategy';
-import { JwtAuthStrategy } from './jwt.strategy';
+import { FortyTwoStrategy } from './42/forty-two.strategy';
+import { JwtAuthStrategy } from './jwt/jwt.strategy';
 import { JwtModule } from '@nestjs/jwt';  
-import { jwtConstants } from './constants';
+import { jwtConstants } from './jwt/constants';
 import { Repository } from 'typeorm';
+import { TwoFactorController } from './twoFactor/twoFactor.controller';
+import { TwoFactorService } from './twoFactor/twoFactor.service';
+import { Jwt2faStrategy } from './jwt/jwt.strategy';
 @Module({
-  controllers: [AuthController],
+  controllers: [AuthController, TwoFactorController],
   imports: [
     UsersModule,
     PassportModule,
     Repository,
     JwtModule.register({secret: jwtConstants.secret})
   ],
-  providers: [AuthService, FortyTwoStrategy, JwtAuthStrategy],
-  exports: [AuthService],
+  providers: [CustomJwtService, FortyTwoStrategy, JwtAuthStrategy, Jwt2faStrategy, TwoFactorService]
 })
 export class AuthModule {}
