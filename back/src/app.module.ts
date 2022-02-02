@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { ChatModule } from './chat/chat.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   controllers: [AppController],
@@ -21,7 +22,8 @@ import { ChatModule } from './chat/chat.module';
       synchronize: true
     }),
     AuthModule,
-    ChatModule
+    ChatModule,
+    UsersModule
   ]
 })
 export class AppModule {}

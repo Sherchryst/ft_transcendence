@@ -59,7 +59,7 @@
 
 ## Chat
 
-### - channel(<ins>id</ins>, name, owner_id, visibility, password)
+### - channel(<ins>id</ins>, name, *owner_id*, visibility, password)
 
 - id: INT
 	- An unique identifier for the channel.

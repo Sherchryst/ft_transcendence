@@ -1,4 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { UserAchievement } from './user-achievement.entity';
+import { UserRelationship } from './user-relationship.entity';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -25,4 +27,10 @@ export class User {
 
   @Column({ length: 32, nullable: true, default: () => 'null' })
   twofa!: string;
+
+  @OneToMany(() => UserAchievement, a => a.user)
+  userAchievements: UserAchievement[];
+
+  @OneToMany(() => UserRelationship, r => r.from)
+  userRelationships: UserRelationship[];
 }
