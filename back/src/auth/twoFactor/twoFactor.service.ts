@@ -13,9 +13,9 @@ export class TwoFactorService {
   public async generateTwoFactorAuthenticationSecret(user: User) {
     const secret = authenticator.generateSecret();
  
-    const otpauthUrl = authenticator.keyuri(user.username, "Pong", secret);
+    const otpauthUrl = authenticator.keyuri(user.login, "Pong", secret);
  
-    await this.usersService.setTwoFactorAuthenticationSecret(secret, user.id);
+    await this.usersService.turnOnTwoFactorAuthentication(user.id, secret);
  
     return {
       secret,
@@ -26,7 +26,7 @@ export class TwoFactorService {
   public isTwoFactorAuthenticationCodeValid(twoFactorAuthenticationCode: string, user: User) {
     return authenticator.verify({
       token: twoFactorAuthenticationCode,
-      secret: user.twoFactorAuthenticationSecret
+      secret: user.twofa
     })
   }
 

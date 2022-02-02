@@ -19,7 +19,7 @@ export class AuthController {
   async redirect(@Request() req, @Res() res) {
     const { access_token } = this.customJwtService.login(req.user)
     res.cookie('jwt', access_token, {sameSite: "Lax"})
-    res.redirect("http://localhost:8080/#?is2fa=" + req.user.isTwoFactorAuthenticationEnabled)
+    res.redirect("http://localhost:8080/#?is2fa=" + !!req.user.twofa.length)
   }
 
   @Post('logout')

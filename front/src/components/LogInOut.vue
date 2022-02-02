@@ -16,7 +16,7 @@
     <div v-if="qrcode && state == 1">
       <img v-bind:src="qrcode"/> <br>
       <input v-model="digits" placeholder="Google authenticator Code">
-      <button v-on:click="send_digit_code('/turn-on')">Send</button>
+      <button v-on:click="send_digit_code('/authenticate')">Send</button>
     </div>
   </div>
 </template>
