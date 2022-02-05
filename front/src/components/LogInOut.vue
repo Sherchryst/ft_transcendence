@@ -3,21 +3,22 @@
     <div v-if="state == 0">
       <button v-on:click="login42()">Login42</button> <br>
     </div>
-    <div v-else>
-      <div v-if="state == 1">
-        <button v-on:click="generate_qrcode()">Generate qrcode</button> <br>
-      </div>
-      <div v-if="state == 2">
-        <input v-model="digits" placeholder="Google authenticator Code">
-        <button v-on:click="send_digit_code('/authenticate')">Send</button>
-      </div>
-      <button v-on:click="logout()">Logout</button> <br>
-    </div>
-    <div v-if="qrcode && state == 1">
-      <img v-bind:src="qrcode"/> <br>
+    <div v-else-if="state == 2">
       <input v-model="digits" placeholder="Google authenticator Code">
       <button v-on:click="send_digit_code('/authenticate')">Send</button>
     </div>
+    <div v-else>
+      <div v-if="state == 1">
+        <button v-on:click="generate_qrcode()">Generate qrcode</button> <br>
+        <div v-if="qrcode">
+          <img v-bind:src="qrcode"/> <br>
+          <input v-model="digits" placeholder="Google authenticator Code">
+          <button v-on:click="send_digit_code('/turn-on')">Send</button>
+        </div>
+      </div>
+      <button v-on:click="logout()">Logout</button> <br>
+    </div>
+    <button v-on:click="ping()">Ping</button>
   </div>
 </template>
 
@@ -64,7 +65,7 @@ export default defineComponent({
       router.push('/42');
     },
     logout(): void {
-      axios.post('http://localhost:3000/auth/logout')
+      axios.post('http://localhost:3000/auth/logout').then(() => {})
       sessionStorage.setItem("state", State.NOTLOGIN.toString())
       this.state = State.NOTLOGIN
     },
@@ -79,6 +80,14 @@ export default defineComponent({
       axios.post('http://localhost:3000/2fa' + path, {twoFactorAuthenticationCode: this.digits}).then((response) => {
         sessionStorage.setItem("state", State.AUTH.toString())
         this.state = State.AUTH
+        console.log(response.data)
+      }).catch((response) => {
+        console.log(response)
+      })
+    },
+    ping(): void {
+      axios.get('http://localhost:3000/ping').then((response) => {
+        console.log(response)
       }).catch((response) => {
         console.log(response)
       })

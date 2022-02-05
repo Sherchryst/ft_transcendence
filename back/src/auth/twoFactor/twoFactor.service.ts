@@ -15,7 +15,7 @@ export class TwoFactorService {
  
     const otpauthUrl = authenticator.keyuri(user.login, "Pong", secret);
  
-    await this.usersService.turnOnTwoFactorAuthentication(user.id, secret);
+    await this.usersService.set2faSecret(user.id, secret);
  
     return {
       secret,
@@ -26,12 +26,16 @@ export class TwoFactorService {
   public isTwoFactorAuthenticationCodeValid(twoFactorAuthenticationCode: string, user: User) {
     return authenticator.verify({
       token: twoFactorAuthenticationCode,
-      secret: user.twofa
+      secret: user.twofaSecret
     })
   }
 
   public async pipeQrCodeStream(stream: Response, otpauthUrl: string) {
     return toFileStream(stream, otpauthUrl);
+  }
+
+  public turnOn2fa(user: User) {
+    this.usersService.set2fa(user.id, true);
   }
 
 }

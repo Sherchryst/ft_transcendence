@@ -48,10 +48,16 @@ export class UsersService {
     });
   }
 
-  async turnOnTwoFactorAuthentication(userId: number, secret: string) {
+  async set2faSecret(userId: number, secret: string) {
     return getRepository(User).update({id: userId}, {
-      twofa: secret
+      twofaSecret: secret
     });
+  }
+
+  async set2fa(userId: number, value: boolean) {
+    return getRepository(User).update({id: userId}, {
+      twofa: value
+    })
   }
 
 }
