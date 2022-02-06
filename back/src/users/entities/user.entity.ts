@@ -26,7 +26,10 @@ export class User {
   mmr: number;
 
   @Column({ length: 32, default: '' })
-  twofa: string;
+  twofaSecret: string;
+
+  @Column({ default: false })
+  twofa: boolean;
 
   @OneToMany(() => UserAchievement, a => a.user)
   userAchievements: UserAchievement[];

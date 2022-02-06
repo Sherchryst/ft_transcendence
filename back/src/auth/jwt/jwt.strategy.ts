@@ -42,7 +42,7 @@ export class Jwt2faStrategy extends PassportStrategy(Strategy, 'jwt-2fa') {
 
   async validate(payload: JwtPayload) {
     const user = await this.usersService.findOne(Number(payload.sub))
-    if (!user.twofa.length || payload.isSecondFactorAuth) {
+    if (!user.twofa || payload.isSecondFactorAuth) {
       return user;
     }
   }
