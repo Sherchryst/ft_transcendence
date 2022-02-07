@@ -1,6 +1,6 @@
 C=
 CMD=sh
-CE=back
+CE=front
 
 
 all:
