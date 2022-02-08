@@ -4,6 +4,7 @@ import { getRepository } from 'typeorm';
 import { ChannelMember, ChannelMemberRole } from './entities/channel-member.entity';
 import { ChannelMessage } from './entities/channel-message.entity';
 import { Channel, ChannelVisibility } from './entities/channel.entity';
+import { DirectMessage } from './entities/direct-message.entity';
 import { Message } from './entities/message.entity';
 
 @Injectable()
@@ -15,6 +16,15 @@ export class ChatService {
     });
   }
 
+  async createMessage(from: User, content: string): Promise<Message> {
+    const msg = getRepository(Message).create({
+      from: from,
+      content: content
+    });
+    await getRepository(Message).save(msg);
+    return msg;
+  }
+
   async findChannel(channelId: number): Promise<Channel> {
     return getRepository(Channel).findOne({
       where: { id: channelId }
@@ -23,8 +33,7 @@ export class ChatService {
 
   async getChannelMembers(channelId: number): Promise<User[]> {
     return getRepository(ChannelMember).find({
-      where: { channel: { id: channelId } },
-      relations: ['user']
+      where: { channel: { id: channelId } }
     }).then(members => members.map(m => m.user));
   }
 
@@ -32,12 +41,6 @@ export class ChatService {
     return getRepository(ChannelMessage).find({
       where: { channel: { id: channelId } }
     }).then(messages => messages.map(m => m.message));
-  }
-
-  async listChannels(): Promise<Channel[]> {
-    return getRepository(Channel).find({
-      where: { visibility: ChannelVisibility.PUBLIC }
-    });
   }
 
   async joinChannel(user: User, channelId: number, role: ChannelMemberRole): Promise<ChannelMember> {
@@ -48,17 +51,34 @@ export class ChatService {
     });
   }
 
-  async sendChannelMessage(channelId: number, from: User, content: string): Promise<Message> {
-    const message = getRepository(Message).create({
-      from: from,
-      content: content
+  async leaveChannel(user: User, channelId: number): Promise<void> {
+    await getRepository(ChannelMember).delete({
+      channel: { id: channelId },
+      user: user
     });
-    await getRepository(Message).save(message);
-    const channelMessage = getRepository(ChannelMessage).create({
+  };
+
+  async listChannels(): Promise<Channel[]> {
+    return getRepository(Channel).find({
+      where: { visibility: ChannelVisibility.PUBLIC }
+    });
+  }
+
+  async sendChannelMessage(channelId: number, message: Message): Promise<ChannelMessage> {
+    const msg = getRepository(ChannelMessage).create({
       channel: { id: channelId },
       message: message
     });
-    await getRepository(ChannelMessage).save(channelMessage);
-    return message;
+    await getRepository(ChannelMessage).save(msg);
+    return msg;
+  }
+
+  async sendDirectMessage(to: User, message: Message): Promise<DirectMessage> {
+    const msg = getRepository(DirectMessage).create({
+      to: to,
+      message: message
+    });
+    await getRepository(DirectMessage).save(msg);
+    return msg;
   }
 }
