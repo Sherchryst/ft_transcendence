@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<form action="http://localhost:3000/users/accept-friend-request" method="post">
+			<label for="fromId">From user id:</label><br>
+			<input type="number" name="fromId" id="fromId" required><br>
+			<label for="toId">To user id:</label><br>
+			<input type="number" name="toId" id="toId" required><br>
+			<input type="submit" value="Accept friend request">
+		</form><br>
+		<form action="http://localhost:3000/users/block-user" method="post">
+			<label for="fromId">From user id:</label><br>
+			<input type="number" name="fromId" id="fromId" required><br>
+			<label for="toId">To user id:</label><br>
+			<input type="number" name="toId" id="toId" required><br>
+			<input type="submit" value="Block user">
+		</form><br>
+		<form action="http://localhost:3000/users/get-friend-requests" method="get">
+			<label for="id">User id:</label><br>
+			<input type="number" name="id" id="id" required><br>
+			<input type="submit" value="Get friend requests">
+		</form><br>
+		<form action="http://localhost:3000/users/get-profile" method="get">
+			<label for="id">User id:</label><br>
+			<input type="number" name="id" id="id" required><br>
+			<input type="submit" value="Get user profile">
+		</form><br>
+		<form action="http://localhost:3000/users/send-friend-request" method="post">
+			<label for="fromId">From user id:</label><br>
+			<input type="number" name="fromId" id="fromId" required><br>
+			<label for="toId">To user id:</label><br>
+			<input type="number" name="toId" id="toId" required><br>
+			<input type="submit" value="Send friend request">
+		</form><br>
+		<form action="http://localhost:3000/users/unblock-user" method="post">
+			<label for="fromId">From user id:</label><br>
+			<input type="number" name="fromId" id="fromId" required><br>
+			<label for="toId">To user id:</label><br>
+			<input type="number" name="toId" id="toId" required><br>
+			<input type="submit" value="Unblock user">
+		</form><br>
+		<form action="http://localhost:3000/users/update-nickname" method="post">
+			<label for="id">User id:</label><br>
+			<input type="number" name="id" id="id" required><br>
+			<label for="nickname">New nickname:</label><br>
+			<input type="text" name="nickname" id="nickname" required><br>
+			<input type="submit" value="Update nickname">
+		</form>
+	</body>
+</html>
