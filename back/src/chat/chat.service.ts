@@ -40,4 +40,18 @@ export class ChatService {
       role: role
     });
   }
+
+  async sendChannelMessage(channelId: number, from: User, content: string): Promise<Message> {
+    const message = getRepository(Message).create({
+      from: from,
+      content: content
+    });
+    await getRepository(Message).save(message);
+    const channelMessage = getRepository(ChannelMessage).create({
+      channel: { id: channelId },
+      message: message
+    });
+    await getRepository(ChannelMessage).save(channelMessage);
+    return message;
+  }
 }
