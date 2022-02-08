@@ -8,8 +8,10 @@ import { ChannelMessage } from './entities/channel-message.entity';
 import { DirectMessage } from './entities/direct-message.entity';
 import { Message } from './entities/message.entity';
 import { ChatController } from './chat.controller';
+import { ChatService } from './chat.service';
 
 @Module({
+  controllers: [ChatController],
   imports: [TypeOrmModule.forFeature([
     Channel,
     ChannelInvitation,
@@ -19,6 +21,6 @@ import { ChatController } from './chat.controller';
     DirectMessage,
     Message
   ])],
-  controllers: [ChatController]
+  providers: [ChatService]
 })
 export class ChatModule {}
