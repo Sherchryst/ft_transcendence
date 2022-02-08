@@ -21,6 +21,13 @@ export class ChatService {
     });
   }
 
+  async getChannelMembers(channelId: number): Promise<User[]> {
+    return getRepository(ChannelMember).find({
+      where: { channel: { id: channelId } },
+      relations: ['user']
+    }).then(members => members.map(m => m.user));
+  }
+
   async getChannelMessages(channelId: number): Promise<Message[]> {
     return getRepository(ChannelMessage).find({
       where: { channel: { id: channelId } }
