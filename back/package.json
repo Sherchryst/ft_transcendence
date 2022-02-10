@@ -27,6 +27,7 @@
     "@nestjs/passport": "^8.1.0",
     "@nestjs/platform-express": "^8.0.0",
     "@nestjs/platform-socket.io": "^8.2.3",
+    "@nestjs/platform-ws": "^8.2.6",
     "@nestjs/typeorm": "^8.0.2",
     "@nestjs/websockets": "^8.2.3",
     "@types/cookie-parser": "^1.4.2",

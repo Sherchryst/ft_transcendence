@@ -9,6 +9,9 @@ import { DirectMessage } from './entities/direct-message.entity';
 import { Message } from './entities/message.entity';
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
+import { ChatGateway } from './chat.gateway';
+import { AuthModule } from '../auth/auth.module'
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   controllers: [ChatController],
@@ -20,7 +23,9 @@ import { ChatService } from './chat.service';
     ChannelMessage,
     DirectMessage,
     Message
-  ])],
-  providers: [ChatService]
+  ]),
+  AuthModule,
+  UsersModule],
+  providers: [ChatService, ChatGateway]
 })
 export class ChatModule {}
