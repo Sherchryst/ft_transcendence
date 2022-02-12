@@ -25,11 +25,11 @@ export class ChannelModeration {
   reason: string;
 
   @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP' })
-  begin_at: Date;
+  beginAt: Date;
 
   @Column('timestamp', { default: () => 'null' })
-  expire_at: Date;
+  expireAt: Date;
 
   @Column('timestamp', { default: () => 'null' })
-  pardon_at: Date;
+  pardonAt: Date;
 }

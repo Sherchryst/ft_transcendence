@@ -19,6 +19,7 @@
 
 import router from '@/router';
 import { defineComponent } from 'vue';
+import axios from 'axios';
 
 export default defineComponent({
     data() {
@@ -27,7 +28,8 @@ export default defineComponent({
             othermsg: "othermsg",
             msg: "msg",
             name: "name",
-            onChannel: false
+            onChannel: false,
+            listChannel: []
         }
     },
     mounted() {
@@ -50,6 +52,11 @@ export default defineComponent({
                     break;
             }
         }
+        axios.get('http://localhost:3000/chat/list').then((response) => {
+            this.listChannel = response.data
+        }).catch((error) => {
+            console.log(error)
+        })
     },
     methods: {
         go_to_home(): void {

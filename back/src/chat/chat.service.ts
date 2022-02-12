@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { User } from 'src/users/entities/user.entity';
-import { getRepository } from 'typeorm';
+import { getRepository, IsNull, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { ChannelMember, ChannelMemberRole } from './entities/channel-member.entity';
 import { ChannelMessage } from './entities/channel-message.entity';
+import { ChannelModeration, ChannelModerationType } from './entities/channel-moderation.entity';
 import { Channel, ChannelVisibility } from './entities/channel.entity';
 import { DirectMessage } from './entities/direct-message.entity';
 import { Message } from './entities/message.entity';
@@ -41,6 +42,30 @@ export class ChatService {
     return getRepository(ChannelMessage).find({
       where: { channel: { id: channelId } }
     }).then(messages => messages.map(m => m.message));
+  }
+
+  async isBan(user: User, channelId: number): Promise<boolean> {
+    return getRepository(ChannelModeration).findOne({
+      where: {
+        channel: { id: channelId },
+        user: user,
+        type: ChannelModerationType.BAN,
+        expire_at: [ IsNull(), MoreThanOrEqual(new Date())  ],
+        pardon_at: IsNull()
+      }
+    }).then(ban => !!ban);
+  }
+
+  async isMute(user: User, channelId: number): Promise<boolean> {
+    return getRepository(ChannelModeration).findOne({
+      where: {
+        channel: { id: channelId },
+        user: user,
+        type: ChannelModerationType.MUTE,
+        expire_at: MoreThanOrEqual(new Date()),
+        pardon_at: IsNull()
+      }
+    }).then(mute => !!mute);
   }
 
   async joinChannel(user: User, channelId: number, role: ChannelMemberRole): Promise<ChannelMember> {
