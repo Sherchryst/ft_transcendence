@@ -1,16 +1,19 @@
 <template>
-  <div id="nav">
+  <div id="container" class="min-h-screen">
+    <!-- <div id="nav">
+    </div> -->
     <router-view/>
   </div>
 </template>
 
-<style>
+<style lang="scss">
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  color: $text-primary;
+  background: $bg-color;
 }
 
 #nav {
@@ -25,4 +28,5 @@
 #nav a.router-link-exact-active {
   color: #42b983;
 }
+
 </style>

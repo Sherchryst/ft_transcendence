@@ -15,7 +15,8 @@
     "vue-authenticate": "^1.5.0",
     "vue-axios": "^3.4.0",
     "vue-class-component": "^8.0.0-0",
-    "vue-router": "^4.0.0-0"
+    "vue-router": "^4.0.0-0",
+    "vuex": "^4.0.0-0"
   },
   "devDependencies": {
     "@tailwindcss/postcss7-compat": "^2.2.17",
@@ -25,6 +26,7 @@
     "@vue/cli-plugin-eslint": "~4.5.0",
     "@vue/cli-plugin-router": "~4.5.0",
     "@vue/cli-plugin-typescript": "~4.5.0",
+    "@vue/cli-plugin-vuex": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
     "@vue/compiler-sfc": "^3.0.0",
     "@vue/eslint-config-typescript": "^7.0.0",

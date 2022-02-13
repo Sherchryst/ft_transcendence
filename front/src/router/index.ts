@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw, useRoute } from 'vue-router'
 import Home from '@/views/Home.vue'
+import Login from '@/views/Login.vue'
 import Redirection from '@/components/Redirection.vue'
 import axios from 'axios'
 
@@ -15,6 +16,11 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter() {
       window.location.href = "http://localhost:3000/auth/login42";
     }
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login,
   }
 ]
 
