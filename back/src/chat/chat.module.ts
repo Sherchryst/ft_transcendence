@@ -12,6 +12,7 @@ import { ChatService } from './chat.service';
 import { ChatGateway } from './chat.gateway';
 import { AuthModule } from '../auth/auth.module'
 import { UsersModule } from 'src/users/users.module';
+import { User } from 'src/users/entities/user.entity';
 
 @Module({
   controllers: [ChatController],
@@ -22,7 +23,8 @@ import { UsersModule } from 'src/users/users.module';
     ChannelModeration,
     ChannelMessage,
     DirectMessage,
-    Message
+    Message,
+    User
   ]),
   AuthModule,
   UsersModule],

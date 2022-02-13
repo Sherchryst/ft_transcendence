@@ -1,16 +1,20 @@
 <template>
-    <div class="chat">
+    <div class="chat" :key="history">
         <h1>Chat</h1>
         <button v-on:click="go_to_home()">Home</button> <br>
-        <span v-if="onChannel">
-        <p>{{othermsg}}</p>
+        <span v-if="channel">
+            <h2>{{channel.name}}</h2>
+            <div v-for="omsg in history" :key="omsg">
+                <p>{{omsg}}</p>
+            </div>
             <form @submit.prevent="send">
                 <input v-model="msg"/>
             </form>
         </span>
         <span v-else>
-            <input v-model="name"/>
-            <button v-on:click="join()">join</button>
+            <div v-for="chan in listChannel" :key="chan.id">
+                <button v-on:click="join(chan.id)">join {{chan.name}}</button>
+            </div>
         </span>
     </div>
 </template>
@@ -21,15 +25,16 @@ import router from '@/router';
 import { defineComponent } from 'vue';
 import axios from 'axios';
 
+
+
 export default defineComponent({
     data() {
         return {
             socket : new WebSocket('ws://localhost:3001'),
-            othermsg: "othermsg",
-            msg: "msg",
-            name: "name",
-            onChannel: false,
-            listChannel: []
+            history: [],
+            msg: "",
+            channel: null,
+            listChannel: [],
         }
     },
     mounted() {
@@ -39,16 +44,19 @@ export default defineComponent({
         this.socket.onclose = (reason) => {
             console.log('disconnected', reason)
         }
-        this.socket.onmessage = (event) => {
-            const fromServer = JSON.parse(event.data)
+        this.socket.onmessage = (msg) => {
+            const fromServer = JSON.parse(msg.data)
+            console.log(fromServer)
             switch (fromServer.event) {
-                case "msgHistory":
-                    this.othermsg = fromServer.data
-                    console.log(fromServer.data)
+                case "joined":
+                    this.channel = fromServer.data.channel
+                    this.history = fromServer.data.history
+                    console.log("channel", this.channel)
+                    console.log("history", this.history)
                     break;
-                case "newMsg":
-                    this.othermsg = fromServer.data
-                    console.log(fromServer.data)
+                
+                case "message":
+                    (this.history as any).push(fromServer.data.channelMessage.message.content)
                     break;
             }
         }
@@ -64,11 +72,12 @@ export default defineComponent({
         },
 
         send(): void {
-            this.socket.send(JSON.stringify({event: 'msg', data : this.msg}))
+            console.log((this.channel as any).id)
+            this.socket.send(JSON.stringify({event: 'message', data: {chanId: (this.channel as any).id, msg : this.msg}}))
         },
 
-        join(): void {
-            this.socket.send(JSON.stringify({event: 'join', data: this.name}))
+        join(chanId: number): void {
+            this.socket.send(JSON.stringify({event: 'join', data : chanId}));
         }
     }
 })

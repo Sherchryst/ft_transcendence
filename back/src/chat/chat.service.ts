@@ -10,11 +10,14 @@ import { Message } from './entities/message.entity';
 
 @Injectable()
 export class ChatService {
-  async createChannel(name: string, owner: User): Promise<Channel> {
-    return getRepository(Channel).save({
+  async createChannel(name: string, owner: User, visibility: ChannelVisibility): Promise<Channel> {
+    const channel = getRepository(Channel).create({
       name: name,
-      owner: owner
+      owner: owner,
+      visibility: visibility
     });
+    await getRepository(Channel).save(channel);
+    return channel;
   }
 
   async createMessage(from: User, content: string): Promise<Message> {
@@ -26,16 +29,35 @@ export class ChatService {
     return msg;
   }
 
+  async createChannelMessage(channelId: number, message: Message): Promise<ChannelMessage> {
+    const msg = getRepository(ChannelMessage).create({
+      channel: { id: channelId },
+      message: message
+    });
+    await getRepository(ChannelMessage).save(msg);
+    return msg;
+  }
+
+  async createDirectMessage(to: User, message: Message): Promise<DirectMessage> {
+    const msg = getRepository(DirectMessage).create({
+      to: to,
+      message: message
+    });
+    await getRepository(DirectMessage).save(msg);
+    return msg;
+  }
+
   async findChannel(channelId: number): Promise<Channel> {
     return getRepository(Channel).findOne({
       where: { id: channelId }
     });
   }
 
-  async getChannelMembers(channelId: number): Promise<User[]> {
-    return getRepository(ChannelMember).find({
+  async getChannelMembers(channelId: number): Promise<ChannelMember[]> {
+    return await getRepository(ChannelMember).find({
+      relations: ['user'],
       where: { channel: { id: channelId } }
-    }).then(members => members.map(m => m.user));
+    });
   }
 
   async getChannelMessages(channelId: number): Promise<Message[]> {
@@ -44,20 +66,20 @@ export class ChatService {
     }).then(messages => messages.map(m => m.message));
   }
 
-  async isBan(user: User, channelId: number): Promise<boolean> {
+  async isBanned(user: User, channelId: number): Promise<boolean> {
     return getRepository(ChannelModeration).findOne({
       where: {
         channel: { id: channelId },
         user: user,
         type: ChannelModerationType.BAN,
-        expire_at: [ IsNull(), MoreThanOrEqual(new Date())  ],
+        expire_at: MoreThanOrEqual(new Date()), // TODO: check null
         pardon_at: IsNull()
       }
     }).then(ban => !!ban);
   }
 
-  async isMute(user: User, channelId: number): Promise<boolean> {
-    return getRepository(ChannelModeration).findOne({
+  async isMuted(user: User, channelId: number): Promise<boolean> {
+    return await getRepository(ChannelModeration).findOne({
       where: {
         channel: { id: channelId },
         user: user,
@@ -87,23 +109,5 @@ export class ChatService {
     return getRepository(Channel).find({
       where: { visibility: ChannelVisibility.PUBLIC }
     });
-  }
-
-  async sendChannelMessage(channelId: number, message: Message): Promise<ChannelMessage> {
-    const msg = getRepository(ChannelMessage).create({
-      channel: { id: channelId },
-      message: message
-    });
-    await getRepository(ChannelMessage).save(msg);
-    return msg;
-  }
-
-  async sendDirectMessage(to: User, message: Message): Promise<DirectMessage> {
-    const msg = getRepository(DirectMessage).create({
-      to: to,
-      message: message
-    });
-    await getRepository(DirectMessage).save(msg);
-    return msg;
   }
 }

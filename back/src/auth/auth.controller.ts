@@ -31,7 +31,7 @@ export class AuthController {
 
   @Get('cheat_login')
   async cheat_login(@Res() res) {
-    const username = "cheat_user"
+    const username = "cheat_user2"
     let user = await this.usersService.findByLogin(username);
     if (!user)
       user = await this.usersService.create(username);
