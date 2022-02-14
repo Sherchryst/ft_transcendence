@@ -24,11 +24,4 @@ export default {
 </script>
 
 <style lang="scss">
-// .r-panel{
-// 	background: $bg--lg-color;
-// 	border-radius: 25px;
-// }
-h2{
-	color: $text-title;
-}
 </style>
