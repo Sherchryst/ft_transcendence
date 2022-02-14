@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="52mm"
+   height="16mm"
+   version="1.1"
+   id="svg14"
+   sodipodi:docname="ApongUs.svg"
+   inkscape:version="1.1.2 (b8e25be833, 2022-02-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs18" />
+  <sodipodi:namedview
+     id="namedview16"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:pageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="4.0378048"
+     inkscape:cx="93.862884"
+     inkscape:cy="50.274843"
+     inkscape:window-width="1920"
+     inkscape:window-height="1025"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg14" />
+  <g
+     transform="matrix(4.0694 0 0 4.0694 -5.3553 -.25177)"
+     id="g12">
+    <text
+       transform="matrix(.26458 0 0 .26458 -82.039 -107.97)"
+       x="88.447266"
+       fill="#000000"
+       font-family="sans-serif"
+       font-size="38.667px"
+       letter-spacing="0px"
+       word-spacing="0px"
+       style="line-height:1.25;shape-inside:url(#rect3422);white-space:pre"
+       xml:space="preserve"
+       id="text2" />
+    <g
+       fill="#efcb68"
+       stroke-width=".11412"
+       id="g10">
+      <circle
+         cx="11.342"
+         cy="4.5622"
+         r=".60503"
+         id="circle4" />
+      <circle
+         cx="25.928"
+         cy="2.4091"
+         r=".60503"
+         id="circle6" />
+      <circle
+         cx="40.248"
+         cy="6.8405"
+         r=".60503"
+         id="circle8" />
+    </g>
+  </g>
+  <text
+     xml:space="preserve"
+     style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+     x="12.430262"
+     y="47.113075"
+     id="text6095"><tspan
+       sodipodi:role="line"
+       x="12.430262"
+       y="47.113075"
+       id="tspan6375"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Righteous;-inkscape-font-specification:Righteous">Apong Us</tspan></text>
+</svg>
