@@ -13,8 +13,8 @@ import LogInOut from '@/components/LogInOut.vue';
 
 export default {
     components: {
-    HelloWorld,
-    LogInOut
+      HelloWorld,
+      LogInOut
   },
 }
 </script>

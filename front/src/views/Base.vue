@@ -1,0 +1,60 @@
+<template>
+	<div id="base" class="grid grid-cols-12 min-h-screen">
+		<nav id="nav" class="flex flex-col items-center">
+			<div class="mt-10 h-36">
+				<img class="h-16 w-16" src="/test.png" alt="profile">
+			</div>
+			<div class="flex flex-col">
+				<NavButton route="/" />
+				<NavButton route="/login" />
+				<NavButton route="/login" />
+				<NavButton route="/login" />
+			</div>
+		</nav>
+		<div class="flex flex-col col-span-11 px-16">
+			<div class="mt-10 h-36">
+				<div class="flex flex-row justify-between justify-items-center h-16">
+					<div class="self-center">
+						<!-- If connected -->
+						<ButtonLink text="Connection" route="/login" /> 
+						<!-- <a href="#">connection</a>
+						<a href="#">FAQ</a> -->
+					</div>
+					<div class="flex flex-row justify-between justify-items-center">
+						<div class="self-center">
+							<OneRowForm action="/" />
+						</div>
+						<div class="ml-10">
+							<img alt="Vue logo" src="../assets/ApongUs.svg">
+						</div>
+					</div>
+				</div>
+			</div>
+			<router-view/>
+		</div>
+	</div>
+</template>
+
+<script lang="ts">
+import NavButton from '@/components/NavButton.vue';
+import ButtonLink from '@/components/ButtonLink.vue';
+import OneRowForm from '@/components/OneRowForm.vue';
+
+export default {
+	components: {
+		NavButton,
+		ButtonLink,
+		OneRowForm
+	}
+}
+</script>
+
+<style lang="scss" scoped>
+#nav {
+	background: $bg--lg-color;
+}
+img {
+	background: $bg-color;
+	border-radius: 12px;
+}
+</style>
