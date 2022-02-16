@@ -5,7 +5,7 @@
 	</div>
 </template>
 
-<script lang="ts">
+<script>
 import {VueAvatar} from 'vue-avatar-editor-improved'
 
 export default {
