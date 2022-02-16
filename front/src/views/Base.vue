@@ -8,7 +8,7 @@
 				<NavButton route="/" />
 				<NavButton route="/login" />
 				<NavButton route="/login" />
-				<NavButton route="/login" />
+				<NavButton route="/chat" />
 			</div>
 		</nav>
 		<div class="flex flex-col col-span-11 px-16">

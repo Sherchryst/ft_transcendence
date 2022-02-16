@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory, RouteRecordRaw, useRoute } from 'vu
 import Base from '@/views/Base.vue'
 import Home from '@/views/Home.vue'
 import Login from '@/views/Login.vue'
+import Chat from '@/views/Chat.vue'
 import Redirection from '@/components/Redirection.vue'
 import axios from 'axios'
 
@@ -17,7 +18,12 @@ const routes: Array<RouteRecordRaw> = [
         name: 'home',
         component: Home
     },
-  ]
+    {
+      path: 'chat',
+      name: 'chat',
+      component: Chat
+    },
+    ]
   },
   {
     path: "/42",
