@@ -6,6 +6,7 @@ import Profile from '@/views/Profile.vue'
 import Register from '@/views/Register.vue'
 import Redirection from '@/components/Redirection.vue'
 import axios from 'axios'
+import Chat from '@/views/Chat.vue'
 
 const routes: Array<RouteRecordRaw> = [
 
@@ -41,7 +42,12 @@ const routes: Array<RouteRecordRaw> = [
   {
 	path: '/register',
 	name: 'Register',
-	component: Register,
+	component: Register
+  },
+  {
+    path: "/chat",
+    name: "Chat",
+    component: Chat
   }
 ]
 
