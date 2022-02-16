@@ -2,6 +2,8 @@ import { createRouter, createWebHashHistory, RouteRecordRaw, useRoute } from 'vu
 import Base from '@/views/Base.vue'
 import Home from '@/views/Home.vue'
 import Login from '@/views/Login.vue'
+import Profile from '@/views/Profile.vue'
+import Register from '@/views/Register.vue'
 import Redirection from '@/components/Redirection.vue'
 import axios from 'axios'
 
@@ -17,6 +19,11 @@ const routes: Array<RouteRecordRaw> = [
         name: 'home',
         component: Home
     },
+	{
+		path: '/profile',
+		name: 'profile',
+		component: Profile
+	},
   ]
   },
   {
@@ -30,6 +37,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/login',
     name: 'Login',
     component: Login,
+  },
+  {
+	path: '/register',
+	name: 'Register',
+	component: Register,
   }
 ]
 
