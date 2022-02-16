@@ -2,6 +2,7 @@
   <div class="LogInOut" :key="state">
     <div v-if="state == 0">
       <button v-on:click="login42()">Login42</button> <br>
+      <button v-on:click="cheat_login()">cheat login</button> <br>
     </div>
     <div v-else-if="state == 2">
       <input v-model="digits" placeholder="Google authenticator Code">
@@ -15,6 +16,9 @@
           <input v-model="digits" placeholder="Google authenticator Code">
           <button v-on:click="send_digit_code('/turn-on')">Send</button>
         </div>
+      </div>
+      <div v-if="state == 3">
+        <button v-on:click="go_to_chat()">chat</button>
       </div>
       <button v-on:click="logout()">Logout</button> <br>
     </div>
@@ -65,7 +69,7 @@ export default defineComponent({
       router.push('/42');
     },
     logout(): void {
-      axios.post('http://localhost:3000/auth/logout').then(() => {})
+      axios.post('http://localhost:3000/auth/logout')
       sessionStorage.setItem("state", State.NOTLOGIN.toString())
       this.state = State.NOTLOGIN
     },
@@ -91,6 +95,18 @@ export default defineComponent({
       }).catch((response) => {
         console.log(response)
       })
+    },
+    cheat_login(): void {
+      axios.get('http://localhost:3000/auth/cheat_login').then((response) => {
+        console.log(response)
+        sessionStorage.setItem("state", State.AUTH.toString())
+        this.state = State.AUTH
+      }).catch((response) => {
+        console.log(response)
+      })
+    },
+    go_to_chat(): void {
+      router.push('/chat')
     }
   }
 })

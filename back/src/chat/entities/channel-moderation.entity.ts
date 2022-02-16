@@ -27,9 +27,9 @@ export class ChannelModeration {
   @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP' })
   begin_at: Date;
 
-  @Column('timestamp', { default: () => 'null' })
+  @Column('timestamp', { nullable: true, default: () => 'null' })
   expire_at: Date;
 
-  @Column('timestamp', { default: () => 'null' })
+  @Column('timestamp', { nullable: true, default: () => 'null' })
   pardon_at: Date;
 }

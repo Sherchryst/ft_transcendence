@@ -39,14 +39,13 @@ export class UsersService {
     });
   }
 
-  create(login: string): User {
+  async create(login: string): Promise<User> {
     const repo = getRepository(User);
     const user = repo.create({
       login: login,
       nickname: login
     });
-    repo.save(user);
-    return user;
+    return await repo.save(user);
   }
 
   findAll(): Promise<User[]> {

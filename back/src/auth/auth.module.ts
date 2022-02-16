@@ -19,6 +19,7 @@ import { Jwt2faStrategy } from './jwt/jwt.strategy';
     Repository,
     JwtModule.register({secret: jwtConstants.secret})
   ],
-  providers: [CustomJwtService, FortyTwoStrategy, JwtAuthStrategy, Jwt2faStrategy, TwoFactorService]
+  providers: [CustomJwtService, FortyTwoStrategy, JwtAuthStrategy, Jwt2faStrategy, TwoFactorService],
+  exports: [CustomJwtService]
 })
 export class AuthModule {}

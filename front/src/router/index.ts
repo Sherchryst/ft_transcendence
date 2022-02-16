@@ -1,7 +1,6 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw, useRoute } from 'vue-router'
 import Home from '@/views/Home.vue'
-import Redirection from '@/components/Redirection.vue'
-import axios from 'axios'
+import Chat from '@/views/Chat.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -15,6 +14,11 @@ const routes: Array<RouteRecordRaw> = [
     beforeEnter() {
       window.location.href = "http://localhost:3000/auth/login42";
     }
+  },
+  {
+    path: "/chat",
+    name: "Chat",
+    component: Chat
   }
 ]
 
