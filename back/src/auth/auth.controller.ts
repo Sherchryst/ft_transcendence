@@ -2,11 +2,12 @@ import { Controller, Get, Redirect, Request, Res, Post, UseGuards } from '@nestj
 import { CustomJwtService } from './jwt/jwt.service';
 import { FortyTwoAuthGuard } from './42/forty-two-auth.guard';
 import { Jwt2faGuard } from './jwt/jwt.guard';
-import { Logger } from '@nestjs/common';
+import { UsersService } from 'src/users/users.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private customJwtService: CustomJwtService) {}
+  constructor(private customJwtService: CustomJwtService,
+    private usersService: UsersService) {}
 
   @Get('login42')
   @UseGuards(FortyTwoAuthGuard)
@@ -19,7 +20,6 @@ export class AuthController {
   async redirect(@Request() req, @Res() res) {
     const { access_token } = this.customJwtService.login(req.user)
     res.cookie('jwt', access_token, {sameSite: "Lax"})
-    console.log(req.user.twofa)
     res.redirect("http://localhost:8080/#?is2fa=" + req.user.twofa)
   }
 
@@ -27,5 +27,16 @@ export class AuthController {
   async logout(@Request() req, @Res() res) {
     res.clearCookie('jwt', {sameSite: "Lax"})
     res.send("logged out")
+  }
+
+  @Get('cheat_login')
+  async cheat_login(@Res() res) {
+    const username = "cheat_user2"
+    let user = await this.usersService.findByLogin(username);
+    if (!user)
+      user = await this.usersService.create(username);
+    const { access_token } = this.customJwtService.login(user)
+    res.cookie('jwt', access_token, {sameSite: "Lax"})
+    res.send("logged in")
   }
 }
