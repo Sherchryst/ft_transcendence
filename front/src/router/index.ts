@@ -3,6 +3,7 @@ import Base from '@/views/Base.vue'
 import Home from '@/views/Home.vue'
 import Login from '@/views/Login.vue'
 import Chat from '@/views/Chat.vue'
+import ListChat from '@/views/ListChat.vue'
 import Profile from '@/views/Profile.vue'
 import Register from '@/views/Register.vue'
 import Redirection from '@/components/Redirection.vue'
@@ -24,6 +25,11 @@ const routes: Array<RouteRecordRaw> = [
       path: 'chat',
       name: 'chat',
       component: Chat
+    },
+    {
+      path: 'chat/list',
+      name: 'list_chat',
+      component: ListChat
     },
     {
       path: '/profile',
@@ -49,11 +55,11 @@ const routes: Array<RouteRecordRaw> = [
 	name: 'Register',
 	component: Register
   },
-  {
-    path: "/chat",
-    name: "Chat",
-    component: Chat
-  }
+  // {
+  //   path: "/chat",
+  //   name: "Chat",
+  //   component: Chat
+  // }
 ]
 
 const router = createRouter({

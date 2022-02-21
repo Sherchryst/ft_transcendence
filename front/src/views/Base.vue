@@ -7,7 +7,7 @@
 			<div class="flex flex-col">
 				<NavButton route="/" />
 				<NavButton route="/login" />
-				<NavButton route="/login" />
+				<NavButton route="/chat/list" />
 				<NavButton route="/chat" />
 			</div>
 		</nav>

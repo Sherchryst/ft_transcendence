@@ -1,6 +1,6 @@
 <template>
   <div class="chat-preview flex flex-row items-center py-3 px-7 my-2">
-      <div class="mr-5">
+      <div v-if="!isChannel" class="mr-5">
           <img class="h-16 w-16" src="/" alt="_profile">
       </div>
       <div class="text-left">
@@ -11,13 +11,25 @@
 </template>
 
 <script lang="ts">
-export default {
+import { Options, Vue } from 'vue-class-component';
 
+@Options({
+  props: {
+    isChannel: {
+        type: Boolean ,
+        default: false
+    }
+  }
+})
+
+export default class OneButtonLink extends Vue {
+	isChannel!: boolean
 }
 </script>
 
 <style lang="scss" scoped>
 .chat-preview{
+    transition: background 300ms ease-in;
     img {
         background: $bg--lg-color;
         border-radius: 50px;
