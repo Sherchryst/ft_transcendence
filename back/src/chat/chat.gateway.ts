@@ -45,6 +45,7 @@ export class ChatGateway implements OnGatewayConnection{
         await this.chatService.joinChannel(user, channelId, ChannelMemberRole.MEMBER);
         const channel = await this.chatService.findChannel(channelId)
         const history = await this.chatService.getChannelMessages(channelId)
+        console.log(history)
         return { event: "joined", data: { channel: channel, history: history} };
     }
 
@@ -69,5 +70,12 @@ export class ChatGateway implements OnGatewayConnection{
                 this.wsClients.get(member.user.id).send(JSON.stringify({ event: "message", data: { channelMessage: channelMessage } }) );
             }
         }
+    }
+
+    @SubscribeMessage('leave')
+    async leave(@ConnectedSocket() client, @MessageBody() channelId: number) {
+        const user = await this.usersService.findOne(client.id);
+        await this.chatService.leaveChannel(user, channelId);
+        return { event: "left", data: { channelId: channelId } };
     }
 }

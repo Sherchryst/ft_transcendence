@@ -61,13 +61,14 @@ export class ChatService {
   }
 
   async getChannelMessages(channelId: number): Promise<Message[]> {
-    return getRepository(ChannelMessage).find({
+    return await getRepository(ChannelMessage).find({
+      relations: ['message', 'message.from'],
       where: { channel: { id: channelId } }
     }).then(messages => messages.map(m => m.message));
   }
 
   async isBanned(user: User, channelId: number): Promise<boolean> {
-    return getRepository(ChannelModeration).findOne({
+    return await getRepository(ChannelModeration).findOne({
       where: {
         channel: { id: channelId },
         user: user,
