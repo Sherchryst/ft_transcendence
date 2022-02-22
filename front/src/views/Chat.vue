@@ -100,6 +100,7 @@ import axios from 'axios';
 import DiscussionPreview from '@/components/DiscussionPreview.vue'
 import Message from '@/components/Message.vue'
 import OneRowForm from '@/components/OneRowForm.vue'
+import { useMeta } from 'vue-meta'
 
 
 
@@ -108,6 +109,9 @@ export default defineComponent({
         DiscussionPreview,
         Message,
         OneRowForm,
+    },
+    setup () {
+        useMeta({ title: 'Chat' })
     },
     data() {
         return {

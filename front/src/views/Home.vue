@@ -10,11 +10,15 @@
 <script lang="ts">
 import HelloWorld from '@/components/HelloWorld.vue';
 import LogInOut from '@/components/LogInOut.vue';
+import { useMeta } from 'vue-meta'
 
 export default {
     components: {
       HelloWorld,
       LogInOut
   },
+  setup () {
+    useMeta({ title: 'Home' })
+  }
 }
 </script>

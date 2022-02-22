@@ -26,12 +26,16 @@
 <script lang="ts">
 import ChooseAvatar from '@/components/ChooseAvatar.vue';
 import SingleCardPage from '@/components/SingleCardPage.vue';
+import { useMeta } from 'vue-meta'
 
 export default {
 	components: {
 		ChooseAvatar,
 		SingleCardPage
-	}
+	},
+	setup () {
+        useMeta({ title: 'Création du compte' })
+    },
 }
 </script>
 

@@ -13,13 +13,17 @@
 import ButtonLink from '@/components/ButtonLink.vue';
 import SingleCardPage from '@/components/SingleCardPage.vue';
 import MainTitle from '@/components/MainTitle.vue';
+import { useMeta } from 'vue-meta'
 
 export default {
 	components: {
 		ButtonLink,
 		SingleCardPage,
 		MainTitle
-	}
+	},
+	setup () {
+        useMeta({ title: 'Connection' })
+    },
 }
 </script>
 

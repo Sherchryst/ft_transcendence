@@ -5,8 +5,12 @@
 </template>
 
 <script lang="ts">
-export default {
+import { useMeta } from 'vue-meta'
 
+export default {
+	setup () {
+        useMeta({ title: 'Profile' })
+    },
 }
 </script>
 

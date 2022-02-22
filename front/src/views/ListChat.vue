@@ -8,11 +8,14 @@
 </template>
 
 <script lang="ts">
-
 import { defineComponent } from 'vue';
 import axios from 'axios';
+import { useMeta } from 'vue-meta'
 
 export default defineComponent ({
+    setup () {
+        useMeta({ title: 'Channels' })
+    },
     data() {
         return {
             socket : new WebSocket('ws://localhost:3001'),
