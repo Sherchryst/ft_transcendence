@@ -6,7 +6,7 @@ import { CustomJwtService } from 'src/auth/jwt/jwt.service';
 import { IncomingMessage } from 'http';
 import { UsersService } from 'src/users/users.service';
 import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
-import { ChannelMemberRole } from './entities/channel-member.entity';
+import { ChannelMember, ChannelMemberRole } from './entities/channel-member.entity';
 import { ChannelVisibility } from './entities/channel.entity';
 
 @WebSocketGateway(3001)
@@ -18,7 +18,7 @@ export class ChatGateway implements OnGatewayConnection{
         private readonly customJwtService: CustomJwtService,
         private readonly usersService: UsersService) {}
         
-        async handleConnection(client: any, msg: IncomingMessage) {
+    async handleConnection(client: any, msg: IncomingMessage) {
         try {
             const payload = this.customJwtService.verify(msg.headers.cookie.slice(4))
             const user = await this.usersService.findOne(payload.sub)
@@ -34,6 +34,15 @@ export class ChatGateway implements OnGatewayConnection{
         }
     }
 
+    private async broadcast(fromId: number, channelId: number, event: string, members: ChannelMember[], data: any) {
+        for (const member of members) {
+          if (fromId != member.user.id && !await this.chatService.isBanned(member.user, channelId) && await this.wsClients.has(member.user.id)) {
+            console.log(member.user.id)
+            this.wsClients.get(member.user.id).send(JSON.stringify({ event: event, data: data }));
+          }
+        }
+    }
+
     async handleDisconnect(client: any) {
         const user = await this.usersService.findOne(client.id);
         this.wsClients.delete(user.id)
@@ -42,10 +51,9 @@ export class ChatGateway implements OnGatewayConnection{
     @SubscribeMessage('join')
     async join(@ConnectedSocket() client, @MessageBody() channelId: number) {
         const user = await this.usersService.findOne(client.id);
+        let channel = await this.chatService.findChannel(channelId);
         await this.chatService.joinChannel(user, channelId, ChannelMemberRole.MEMBER);
-        const channel = await this.chatService.findChannel(channelId)
-        const history = await this.chatService.getChannelMessages(channelId)
-        console.log(history)
+        const history = await this.chatService.getChannelMessages(channelId);
         return { event: "joined", data: { channel: channel, history: history} };
     }
 
@@ -64,18 +72,18 @@ export class ChatGateway implements OnGatewayConnection{
         const channelMessage = await this.chatService.createChannelMessage(data.chanId, message);
         const members = await this.chatService.getChannelMembers(data.chanId);
         console.log(members)
-        for (const member of members) {
-            if (member.user.id != user.id && !await this.chatService.isBanned(member.user, data.chanId)  && await this.wsClients.has(member.user.id)) {
-                console.log('sent')
-                this.wsClients.get(member.user.id).send(JSON.stringify({ event: "message", data: { channelMessage: channelMessage } }) );
-            }
-        }
+        this.broadcast(user.id, data.chanId, "message", members, { channelMessage: channelMessage });
     }
 
     @SubscribeMessage('leave')
     async leave(@ConnectedSocket() client, @MessageBody() channelId: number) {
         const user = await this.usersService.findOne(client.id);
         await this.chatService.leaveChannel(user, channelId);
+        const members = await this.chatService.getChannelMembers(channelId);
+        if (members.length == 0)
+          await this.chatService.deleteChannel(channelId);
+        else
+          this.broadcast(user.id, channelId, "left", members, { channelId: channelId });
         return { event: "left", data: { channelId: channelId } };
     }
 }

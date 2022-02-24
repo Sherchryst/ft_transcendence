@@ -63,13 +63,17 @@ export default defineComponent({
                     break;
                 
                 case "message":
-                    (this.history as any).push({content: fromServer.data.channelMessage.message.content, from: fromServer.data.channelMessage.message.from})
+                    (this.history as any).push({content: fromServer.data.channelMessage.message.content, from: fromServer.data.channelMessage.message.from.login})
+                    console.log(fromServer.data)
                     break;
                 
                 case "created":
-                    (this.listChannel as any).push(fromServer.data.channel)
+                    this.channel = fromServer.data.channel
+                    this.history = []
+                    console.log("channel", this.channel)
+                    console.log("history", this.history)
                     break;
-                
+
                 case "left":
                     this.channel = null
                     break;

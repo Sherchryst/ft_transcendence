@@ -67,10 +67,7 @@
 - owner_id: INT NOT NULL
 	- The owner is a channel administrator.
 	- The owner can delete the channel.
-	- If the owner leaves the channel, an election procedure begins:
-		1. A new random channel administrator is choosen as the channel owner.
-		1. If the channel doesn't have any channel administrator, a new random user is choosen as the channel owner and is promoted to channel administrator.
-		1. A channel with no members is removed.
+	- If the owner leaves the channel, the channel is deleted.
 - visibility: ENUM NOT NULL DEFAULT `private`
 	- `private`: The group is private.
 	- `public`: The group is public.

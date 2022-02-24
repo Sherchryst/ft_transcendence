@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { userInfo } from 'os';
 import { User } from 'src/users/entities/user.entity';
 import { getRepository, IsNull, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { ChannelMember, ChannelMemberRole } from './entities/channel-member.entity';
@@ -45,6 +46,10 @@ export class ChatService {
     });
     await getRepository(DirectMessage).save(msg);
     return msg;
+  }
+
+  async deleteChannel(channelId: number) {
+    await getRepository(Channel).delete({ id: channelId });
   }
 
   async findChannel(channelId: number): Promise<Channel> {
