@@ -5,10 +5,18 @@
 				<img class="h-16 w-16" src="/test.png" alt="profile">
 			</div>
 			<div class="flex flex-col">
-				<NavButton route="/" />
-				<NavButton route="/login" />
-				<NavButton route="/chat/list" />
-				<NavButton route="/chat" />
+				<nav-button route="/">
+					<HomeIcon />
+				</nav-button>
+				<nav-button route="/login">
+					<GameIcon />
+				</nav-button>
+				<nav-button route="/chat/list">
+					<GroupIcon />
+				</nav-button>
+				<nav-button route="/chat">
+					<ChatIcon />
+				</nav-button>
 			</div>
 		</nav>
 		<div class="flex flex-col col-span-11 px-16">
@@ -25,7 +33,8 @@
 							<OneRowForm action="/" />
 						</div>
 						<div class="ml-10">
-							<img alt="Vue logo" src="../assets/ApongUs.svg">
+							<Logo />
+							<!-- <img alt="Vue logo" src="../assets/ApongUs.svg"> -->
 						</div>
 					</div>
 				</div>
@@ -39,12 +48,22 @@
 import NavButton from '@/components/NavButton.vue';
 import ButtonLink from '@/components/ButtonLink.vue';
 import OneRowForm from '@/components/OneRowForm.vue';
+import HomeIcon from '@/assets/icon/home.svg';
+import ChatIcon from '@/assets/icon/chat.svg';
+import GroupIcon from '@/assets/icon/group.svg';
+import GameIcon from '@/assets/icon/game.svg';
+import Logo from '@/assets/ApongUs.svg';
 
 export default {
 	components: {
 		NavButton,
 		ButtonLink,
-		OneRowForm
+		OneRowForm,
+		HomeIcon,
+		ChatIcon,
+		GroupIcon,
+		GameIcon,
+		Logo,
 	}
 }
 </script>
