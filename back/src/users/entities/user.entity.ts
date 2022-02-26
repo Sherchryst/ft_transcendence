@@ -25,10 +25,10 @@ export class User {
   @Column({ default: 0 })
   mmr: number;
 
-  @Column({ length: 32, default: '' })
+  @Column({ length: 32, default: '', select: false })
   twofaSecret: string;
 
-  @Column({ default: false })
+  @Column({ default: false, select: false })
   twofa: boolean;
 
   @OneToMany(() => UserAchievement, a => a.user)

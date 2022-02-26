@@ -49,7 +49,7 @@ export class UsersController {
       - User can send friend request
     */
     return JSON.stringify({
-      ...user, twofa: undefined,
+      user,
       achievements,
       friends: friends.map(({ id, nickname }) => ({ id, nickname }))
     });
