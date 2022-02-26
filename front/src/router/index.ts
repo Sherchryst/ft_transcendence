@@ -6,6 +6,7 @@ import Chat from '@/views/Chat.vue'
 import ListChat from '@/views/ListChat.vue'
 import Profile from '@/views/Profile.vue'
 import Register from '@/views/Register.vue'
+import GameChoice from '@/views/GameChoice.vue'
 import Redirection from '@/components/Redirection.vue'
 import axios from 'axios'
 
@@ -20,6 +21,11 @@ const routes: Array<RouteRecordRaw> = [
         path: '/',
         name: 'home',
         component: Home
+    },
+    {
+      path: 'game-choice',
+      name: 'game_choice',
+      component: GameChoice
     },
     {
       path: 'chat',

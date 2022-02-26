@@ -7,8 +7,14 @@ import { Options, Vue } from 'vue-class-component';
 
 @Options({
   props: {
-    text: String,
-	route: String
+    text: {
+		type: String,
+		default: "action"
+	},
+	route: {
+		type: String,
+		default: "/"
+	}
   }
 })
 export default class ButtonLink extends Vue {

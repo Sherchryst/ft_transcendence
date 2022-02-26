@@ -8,7 +8,7 @@
 				<nav-button route="/">
 					<HomeIcon />
 				</nav-button>
-				<nav-button route="/login">
+				<nav-button route="/game-choice">
 					<GameIcon />
 				</nav-button>
 				<nav-button route="/chat/list">
@@ -30,7 +30,10 @@
 					</div>
 					<div class="flex flex-row justify-between justify-items-center">
 						<div class="self-center">
-							<OneRowForm action="/" />
+							<one-row-form action="/">
+								<SearchIcon />
+							</one-row-form>
+							<!-- <OneRowForm action="/" /> -->
 						</div>
 						<div class="ml-10">
 							<Logo />
@@ -52,6 +55,7 @@ import HomeIcon from '@/assets/icon/home.svg';
 import ChatIcon from '@/assets/icon/chat.svg';
 import GroupIcon from '@/assets/icon/group.svg';
 import GameIcon from '@/assets/icon/game.svg';
+import SearchIcon from '@/assets/icon/search.svg';
 import Logo from '@/assets/ApongUs.svg';
 
 export default {
@@ -63,6 +67,7 @@ export default {
 		ChatIcon,
 		GroupIcon,
 		GameIcon,
+		SearchIcon,
 		Logo,
 	}
 }
