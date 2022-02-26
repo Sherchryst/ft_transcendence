@@ -53,7 +53,7 @@ export class ChatGateway implements OnGatewayConnection{
         const user = await this.usersService.findOne(client.id);
         let channel = await this.chatService.findChannel(channelId);
         await this.chatService.joinChannel(user, channelId, ChannelMemberRole.MEMBER);
-        const history = await this.chatService.getChannelMessages(channelId);
+        const history = await this.chatService.getChannelMessages(channelId, new Date(), 100);
         return { event: "joined", data: { channel: channel, history: history} };
     }
 

@@ -39,6 +39,18 @@ export class ChatService {
     return msg;
   }
 
+  async createChannelModeration(channelId: number, userId: number, admin: User, type: ChannelModerationType, reason: string, beginAt: Date): Promise<ChannelModeration> {
+    const moderation = getRepository(ChannelModeration).create({
+      channel: { id: channelId },
+      user: { id: userId },
+      admin: admin,
+      type: type,
+      reason: reason,
+      begin_at: beginAt
+    });
+    return await getRepository(ChannelModeration).save(moderation);
+  }
+
   async createDirectMessage(to: User, message: Message): Promise<DirectMessage> {
     const msg = getRepository(DirectMessage).create({
       to: to,
@@ -50,6 +62,15 @@ export class ChatService {
 
   async deleteChannel(channelId: number) {
     await getRepository(Channel).delete({ id: channelId });
+  }
+
+  async editChannelMember(channelId: number, user: User, role: ChannelMemberRole): Promise<ChannelMember> {
+    const member = await getRepository(ChannelMember).findOne({
+      channel: { id: channelId },
+      user: { id: user.id }
+    });
+    member.role = role;
+    return getRepository(ChannelMember).save(member);
   }
 
   async findChannel(channelId: number): Promise<Channel> {
@@ -65,11 +86,11 @@ export class ChatService {
     });
   }
 
-  async getChannelMessages(channelId: number): Promise<Message[]> {
-    return await getRepository(ChannelMessage).find({
+  async getChannelMessages(channelId: number, maxDate: Date, maxMessages: number): Promise<Message[]> {
+    return (await getRepository(ChannelMessage).find({
       relations: ['message', 'message.from'],
-      where: { channel: { id: channelId } }
-    }).then(messages => messages.map(m => m.message));
+      where: { channel: { id: channelId }, message: { sent_at: LessThanOrEqual(maxDate) } }
+    }).then(messages => messages.map(m => m.message))).slice(0, maxMessages);
   }
 
   async isBanned(user: User, channelId: number): Promise<boolean> {
@@ -115,5 +136,9 @@ export class ChatService {
     return getRepository(Channel).find({
       where: { visibility: ChannelVisibility.PUBLIC }
     });
+  }
+
+  async updateChannel(channel: Channel): Promise<Channel> {
+    return getRepository(Channel).save(channel);
   }
 }
