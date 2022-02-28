@@ -66,6 +66,7 @@
 - name: VARCHAR(32) UNIQUE
 - owner_id: INT NOT NULL
 	- The owner is a channel administrator.
+	- The owner can promote members to channel admnistrators and demote channel administrators (except himself).
 	- The owner can delete the channel.
 	- If the owner leaves the channel, the channel is deleted.
 - visibility: ENUM NOT NULL DEFAULT `private`
@@ -86,8 +87,6 @@
 - role: ENUM NOT NULL DEFAULT `member`
 	- `admin`: The user is a moderator of the channel.
 		- A channel administrator can ban or mute users except channel owner.
-		- Channel administrator can also promote other users to channel administrator, as well as demote channel administrators.
-		- A channel administrator cannot demote himself or the channel owner.
 	- `member`: The user is a member of the channel.
 		- The user can send messages to the channel if not banned or muted.
 - last_read_at: TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
