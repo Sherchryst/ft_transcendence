@@ -1,14 +1,12 @@
-import { Res, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException} from '@nestjs/websockets';
 import { ChatService } from './chat.service';
 import { CustomJwtService } from 'src/auth/jwt/jwt.service';
 import { IncomingMessage } from 'http';
 import { UsersService } from 'src/users/users.service';
-import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
 import { ChannelMember, ChannelMemberRole } from './entities/channel-member.entity';
 import { ChannelVisibility } from './entities/channel.entity';
 import { ChannelModerationType } from './entities/channel-moderation.entity';
-import { exportDefaultDeclaration } from '@babel/types';
 import { User } from 'src/users/entities/user.entity';
 
 @WebSocketGateway(3001)
@@ -107,18 +105,18 @@ export class ChatGateway implements OnGatewayConnection{
 
     @SubscribeMessage('destroy')
     async destroy(@ConnectedSocket() client, @MessageBody() chanId: number) {
-        await this.auth(client)
+        const user = await this.auth(client)
         const channel = await this.chatService.findChannel(chanId);
-        if (client.id != channel.owner.id)
+        if (user.id != channel.owner.id)
             throw new UnauthorizedException('you\'re not the owner');
         this.chatService.deleteChannel(chanId)
     }
 
     @SubscribeMessage('change_owner')
     async change_owner(@ConnectedSocket() client, @MessageBody() data: {chanId: number, newOwnerId: number}) {
-        await this.auth(client)
+        const user = await this.auth(client)
         const channel = await this.chatService.findChannel(data.chanId);
-        if (client.id != channel.owner.id)
+        if (user.id != channel.owner.id)
             throw new UnauthorizedException('you\'re not the owner');
         channel.owner = await this.usersService.findOne(data.newOwnerId);
         this.chatService.updateChannel(channel);
@@ -126,18 +124,52 @@ export class ChatGateway implements OnGatewayConnection{
 
     @SubscribeMessage('promote')
     async promote(@ConnectedSocket() client, @MessageBody() data: {chanId: number, userId: number}) {
-        await this.auth(client)
+        const user = await this.auth(client)
+        const channel = await this.chatService.findChannel(data.chanId);
+        if (user.id != channel.owner.id)
+            throw new UnauthorizedException('you\'re not the owner');
+        const member = await this.chatService.getChannelMember(channel.id, user.id);
+        member.role = ChannelMemberRole.ADMIN;
+        this.chatService.updateMember(member);
+    }
+
+    @SubscribeMessage('demote')
+    async demote(@ConnectedSocket() client, @MessageBody() data: {chanId: number, userId: number}) {
+        const user = await this.auth(client)
+        const channel = await this.chatService.findChannel(data.chanId);
+        if (user.id != channel.owner.id)
+            throw new UnauthorizedException('you\'re not the owner');
+        const member = await this.chatService.getChannelMember(channel.id, user.id);
+        member.role = ChannelMemberRole.MEMBER;
+        this.chatService.updateMember(member);
     }
 
     @SubscribeMessage('invite')
     async invite(@ConnectedSocket() client, @MessageBody() data: {chanId: number, invitedId: number}) {
-        await this.auth(client)
+        const user = await this.auth(client)
         const channel = await this.chatService.findChannel(data.chanId);
-
+        this.chatService.createInvitation(data.chanId, user, data.invitedId)
+        this.wsClients.get(data.invitedId).send(JSON.stringify({event: "invited", data: {from: user, channel: channel}}))
+        return "ok";
     }
 
     @SubscribeMessage('join_with_invitation')
     async join_with_invitation(@ConnectedSocket() client, @MessageBody() chanId: number) {
-        await this.auth(client)
+        const user = await this.auth(client)
+        const channel = await this.chatService.findChannel(chanId);
+        if (!(await this.chatService.isInvited(chanId, user)))
+            throw new UnauthorizedException('not invited to chan');
+        this.chatService.joinChannel(user, chanId, ChannelMemberRole.MEMBER);
+        const history = await this.chatService.getChannelMessages(chanId, new Date(), 100);
+        return { event: "joined", data: { channel: channel, history: history} };
+    }
+
+    @SubscribeMessage('direct_message')
+    async direct_message(@ConnectedSocket() client, @MessageBody() data: {towardId: number, content: string}) {
+        const user = await this.auth(client);
+        const to = await this.usersService.findOne(data.towardId);
+        const message = await this.chatService.createMessage(user, data.content)
+        this.wsClients.get(to.id).send(JSON.stringify(await this.chatService.createDirectMessage(to, message)));
+        return "ok"
     }
 }

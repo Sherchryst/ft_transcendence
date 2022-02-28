@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { userInfo } from 'os';
 import { User } from 'src/users/entities/user.entity';
 import { getRepository, IsNull, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { ChannelInvitation } from './entities/channel-invitation.entity';
@@ -172,5 +171,9 @@ export class ChatService {
 
   async updateChannel(channel: Channel): Promise<Channel> {
     return getRepository(Channel).save(channel);
+  }
+
+  async updateMember(channelMember: ChannelMember): Promise<ChannelMember> {
+    return getRepository(ChannelMember).save(channelMember);
   }
 }
