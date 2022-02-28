@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
@@ -21,5 +22,6 @@ export class Channel {
   visibility: ChannelVisibility;
 
   @Column({ length: 32, nullable: true, default: () => 'null' })
+  @Exclude()
   password!: string;
 }

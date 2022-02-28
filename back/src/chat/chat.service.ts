@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { User } from 'src/users/entities/user.entity';
 import { getRepository, IsNull, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { ChannelInvitation } from './entities/channel-invitation.entity';
 import { ChannelMember, ChannelMemberRole } from './entities/channel-member.entity';
 import { ChannelMessage } from './entities/channel-message.entity';
 import { ChannelModeration, ChannelModerationType } from './entities/channel-moderation.entity';
@@ -18,6 +19,16 @@ export class ChatService {
     });
     await getRepository(Channel).save(channel);
     return channel;
+  }
+
+  async createInvitation(channelId: number, from: User, toUserId: number): Promise<ChannelInvitation> {
+    const invitation = getRepository(ChannelInvitation).create({
+      channel: { id: channelId },
+      from: from,
+      to: { id: toUserId }
+    });
+    await getRepository(ChannelInvitation).save(invitation);
+    return invitation;
   }
 
   async createMessage(from: User, content: string): Promise<Message> {
@@ -38,6 +49,18 @@ export class ChatService {
     return msg;
   }
 
+  async createChannelModeration(channelId: number, userId: number, admin: User, type: ChannelModerationType, reason: string, duration: number): Promise<ChannelModeration> {
+    const moderation = getRepository(ChannelModeration).create({
+      channel: { id: channelId },
+      user: { id: userId },
+      admin: admin,
+      type: type,
+      reason: reason,
+      expire_at: new Date(new Date().getTime() + duration)
+    });
+    return await getRepository(ChannelModeration).save(moderation);
+  }
+
   async createDirectMessage(to: User, message: Message): Promise<DirectMessage> {
     const msg = getRepository(DirectMessage).create({
       to: to,
@@ -47,9 +70,28 @@ export class ChatService {
     return msg;
   }
 
+  async deleteChannel(channelId: number) {
+    await getRepository(Channel).delete({ id: channelId });
+  }
+
+  async editChannelMember(channelId: number, user: User, role: ChannelMemberRole): Promise<ChannelMember> {
+    const member = await getRepository(ChannelMember).findOne({
+      channel: { id: channelId },
+      user: { id: user.id }
+    });
+    member.role = role;
+    return getRepository(ChannelMember).save(member);
+  }
+
   async findChannel(channelId: number): Promise<Channel> {
     return getRepository(Channel).findOne({
       where: { id: channelId }
+    });
+  }
+
+  async getChannelMember(channelId: number, userId: number): Promise<ChannelMember> {
+    return await getRepository(ChannelMember).findOne({
+      where: { channel: { id: channelId }, user: {id: userId} }
     });
   }
 
@@ -60,14 +102,15 @@ export class ChatService {
     });
   }
 
-  async getChannelMessages(channelId: number): Promise<Message[]> {
-    return getRepository(ChannelMessage).find({
-      where: { channel: { id: channelId } }
-    }).then(messages => messages.map(m => m.message));
+  async getChannelMessages(channelId: number, maxDate: Date, maxMessages: number): Promise<Message[]> {
+    return (await getRepository(ChannelMessage).find({
+      relations: ['message', 'message.from'],
+      where: { channel: { id: channelId }, message: { sent_at: LessThanOrEqual(maxDate) } }
+    }).then(messages => messages.map(m => m.message))).slice(0, maxMessages);
   }
 
   async isBanned(user: User, channelId: number): Promise<boolean> {
-    return getRepository(ChannelModeration).findOne({
+    return await getRepository(ChannelModeration).findOne({
       where: {
         channel: { id: channelId },
         user: user,
@@ -77,6 +120,16 @@ export class ChatService {
       }
     }).then(ban => !!ban);
   }
+
+  async isInvited(channelId: number, user: User): Promise<boolean> {
+    return await getRepository(ChannelInvitation).findOne({
+      where: {
+        channel: { id: channelId },
+        to: user
+      }
+    }).then(invitation => !!invitation);
+  }
+
 
   async isMuted(user: User, channelId: number): Promise<boolean> {
     return await getRepository(ChannelModeration).findOne({
@@ -91,11 +144,16 @@ export class ChatService {
   }
 
   async joinChannel(user: User, channelId: number, role: ChannelMemberRole): Promise<ChannelMember> {
-    return getRepository(ChannelMember).save({
+    let member = await getRepository(ChannelMember).save({
       channel: { id: channelId },
       user: user,
       role: role
     });
+    await getRepository(ChannelInvitation).delete({
+      channel: { id: channelId },
+      to: user
+    });
+    return member;
   }
 
   async leaveChannel(user: User, channelId: number): Promise<void> {
@@ -109,5 +167,13 @@ export class ChatService {
     return getRepository(Channel).find({
       where: { visibility: ChannelVisibility.PUBLIC }
     });
+  }
+
+  async updateChannel(channel: Channel): Promise<Channel> {
+    return getRepository(Channel).save(channel);
+  }
+
+  async updateMember(channelMember: ChannelMember): Promise<ChannelMember> {
+    return getRepository(ChannelMember).save(channelMember);
   }
 }
