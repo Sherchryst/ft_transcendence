@@ -6,7 +6,7 @@
           <discussion-preview />
           <discussion-preview />
           <h4 class="text-left font-bold text-xl mt-4" >Channels</h4>
-          <discussion-preview isChannel="true"/>
+          <discussion-preview isChannel />
       </div>
       <div class="col-span-8 conversation flex flex-col justify-between px-7 py-5">
           <div class="flex-auto mb-5 overflow-x-auto">
@@ -33,7 +33,10 @@
             </message>
           </div>
           <one-row-form placeholder="Message">
-              <SendIcon/>
+                <span class="flex flex-row items-center">
+                    <span class="px-2">Envoyer</span>
+                    <SendIcon/>
+                </span>
            </one-row-form>
       </div>
       <div class="chat" :key="history">
@@ -143,7 +146,6 @@ export default defineComponent({
                     console.log("channel", this.channel)
                     console.log("history", this.history)
                     break;
-                
                 case "message":
                     (this.history as any).push(fromServer.data.channelMessage.message.content)
                     break;

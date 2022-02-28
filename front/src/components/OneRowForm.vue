@@ -33,7 +33,7 @@ export default class OneButtonLink extends Vue {
 </script>
 
 <style lang="scss">
-	$line-widht: 3px;
+	$line-widht: 1px;
 	$--hover-bg-color: #fff;
 
 	.one-form-row{
@@ -46,9 +46,13 @@ export default class OneButtonLink extends Vue {
 			&:hover{
 				// outline: $line-widht darken($color: $bg-action, $amount: 20%) solid;
 				background: $--hover-bg-color;
-				outline: $line-widht $action solid;
+				// outline: $line-widht $action solid;
 				input{
+					transition: all 100ms ease-in;
 					background: $--hover-bg-color;
+					&::placeholder{
+						color: $action;
+				}
 				}
 			}
 			&:focus-within{
@@ -65,7 +69,7 @@ export default class OneButtonLink extends Vue {
 				outline: unset;
 				background: $--hover-bg-color;
 				&::placeholder{
-					color: $action;
+					color: $panel-color !important;
 				}
 			}
 		}
