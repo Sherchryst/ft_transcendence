@@ -33,7 +33,7 @@ export default class ProfilePanel extends Vue {
 }
 .title{
 	width: auto;
-	height: 44px;
+	height: auto;
 	left: 720px;
 	top: 171px;
 }
