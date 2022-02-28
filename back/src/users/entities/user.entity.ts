@@ -1,3 +1,4 @@
+import { Exclude } from 'class-transformer';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { UserAchievement } from './user-achievement.entity';
 import { UserRelationship } from './user-relationship.entity';
@@ -25,10 +26,12 @@ export class User {
   @Column({ default: 0 })
   mmr: number;
 
-  @Column({ length: 32, default: '', select: false })
+  @Column({ length: 32, default: '' })
+  @Exclude()
   twofaSecret: string;
 
-  @Column({ default: false, select: false })
+  @Column({ default: false })
+  @Exclude()
   twofa: boolean;
 
   @OneToMany(() => UserAchievement, a => a.user)
