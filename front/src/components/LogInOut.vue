@@ -17,9 +17,7 @@
           <button v-on:click="send_digit_code('/turn-on')">Send</button>
         </div>
       </div>
-      <div v-if="state == 3">
-        <button v-on:click="go_to_chat()">chat</button>
-      </div>
+      <button v-on:click="go_to_chat()">chat</button>
       <button v-on:click="logout()">Logout</button> <br>
     </div>
     <button v-on:click="ping()">Ping</button>
