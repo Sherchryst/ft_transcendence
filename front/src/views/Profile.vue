@@ -23,8 +23,16 @@
 			</div>
 		</div>
 		<div class="fex flex-col relative">
-			<TitlePanel title="Historique des matchs"> <img src="../assets/scroll.svg"> </TitlePanel>
-			<TitlePanel title="Achievements"> <img src="../assets/trophy.svg"> </TitlePanel>
+			<div>
+				<TitlePanel title="Historique des matchs"> <img src="../assets/scroll.svg"> </TitlePanel>
+				<br>
+				<div>
+					<MatchesHistory></MatchesHistory>
+				</div>
+			</div>
+			<div>
+				<TitlePanel title="Achievements"> <img src="../assets/trophy.svg"> </TitlePanel>
+			</div>
 		</div>
 	</div>
 </template>
@@ -38,7 +46,7 @@ import LevelBar from '@/components/LevelBar.vue';
 import ButtonLink from '@/components/ButtonLink.vue';
 import LittleCard from '@/components/LittleCard.vue';
 import TitlePanel from '@/components/TitlePanel.vue';
-
+import MatchesHistory from '@/components/MatchesHistory.vue';
 export default {
 	components: {
 		ProfilePicture,
@@ -47,11 +55,9 @@ export default {
 		LevelBar,
 		ButtonLink,
 		LittleCard,
-		TitlePanel
-	},
-	setup () {
-        useMeta({ title: 'Profile' })
-    },
+		TitlePanel,
+		MatchesHistory
+	}
 }
 </script>
 
