@@ -39,14 +39,14 @@ export class ChatService {
     return msg;
   }
 
-  async createChannelModeration(channelId: number, userId: number, admin: User, type: ChannelModerationType, reason: string, beginAt: Date): Promise<ChannelModeration> {
+  async createChannelModeration(channelId: number, userId: number, admin: User, type: ChannelModerationType, reason: string, duration: number): Promise<ChannelModeration> {
     const moderation = getRepository(ChannelModeration).create({
       channel: { id: channelId },
       user: { id: userId },
       admin: admin,
       type: type,
       reason: reason,
-      begin_at: beginAt
+      expire_at: new Date(new Date().getTime() + duration)
     });
     return await getRepository(ChannelModeration).save(moderation);
   }
@@ -76,6 +76,12 @@ export class ChatService {
   async findChannel(channelId: number): Promise<Channel> {
     return getRepository(Channel).findOne({
       where: { id: channelId }
+    });
+  }
+
+  async getChannelMember(channelId: number, userId: number): Promise<ChannelMember> {
+    return await getRepository(ChannelMember).findOne({
+      where: { channel: { id: channelId }, user: {id: userId} }
     });
   }
 

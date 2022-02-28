@@ -77,6 +77,8 @@ export class UsersController {
 
   @Post('update-nickname')
   async updateNickname(@Body() dto: { id: number, nickname: string }) {
+    if (dto.nickname.slice(0, 4) === 'anon')
+      throw new ConflictException('forbidden prefix : anon');
     try {
       await this.usersService.updateNickname(dto.id, dto.nickname);
     } catch (error) {

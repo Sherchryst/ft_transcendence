@@ -1,6 +1,5 @@
 import { Res, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException} from '@nestjs/websockets';
-import { User } from 'src/users/entities/user.entity';
 import { ChatService } from './chat.service';
 import { CustomJwtService } from 'src/auth/jwt/jwt.service';
 import { IncomingMessage } from 'http';
@@ -8,6 +7,8 @@ import { UsersService } from 'src/users/users.service';
 import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
 import { ChannelMember, ChannelMemberRole } from './entities/channel-member.entity';
 import { ChannelVisibility } from './entities/channel.entity';
+import { ChannelModerationType } from './entities/channel-moderation.entity';
+import { exportDefaultDeclaration } from '@babel/types';
 
 @WebSocketGateway(3001)
 export class ChatGateway implements OnGatewayConnection{
@@ -37,7 +38,6 @@ export class ChatGateway implements OnGatewayConnection{
     private async broadcast(fromId: number, channelId: number, event: string, members: ChannelMember[], data: any) {
         for (const member of members) {
           if (fromId != member.user.id && !await this.chatService.isBanned(member.user, channelId) && await this.wsClients.has(member.user.id)) {
-            console.log(member.user.id)
             this.wsClients.get(member.user.id).send(JSON.stringify({ event: event, data: data }));
           }
         }
@@ -49,11 +49,11 @@ export class ChatGateway implements OnGatewayConnection{
     }
 
     @SubscribeMessage('join')
-    async join(@ConnectedSocket() client, @MessageBody() channelId: number) {
+    async join(@ConnectedSocket() client, @MessageBody() data: {channelId: number, password: string}) {
         const user = await this.usersService.findOne(client.id);
-        let channel = await this.chatService.findChannel(channelId);
-        await this.chatService.joinChannel(user, channelId, ChannelMemberRole.MEMBER);
-        const history = await this.chatService.getChannelMessages(channelId, new Date(), 100);
+        let channel = await this.chatService.findChannel(data.channelId);
+        await this.chatService.joinChannel(user, data.channelId, ChannelMemberRole.MEMBER);
+        const history = await this.chatService.getChannelMessages(data.channelId, new Date(), 100);
         return { event: "joined", data: { channel: channel, history: history} };
     }
 
@@ -85,5 +85,16 @@ export class ChatGateway implements OnGatewayConnection{
         else
           this.broadcast(user.id, channelId, "left", members, { channelId: channelId });
         return { event: "left", data: { channelId: channelId } };
+    }
+
+    @SubscribeMessage('chanModeration')
+    async ban(@ConnectedSocket() client, @MessageBody() data: {chanId: number, userId: number, action: ChannelModerationType, duration: number, reason: string}) {
+        const user = await this.usersService.findOne(client.id);
+        const admin = await this.chatService.getChannelMember(data.chanId, user.id);
+        if (admin.role != ChannelMemberRole.ADMIN)
+            throw new UnauthorizedException('you\'re not an administrator')
+        const members = await this.chatService.getChannelMembers(data.chanId);
+        this.broadcast(-1, data.chanId, data.action, members, {user: user, duration: data.duration, reason: data.reason})
+        await this.chatService.createChannelModeration(data.chanId, data.userId, user, data.action, data.reason, data.duration)
     }
 }

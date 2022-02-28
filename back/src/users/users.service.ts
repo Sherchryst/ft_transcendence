@@ -43,7 +43,7 @@ export class UsersService {
     const repo = getRepository(User);
     const user = repo.create({
       login: login,
-      nickname: login
+      nickname: "anon-" + login
     });
     return await repo.save(user);
   }
