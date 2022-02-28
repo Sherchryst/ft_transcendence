@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { userInfo } from 'os';
 import { User } from 'src/users/entities/user.entity';
 import { getRepository, IsNull, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { ChannelInvitation } from './entities/channel-invitation.entity';
 import { ChannelMember, ChannelMemberRole } from './entities/channel-member.entity';
 import { ChannelMessage } from './entities/channel-message.entity';
 import { ChannelModeration, ChannelModerationType } from './entities/channel-moderation.entity';
@@ -19,6 +20,16 @@ export class ChatService {
     });
     await getRepository(Channel).save(channel);
     return channel;
+  }
+
+  async createInvitation(channelId: number, from: User, toUserId: number): Promise<ChannelInvitation> {
+    const invitation = getRepository(ChannelInvitation).create({
+      channel: { id: channelId },
+      from: from,
+      to: { id: toUserId }
+    });
+    await getRepository(ChannelInvitation).save(invitation);
+    return invitation;
   }
 
   async createMessage(from: User, content: string): Promise<Message> {
@@ -111,6 +122,16 @@ export class ChatService {
     }).then(ban => !!ban);
   }
 
+  async isInvited(channelId: number, user: User): Promise<boolean> {
+    return await getRepository(ChannelInvitation).findOne({
+      where: {
+        channel: { id: channelId },
+        to: user
+      }
+    }).then(invitation => !!invitation);
+  }
+
+
   async isMuted(user: User, channelId: number): Promise<boolean> {
     return await getRepository(ChannelModeration).findOne({
       where: {
@@ -124,11 +145,16 @@ export class ChatService {
   }
 
   async joinChannel(user: User, channelId: number, role: ChannelMemberRole): Promise<ChannelMember> {
-    return getRepository(ChannelMember).save({
+    let member = await getRepository(ChannelMember).save({
       channel: { id: channelId },
       user: user,
       role: role
     });
+    await getRepository(ChannelInvitation).delete({
+      channel: { id: channelId },
+      to: user
+    });
+    return member;
   }
 
   async leaveChannel(user: User, channelId: number): Promise<void> {
