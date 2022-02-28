@@ -9,7 +9,8 @@
 				<br><br>
 			</div>
 			<div class="self-center">
-				<label for="username">enter username:</label>
+				<label for="username">Enter username:</label>
+				<br>
 				<input type="text" class="input" id="username" name="username" placeholder="username" required>
 			</div>
 			<div class="self-center">
