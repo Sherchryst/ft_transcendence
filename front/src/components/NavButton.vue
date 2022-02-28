@@ -19,12 +19,19 @@ export default class ButtonLink extends Vue {
 
 <style lang="scss">
 .nav-link{
+	transition: 200ms all;
 	display: flex;
 	border-radius: 12px;
-	background: $panel-color;
-	box-shadow: 0px 4px 4px rgba(7, 53, 70, 0.22);
+	// background: $panel-color;
+	// box-shadow: 0px 4px 4px rgba(7, 53, 70, 0.22);
 	svg {
-		fill: white;
+		transition: 200ms all;
+		fill: $panel-color;
+	}
+	&:hover{
+		svg {
+			fill: $action;
+		}
 	}
 	&.router-link-exact-active {
 		background: $bg-action;
