@@ -32,7 +32,9 @@
                 Lorem ipsum dolor sit amet consectetur, adipisicing elit. Incidunt impedit mollitia numquam voluptatibus, necessitatibus amet neque sint hic soluta animi. Perspiciatis tenetur numquam harum eaque veritatis dicta odit illum magni.
             </message>
           </div>
-          <one-row-form placeholder="Message">Send</one-row-form>
+          <one-row-form placeholder="Message">
+              <SendIcon/>
+           </one-row-form>
       </div>
       <div class="chat" :key="history">
         <span v-if="channel">
@@ -100,6 +102,8 @@ import axios from 'axios';
 import DiscussionPreview from '@/components/DiscussionPreview.vue'
 import Message from '@/components/Message.vue'
 import OneRowForm from '@/components/OneRowForm.vue'
+import SendIcon from '@/assets/icon/send.svg';
+import { useMeta } from 'vue-meta'
 
 
 
@@ -108,6 +112,10 @@ export default defineComponent({
         DiscussionPreview,
         Message,
         OneRowForm,
+        SendIcon,
+    },
+    setup () {
+        useMeta({ title: 'Chat' })
     },
     data() {
         return {

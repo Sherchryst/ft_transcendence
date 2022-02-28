@@ -30,6 +30,7 @@ export default class OneButtonLink extends Vue {
 <style lang="scss" scoped>
 .chat-preview{
     transition: background 300ms ease-in;
+    cursor: pointer;
     img {
         background: $bg--lg-color;
         border-radius: 50px;

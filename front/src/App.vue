@@ -1,4 +1,8 @@
 <template>
+  <metainfo>
+    <template v-slot:title="{ content }">{{ content ? `${content} | ApongUs` : `ApongUs` }}</template>
+    <!-- <title>testlol</title> -->
+  </metainfo>
   <div id="container" class="min-h-screen">
     <router-view/>
   </div>
@@ -28,3 +32,15 @@
 // }
 
 </style>
+
+<script lang="ts">
+import { useMeta } from 'vue-meta'
+
+export default {
+  setup () {
+    useMeta({
+      title: '',
+    })
+  }
+}
+</script>

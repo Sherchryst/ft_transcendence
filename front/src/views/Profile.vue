@@ -38,6 +38,7 @@
 </template>
 
 <script lang="ts">
+import { useMeta } from 'vue-meta'
 import ProfilePicture from '@/components/ProfilePicture.vue';
 import MainTitle from '@/components/MainTitle.vue';
 import Level from '@/components/Level.vue';
