@@ -30,7 +30,7 @@
 					</div>
 					<div class="flex flex-row justify-between justify-items-center">
 						<div class="self-center">
-							<one-row-form action="/">
+							<one-row-form placeholder="Recherche" action="/">
 								<SearchIcon />
 							</one-row-form>
 							<!-- <OneRowForm action="/" /> -->
