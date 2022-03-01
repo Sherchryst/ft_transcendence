@@ -35,7 +35,7 @@
 
 <style lang="scss" scoped>
     .conversation{
-        background: $panel--dk-color;
+        background: #e0e0e3;
     }
 </style>
 

@@ -1,6 +1,6 @@
 <template>
   <div class="chat grid grid-cols-12 gap-5">
-      <div class="col-span-4 list flex flex-col px-7 py-5">
+      <div class="col-span-4 list flex flex-col pr-7">
           <h4 class="text-left font-bold text-xl mb-4" >Messages directs</h4>
           <discussion-preview id="0232839723" />
           <discussion-preview id="3463992320" />
@@ -40,9 +40,9 @@
         border-radius: 25px;
     }
     .list{
-        background: $panel-color;
+        // background: $panel-color;
         h4 {
-            color: $bg--lg-color;
+            color: $dark-font;
         }
     }
 }

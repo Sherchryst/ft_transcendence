@@ -31,16 +31,17 @@ export default class Message extends Vue {
 
 <style lang="scss" scoped>
 .message {
-    color: $bg--lg-color;
     img {
         background: $bg--lg-color;
         border-radius: 50px;
     }
     .text-left{
+        color: $dark-font;
         background: $panel-color;
         border-radius: 0px 10px 10px 10px
     }
     .text-right{
+        color: $bg--lg-color;
         background: $action;
         border-radius: 10px 0px 10px 10px
     }
