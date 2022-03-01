@@ -1,5 +1,5 @@
 <template>
-	<router-link :to="route" class="button px-7 py-3 pb-2">{{ text }}</router-link>
+	<router-link :to="{name: route}" class="button px-7 py-3 pb-2">{{ text }}</router-link>
 </template>
 
 <script lang="ts">
@@ -13,7 +13,7 @@ import { Options, Vue } from 'vue-class-component';
 	},
 	route: {
 		type: String,
-		default: "/"
+		default: "home"
 	}
   }
 })

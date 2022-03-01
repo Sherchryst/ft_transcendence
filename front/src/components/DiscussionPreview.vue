@@ -1,5 +1,5 @@
 <template>
-    <router-link :to="/chat/ + id" class="chat-preview flex flex-row items-center py-3 px-7 my-2">
+    <router-link :to="{ name: 'unique-chat', params: { id: id }}" class="chat-preview flex flex-row items-center py-3 px-7 my-2">
       <div v-if="!isChannel" class="mr-5">
           <img class="h-16 w-16" src="/" alt="_profile">
       </div>

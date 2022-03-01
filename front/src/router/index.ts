@@ -25,7 +25,7 @@ const routes: Array<RouteRecordRaw> = [
     },
     {
       path: 'game-choice',
-      name: 'game_choice',
+      name: 'game-choice',
       component: GameChoice
     },
     {
@@ -42,7 +42,7 @@ const routes: Array<RouteRecordRaw> = [
     },
     {
       path: 'channel',
-      name: 'list_chat',
+      name: 'channel',
       component: ListChat
     },
     {
@@ -54,6 +54,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: "/42",
+    name: 'ft-api',
     component: Home,
     beforeEnter() {
       window.location.href = "http://localhost:3000/auth/login42";
@@ -61,7 +62,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/login',
-    name: 'Login',
+    name: 'login',
     component: Login,
   },
   {

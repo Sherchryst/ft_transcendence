@@ -5,16 +5,16 @@
 				<img class="h-16 w-16" src="/test.png" alt="profile">
 			</div>
 			<div class="flex flex-col">
-				<nav-button route="/">
+				<nav-button route="home">
 					<HomeIcon />
 				</nav-button>
-				<nav-button route="/game-choice">
+				<nav-button route="game-choice">
 					<GameIcon />
 				</nav-button>
-				<nav-button route="/chat/list">
+				<nav-button route="channel">
 					<GroupIcon />
 				</nav-button>
-				<nav-button route="/chat">
+				<nav-button route="chat" class="chat-link">
 					<ChatIcon />
 				</nav-button>
 			</div>
@@ -24,7 +24,7 @@
 				<div class="flex flex-row justify-between justify-items-center h-16">
 					<div class="self-center">
 						<!-- If connected -->
-						<ButtonLink text="Connection" route="/login" /> 
+						<ButtonLink text="Connection" route="login" /> 
 						<!-- <a href="#">connection</a>
 						<a href="#">FAQ</a> -->
 					</div>

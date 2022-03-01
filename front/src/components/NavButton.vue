@@ -1,5 +1,5 @@
 <template>
-	<router-link :to="route" class="nav-link h-16 w-16 mb-5">
+	<router-link :to="{name: route}" class="nav-link h-16 w-16 mb-5">
 		<slot></slot>
 	</router-link>
 </template>
@@ -33,7 +33,7 @@ export default class ButtonLink extends Vue {
 			fill: $action;
 		}
 	}
-	&.router-link-exact-active {
+	&.router-link-exact-active, &.chat-link.router-link-active {
 		background: $bg-action;
 		box-shadow: 0px 4px 4px rgba(142, 172, 171, 0.31);
 		svg {
