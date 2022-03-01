@@ -1,5 +1,5 @@
 <template>
-  <div class="chat-preview flex flex-row items-center py-3 px-7 my-2">
+    <router-link :to="/chat/ + id" class="chat-preview flex flex-row items-center py-3 px-7 my-2">
       <div v-if="!isChannel" class="mr-5">
           <img class="h-16 w-16" src="/" alt="_profile">
       </div>
@@ -7,7 +7,7 @@
           <p class="">Username</p>
           <p class="font-thin text-xs">last message</p>
       </div>
-  </div>
+    </router-link>
 </template>
 
 <script lang="ts">
@@ -18,12 +18,17 @@ import { Options, Vue } from 'vue-class-component';
     isChannel: {
         type: Boolean ,
         default: false
+    },
+    id: {
+        type: [String, Number],
+        default: 0
     }
   }
 })
 
 export default class OneButtonLink extends Vue {
 	isChannel!: boolean
+    id!: number;
 }
 </script>
 
@@ -41,7 +46,7 @@ export default class OneButtonLink extends Vue {
     &:hover{
         background: $bg-action;
     }
-    &.active{
+    &.router-link-exact-active{
         background: $action;
     }
     border-radius: 16px;

@@ -2,43 +2,13 @@
   <div class="chat grid grid-cols-12 gap-5">
       <div class="col-span-4 list flex flex-col px-7 py-5">
           <h4 class="text-left font-bold text-xl mb-4" >Messages directs</h4>
-          <discussion-preview class="active" />
-          <discussion-preview />
-          <discussion-preview />
+          <discussion-preview id="0232839723" />
+          <discussion-preview id="3463992320" />
+          <discussion-preview id="9834934920" />
           <h4 class="text-left font-bold text-xl mt-4" >Channels</h4>
           <discussion-preview isChannel />
       </div>
-      <div class="col-span-8 conversation flex flex-col justify-between px-7 py-5">
-          <div class="flex-auto mb-5 overflow-x-auto">
-            <message side="1">
-                Lorem ipsum dolor
-            </message>
-            <message side="0">
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Incidunt impedit mollitia numquam voluptatibus, necessitatibus amet neque sint hic soluta animi. Perspiciatis tenetur numquam harum eaque veritatis dicta odit illum magni.
-            </message>
-            <message side="1">
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Incidunt impedit mollitia numquam voluptatibus, necessitatibus amet neque sint hic soluta animi. Perspiciatis tenetur numquam harum eaque veritatis dicta odit illum magni.
-            </message>
-            <message side="1">
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Incidunt impedit mollitia numquam voluptatibus, necessitatibus amet neque sint hic soluta animi. Perspiciatis tenetur numquam harum eaque veritatis dicta odit illum magni.
-            </message>
-            <message side="1">
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Incidunt impedit mollitia numquam voluptatibus, necessitatibus amet neque sint hic soluta animi. Perspiciatis tenetur numquam harum eaque veritatis dicta odit illum magni.
-            </message>
-            <message side="1">
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Incidunt impedit mollitia numquam voluptatibus, necessitatibus amet neque sint hic soluta animi. Perspiciatis tenetur numquam harum eaque veritatis dicta odit illum magni.
-            </message>
-            <message side="1">
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Incidunt impedit mollitia numquam voluptatibus, necessitatibus amet neque sint hic soluta animi. Perspiciatis tenetur numquam harum eaque veritatis dicta odit illum magni.
-            </message>
-          </div>
-          <one-row-form placeholder="Message">
-                <span class="flex flex-row items-center">
-                    <span class="px-2">Envoyer</span>
-                    <SendIcon/>
-                </span>
-           </one-row-form>
-      </div>
+      <router-view/>
       <div class="chat" :key="history ">
         <h1>Chat</h1>
         <button v-on:click="go_to_home()">Home</button> <br>
@@ -75,9 +45,6 @@
             color: $bg--lg-color;
         }
     }
-    .conversation{
-        background: $panel--dk-color;
-    }
 }
 </style>
 
@@ -111,9 +78,6 @@ import router from '@/router';
 import { defineComponent } from 'vue';
 import axios from 'axios';
 import DiscussionPreview from '@/components/DiscussionPreview.vue'
-import Message from '@/components/Message.vue'
-import OneRowForm from '@/components/OneRowForm.vue'
-import SendIcon from '@/assets/icon/send.svg';
 import { useMeta } from 'vue-meta'
 
 
@@ -121,9 +85,6 @@ import { useMeta } from 'vue-meta'
 export default defineComponent({
     components: {
         DiscussionPreview,
-        Message,
-        OneRowForm,
-        SendIcon,
     },
     setup () {
         useMeta({ title: 'Chat' })
