@@ -1,6 +1,6 @@
 <template>
-	<div class="flex flex-rows justify-evenly flex-wrap md:flex-wrap sm:flex-wrap">
-		<div class="fex flex-col">
+	<div class="flex flex-rows justify-between flex-wrap sm:flex-wrap">
+		<div>
 			<div class="flex place-content-center">
 				<ProfilePicture></ProfilePicture>
 			</div>
@@ -23,16 +23,38 @@
 			</div>
 		</div>
 		<div class="fex flex-col relative">
-			<div>
-				<TitlePanel title="Historique des matchs"> <img src="../assets/scroll.svg"> </TitlePanel>
-				<br>
-				<div>
-					<MatchesHistory></MatchesHistory>
-				</div>
-			</div>
-			<div>
-				<TitlePanel title="Achievements"> <img src="../assets/trophy.svg"> </TitlePanel>
-			</div>
+			<ProfilePanel>
+				<template v-slot:title>
+					<TitlePanel title="Historique des matchs"> <Scrool></Scrool> </TitlePanel>
+				</template>
+				<template v-slot:body>
+					<MatchesHistory result type="type of battle" first="5" second="3"></MatchesHistory>
+					<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
+				</template>
+			</ProfilePanel>
+			<ProfilePanel>
+				<template v-slot:title>
+					<TitlePanel title="Achievements"> <Trophy></Trophy> </TitlePanel>
+				</template>
+				<template v-slot:body>
+					<div class="flex flex-rows flex-wrap max-w-3xl max-h-10">
+						<div>
+							<LargerCard></LargerCard>
+						</div>
+						<div>
+							<LargerCard></LargerCard>
+						</div>
+						<div>
+							<LargerCard></LargerCard>
+						</div>
+						<div>
+							<LargerCard></LargerCard>
+						</div>
+					</div>
+				</template>
+			</ProfilePanel>
+		</div>
+		<div>
 		</div>
 	</div>
 </template>
@@ -45,8 +67,13 @@ import Level from '@/components/Level.vue';
 import LevelBar from '@/components/LevelBar.vue';
 import ButtonLink from '@/components/ButtonLink.vue';
 import LittleCard from '@/components/LittleCard.vue';
+import LargerCard from '@/components/LargerCard.vue';
 import TitlePanel from '@/components/TitlePanel.vue';
 import MatchesHistory from '@/components/MatchesHistory.vue';
+import ProfilePanel from '@/components/ProfilePanel.vue';
+import Scrool from '@/assets/scroll.svg';
+import Trophy from '@/assets/trophy.svg';
+
 export default {
 	components: {
 		ProfilePicture,
@@ -56,7 +83,11 @@ export default {
 		ButtonLink,
 		LittleCard,
 		TitlePanel,
-		MatchesHistory
+		MatchesHistory,
+		Scrool,
+		Trophy,
+		ProfilePanel,
+		LargerCard
 	}
 }
 </script>

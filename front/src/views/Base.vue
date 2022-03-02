@@ -1,6 +1,6 @@
 <template>
 	<div id="base" class="grid grid-cols-12 min-h-screen">
-		<nav id="nav" class="flex flex-col items-center">
+		<nav id="nav" class=" hidden sm:flex flex-col items-center">
 			<div class="mt-10 h-36">
 				<img class="h-16 w-16" src="/test.png" alt="profile">
 			</div>
@@ -19,12 +19,12 @@
 				</nav-button>
 			</div>
 		</nav>
-		<div class="flex flex-col col-span-11 px-16">
-			<div class="mt-10 h-36">
-				<div class="flex flex-row justify-between justify-items-center h-16">
+		<div class="flex flex-col col-span-12 md:col-span-11 px-16">
+			<div class=" invisible sm:visible md:visible  mt-10 h-36 ">
+				<div class="hidden sm:flex flex-row justify-between justify-items-center h-16">
 					<div class="self-center">
 						<!-- If connected -->
-						<ButtonLink text="Connection" route="/login" /> 
+						<ButtonLink text="Connection" route="/login" />
 						<!-- <a href="#">connection</a>
 						<a href="#">FAQ</a> -->
 					</div>
