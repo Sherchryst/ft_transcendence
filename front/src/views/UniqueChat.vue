@@ -1,26 +1,41 @@
 <template>
       <div class="col-span-8 conversation flex flex-col justify-between px-7 py-5">
           <div id="chat" class="flex-auto mb-5 overflow-x-auto">
-            <message side="1">
+            <message side="0">
                 Lorem ipsum dolor
+            </message>
+            <message side="1">
+                Lorem ipsum dolor sit
+            </message>
+            <message side="0">
+                Lorem
             </message>
             <message side="0">
                 Lorem ipsum dolor sit amet consectetur, adipisicing elit. Incidunt impedit mollitia numquam voluptatibus, necessitatibus amet neque sint hic soluta animi. Perspiciatis tenetur numquam harum eaque veritatis dicta odit illum magni.
             </message>
             <message side="1">
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Incidunt impedit mollitia numquam voluptatibus, necessitatibus amet neque sint hic soluta animi. Perspiciatis tenetur numquam harum eaque veritatis dicta odit illum magni.
+                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Incidunt impedit mollitia numquam voluptatibus, necessitatibus amet neque sint hic.
             </message>
             <message side="1">
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Incidunt impedit mollitia numquam voluptatibus, necessitatibus amet neque sint hic soluta animi. Perspiciatis tenetur numquam harum eaque veritatis dicta odit illum magni.
+                Lorem ipsum dolor sit amet consectetur, elit.
             </message>
             <message side="1">
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Incidunt impedit mollitia numquam voluptatibus, necessitatibus amet neque sint hic soluta animi. Perspiciatis tenetur numquam harum eaque veritatis dicta odit illum magni.
+                Lorem ipsum dolor sit amet consectetur, adipisicing elit.
+            </message>
+            <message side="0">
+                Lorem ipsum dolor
             </message>
             <message side="1">
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Incidunt impedit mollitia numquam voluptatibus, necessitatibus amet neque sint hic soluta animi. Perspiciatis tenetur numquam harum eaque veritatis dicta odit illum magni.
+                Lorem ipsum
+            </message>
+            <message side="0">
+                Lorem ipsum dolor sit amet
             </message>
             <message side="1">
-                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Incidunt impedit mollitia numquam voluptatibus, necessitatibus amet neque sint hic soluta animi. Perspiciatis tenetur numquam harum eaque veritatis dicta odit illum magni.
+                 Lorem ipsum dolor sit amet consectetur
+            </message>
+            <message side="0">
+                Lorem ipsum dolor sit
             </message>
           </div>
           <one-row-form placeholder="Message">
