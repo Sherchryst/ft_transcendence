@@ -149,7 +149,7 @@ export default defineComponent({
         },
 
         join(chanId: number): void {
-            this.socket.send(JSON.stringify({event: 'join', data : chanId}));
+            this.socket.send(JSON.stringify({event: 'join', data : {channelId: chanId, password: ""}}));
         },
 
         create(): void {
