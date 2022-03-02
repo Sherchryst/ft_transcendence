@@ -1,7 +1,7 @@
 <template>
-	<form :action="action" :method="method">
+	<form class="one-form-row" :action="action" :method="method">
 		<div class="flex flex-row justify-between">
-			<input class="m-2 flex-auto focus-visible:outline-0" type="text" :placeholder="placeholder">
+			<input class="m-2 flex-auto" type="text" :placeholder="placeholder">
 			<button class="p-1" type="submit">
 				<slot> + </slot>
 			</button>
@@ -32,42 +32,54 @@ export default class OneButtonLink extends Vue {
 }
 </script>
 
-<style lang="scss" scoped>
-	$line-widht: 3px;
+<style lang="scss">
+	$line-widht: 1px;
+	$--hover-bg-color: #fff;
 
-	form{
+	.one-form-row{
 		// outline: $line-widht solid transparent;
 		div{
-			background: $bg--lg-color;
+			background: #fff;
 			border-radius: 10px;
 			background-clip: padding-box;
 			transition: all 100ms ease-in;
 			&:hover{
 				// outline: $line-widht darken($color: $bg-action, $amount: 20%) solid;
-				background: lighten($color: $bg--lg-color, $amount: 5%);
+				background: $--hover-bg-color;
+				// outline: $line-widht $action solid;
 				input{
-					background: lighten($color: $bg--lg-color, $amount: 5%);
+					transition: all 100ms ease-in;
+					background: $--hover-bg-color;
+					&::placeholder{
+						color: $action;
+				}
 				}
 			}
 			&:focus-within{
 				outline: $line-widht $action solid;
 				background: $bg--lg-color;
-				background: lighten($color: $bg--lg-color, $amount: 5%);
+				background: $--hover-bg-color;
 			}
 		}
 		input{
 			transition: all 100ms ease-in;
-			background: $bg--lg-color;
-			color: $panel--dk-color;
+			background: #fff;
+			color: $action;
 			&:focus-visible{
 				outline: unset;
-				background: lighten($color: $bg--lg-color, $amount: 5%)
+				background: $--hover-bg-color;
+				&::placeholder{
+					color: $panel-color !important;
+				}
 			}
 		}
 		button{
-			background: $bg-action;
-			color: $action;
-			border-radius: 9px;
+			background: $action;
+			color: #fff;
+			border-radius: 0px 9px 9px 0px;
+			svg {
+				fill : #fff;
+			}
 		}
 	}
 </style>

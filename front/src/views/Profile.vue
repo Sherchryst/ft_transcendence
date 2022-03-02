@@ -11,7 +11,7 @@
 			<Level text="lvl.8"></Level>
 			<LevelBar percent="68" level="8" nextLevel="9"></LevelBar>
 			<br>
-			<ButtonLink text="Demander en ami" route="NULL"></ButtonLink>
+			<ButtonLink text="Demander en ami"></ButtonLink>
 			<br><br>
 			<div class="flex flex-rows justify-around md:flex-wrap">
 				<div class="">

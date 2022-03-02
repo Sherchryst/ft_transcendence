@@ -3,6 +3,7 @@ import Base from '@/views/Base.vue'
 import Home from '@/views/Home.vue'
 import Login from '@/views/Login.vue'
 import Chat from '@/views/Chat.vue'
+import UniqueChat from '@/views/UniqueChat.vue'
 import ListChat from '@/views/ListChat.vue'
 import Profile from '@/views/Profile.vue'
 import Register from '@/views/Register.vue'
@@ -24,17 +25,24 @@ const routes: Array<RouteRecordRaw> = [
     },
     {
       path: 'game-choice',
-      name: 'game_choice',
+      name: 'game-choice',
       component: GameChoice
     },
     {
       path: 'chat',
       name: 'chat',
-      component: Chat
+      component: Chat,
+      children: [
+        {
+          path: ':id',
+          name: 'unique-chat',
+          component: UniqueChat,
+        },
+      ]
     },
     {
-      path: 'chat/list',
-      name: 'list_chat',
+      path: 'channel',
+      name: 'channel',
       component: ListChat
     },
     {
@@ -46,6 +54,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: "/42",
+    name: 'ft-api',
     component: Home,
     beforeEnter() {
       window.location.href = "http://localhost:3000/auth/login42";
@@ -53,7 +62,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/login',
-    name: 'Login',
+    name: 'login',
     component: Login,
   },
   {
