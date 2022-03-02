@@ -55,7 +55,7 @@ export class ChatGateway implements OnGatewayConnection{
     async join(@ConnectedSocket() client, @MessageBody() data: {channelId: number, password: string}) {
         const user = await this.auth(client)
         let channel = await this.chatService.findChannel(data.channelId);
-        if (channel.password !== data.password)
+        if (channel.password && channel.password !== data.password)
             throw new UnauthorizedException("wrong password");
         this.chatService.joinChannel(user, data.channelId, ChannelMemberRole.MEMBER);
         const history = await this.chatService.getChannelMessages(data.channelId, new Date(), 100);
