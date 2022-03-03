@@ -50,7 +50,7 @@
 
 <style lang="scss" scoped>
     .conversation{
-        background: #e0e0e3;
+        background: #E2E3F2;
     }
 </style>
 

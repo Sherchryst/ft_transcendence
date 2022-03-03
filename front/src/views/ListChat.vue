@@ -1,8 +1,14 @@
 <template>
-    <div v-for="chan in listChannel" :key="chan.id">
-        <div>
-            {{chan.name}}
-            <button v-on:click="join(chan.id)">join</button>
+    <div class="grid grid-cols-3 span-4">
+        <div class="chan flex flex-row justify-between px-4 py-3">
+            <!-- <div v-for="chan in listChannel" :key="chan.id"> -->
+                <div class="flex flex-col items-start">
+                    <!-- {{chan.name}} -->
+                    <span class="title font-bold text-xl">#Chan-name</span>
+                    <span class="font-light">Username</span>
+                </div>
+                <button v-on:click="join(chan.id)">join</button>
+            <!-- </div> -->
         </div>
     </div>
 </template>
@@ -38,5 +44,13 @@ export default defineComponent ({
 </script>
 
 <style lang="scss" scoped>
-
+.chan{
+    border-radius: 12px;
+    .title{
+        color: $dark-font;
+    }
+    &:hover{
+        background: $panel-color;
+    }
+}
 </style>

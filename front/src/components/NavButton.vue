@@ -26,7 +26,7 @@ export default class ButtonLink extends Vue {
 	// box-shadow: 0px 4px 4px rgba(7, 53, 70, 0.22);
 	svg {
 		transition: 200ms all;
-		fill: $panel-color;
+		fill: $text-primary;
 	}
 	&:hover{
 		svg {

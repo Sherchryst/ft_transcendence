@@ -37,7 +37,7 @@ export default class Message extends Vue {
     }
     .text-left{
         color: $dark-font;
-        background: $panel-color;
+        background: $bg--lg-color;
         border-radius: 0px 10px 10px 10px
     }
     .text-right{

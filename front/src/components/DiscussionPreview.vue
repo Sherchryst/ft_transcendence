@@ -4,8 +4,8 @@
           <img class="h-16 w-16" src="/" alt="_profile">
       </div>
       <div class="text-left">
-          <p class="text-xl font-bold">Username</p>
-          <p class="font-thin text-xs">last message</p>
+          <p class="username text-lg">Username</p>
+          <p class="last-message font-thin text-xs">last message</p>
       </div>
     </router-link>
 </template>
@@ -47,9 +47,15 @@ export default class OneButtonLink extends Vue {
         background: $bg-action;
     }
     &.router-link-exact-active{
-        background: $action;
+        background: $panel-color;
         &> div > p {
-            color: white;
+            color: $dark-font;
+        }
+        .username{
+            font-weight: bold;
+        }
+        .last-message{
+            display: none;
         }
     }
     border-radius: 16px;

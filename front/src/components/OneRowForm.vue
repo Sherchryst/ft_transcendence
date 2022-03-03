@@ -69,7 +69,7 @@ export default class OneButtonLink extends Vue {
 				outline: unset;
 				background: $--hover-bg-color;
 				&::placeholder{
-					color: $panel-color !important;
+					color: $text-primary !important;
 				}
 			}
 		}
