@@ -1,5 +1,5 @@
 <template>
-    <div class="grid grid-cols-3 span-4">
+    <div class="grid-cols-1 md:grid grid-cols-3 span-4">
         <div class="chan flex flex-row justify-between px-4 py-3">
             <!-- <div v-for="chan in listChannel" :key="chan.id"> -->
                 <div class="flex flex-col items-start">

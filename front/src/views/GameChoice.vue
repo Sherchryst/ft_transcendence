@@ -1,5 +1,5 @@
 <template>
-	<div class="grid grid-cols-3 gap-12">
+	<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
 		<GamePanel title="Battleground" action_name="Recherche" />
 		<game-panel title="Challenge" action_name="Défier">
 			<form action="" class="flex flex-col">
