@@ -38,6 +38,7 @@
         socket : new WebSocket('ws://localhost:3001'),
         ctx : null as any,
         id : 123,
+        login : ["player1", "player2"],
         dimX : 0,
         dimY : 0,
         racket : {
@@ -78,6 +79,9 @@
             this.id = fromServer.data;
             console.log(this.id);
           //   console.log("Updated board", this.board)
+            break;
+          case "login":
+            this.login[fromServer.data.id] = fromServer.data.login;
             break;
         }
       document.addEventListener("mousemove", this.moveRackets);
@@ -141,13 +145,19 @@
         this.ctx.fillText((this.board.player[0].score).toString(), this.ctx.canvas.width / 2 - this.ctx.canvas.width / 20, this.ctx.canvas.height / 10);
         this.ctx.textAlign = "left";
         this.ctx.fillText((this.board.player[1].score).toString(), this.ctx.canvas.width / 2 + this.ctx.canvas.width / 20, this.ctx.canvas.height / 10);
+        this.ctx.font = "30px courier new" // absolute size /!\
+        this.ctx.textAlign = "right";
+        this.ctx.fillText(this.login[1], this.ctx.canvas.width - this.ctx.canvas.width / 10, this.ctx.canvas.height / 10);
+        this.ctx.textAlign = "left";
+        this.ctx.fillText(this.login[0], this.ctx.canvas.width / 10, this.ctx.canvas.height / 10);
       },
       drawWinner(winner : number)
       {
         this.ctx.fillStyle = "white";
-        this.ctx.font = "100px courier new" // absolute size /!\
+        this.ctx.font = "70px courier new" // absolute size /!\
         this.ctx.textAlign = "center";
-        this.ctx.fillText(winner? "Player2 wins" : "Player1 wins", this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
+        this.ctx.fillText(this.login[winner] + " wins", this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
+        // this.ctx.fillText("wins", this.ctx.canvas.width / 2, this.ctx.canvas.height / 2 + 70);
       },
       addObjects()
       {
