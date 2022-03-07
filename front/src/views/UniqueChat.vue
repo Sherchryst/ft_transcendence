@@ -1,6 +1,7 @@
 <template>
-      <div class="col-span-8 conversation flex flex-col justify-between px-7 py-5">
-          <div id="chat" class="flex-auto mb-5 overflow-x-auto">
+    <chat-wrapper hasConv>
+      <!-- <div class="col-span-8 conversation flex flex-col justify-between px-7 py-5"> -->
+          <div id="chat" class="flex-auto flex flex-col-reverse mb-5 overflow-x-auto">
             <message side="0">
                 Lorem ipsum dolor
             </message>
@@ -40,17 +41,20 @@
           </div>
           <one-row-form placeholder="Message">
                 <span class="flex flex-row items-center">
-                    <span class="pl-2 pr-1">Envoyer</span>
+                    <span class="hidden md:flex pl-2 pr-1">Envoyer</span>
                     <SendIcon/>
                 </span>
            </one-row-form>
-      </div>
+      <!-- </div> -->
+    </chat-wrapper>
   <!-- </div> -->
 </template>
 
 <style lang="scss" scoped>
-    .conversation{
-        background: #E2E3F2;
+    #chat{
+        // background: #E2E3F2;
+        // border-radius: 25px;
+        // height: 77vh;
     }
 </style>
 
@@ -87,6 +91,7 @@ import axios from 'axios';
 import Message from '@/components/Message.vue'
 import OneRowForm from '@/components/OneRowForm.vue'
 import SendIcon from '@/assets/icon/send.svg';
+import ChatWrapper from '@/components/ChatWrapper.vue'
 import { useMeta } from 'vue-meta'
 
 
@@ -97,6 +102,7 @@ export default defineComponent({
         Message,
         OneRowForm,
         SendIcon,
+        ChatWrapper,
     },
     setup () {
         useMeta({ title: 'Chat' })
@@ -106,10 +112,10 @@ export default defineComponent({
         }
     },
     mounted() {
-        var chat = document.getElementById('chat');
-        if (chat != null) {
-            chat.scrollTop = chat.scrollHeight;
-        }
+        // var chat = document.getElementById('chat');
+        // if (chat != null) {
+        //     chat.scrollTop = chat.scrollHeight;
+        // }
     },
     methods: {
     }

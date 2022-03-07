@@ -1,9 +1,9 @@
 <template>
     <div class="message flex my-3" v-bind:class="[ side == Side.RIGHT ? 'flex-row-reverse' : 'flex-row' ]">
-        <div class="">
-            <img class="h-10 w-10" src="/" alt="">
+        <div class="flex-shrink-0 h-10 w-10">
+            <img class="h-10 w-10" src="../assets/logo.png" alt="">
         </div>
-         <div class="p-3 max-w-xl" v-bind:class="[ side == Side.RIGHT ? 'text-right mr-3' : 'text-left ml-3' ]" >
+         <div class="p-3 max-w-xl flex-shrink" v-bind:class="[ side == Side.RIGHT ? 'text-right mr-3' : 'text-left ml-3' ]" >
              <slot></slot>
         </div>
     </div>

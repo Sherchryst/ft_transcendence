@@ -33,12 +33,13 @@ const routes: Array<RouteRecordRaw> = [
       name: 'chat',
       component: Chat,
       children: [
-        {
-          path: ':id',
-          name: 'unique-chat',
-          component: UniqueChat,
-        },
+        
       ]
+    },
+    {
+      path: 'chat/:id',
+      name: 'unique-chat',
+      component: UniqueChat,
     },
     {
       path: 'channel',
