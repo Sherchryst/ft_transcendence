@@ -11,6 +11,7 @@ import Register from '@/views/Register.vue'
 import GameChoice from '@/views/GameChoice.vue'
 import Redirection from '@/components/Redirection.vue'
 import axios from 'axios'
+import Game from '@/views/Game.vue'
 
 const routes: Array<RouteRecordRaw> = [
 
@@ -76,11 +77,11 @@ const routes: Array<RouteRecordRaw> = [
 	name: 'Register',
 	component: Register
   },
-  // {
-  //   path: "/chat",
-  //   name: "Chat",
-  //   component: Chat
-  // }
+  {
+    path: "/game",
+    name: "Game",
+    component: Game
+  }
 ]
 
 const router = createRouter({

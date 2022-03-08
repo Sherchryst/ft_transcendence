@@ -9,7 +9,7 @@ import { ChannelVisibility } from './entities/channel.entity';
 import { ChannelModerationType } from './entities/channel-moderation.entity';
 import { User } from 'src/users/entities/user.entity';
 
-@WebSocketGateway(3001)
+@WebSocketGateway(3002)
 export class ChatGateway implements OnGatewayConnection{
     @WebSocketServer() private server: any;
     wsClients = new Map<number, any>();

@@ -18,6 +18,7 @@
         </div>
       </div>
       <button v-on:click="go_to_chat()">chat</button>
+      <button v-on:click="go_to_game()">game</button>
       <button v-on:click="logout()">Logout</button> <br>
     </div>
     <button v-on:click="ping()">Ping</button>
@@ -105,6 +106,9 @@ export default defineComponent({
     },
     go_to_chat(): void {
       router.push('/chat')
+    },
+    go_to_game(): void {
+      router.push('/game')
     }
   }
 })

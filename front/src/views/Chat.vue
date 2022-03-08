@@ -17,14 +17,9 @@ import ChatWrapper from '@/components/ChatWrapper.vue'
 export default defineComponent({
     components: {
         ChatWrapper,
-    },
     setup () {
         useMeta({ title: 'Chat' })
     },
-    data() {
-        return {}
-    },
-    methods: {}
 })
 
 </script>
