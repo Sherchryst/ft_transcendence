@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<div class="flex flex-rows justify-between  space-x-14 flex-wrap sm:ml-12">
+		<div class="flex flex-rows justify-between  md:space-x-14 flex-wrap sm:ml-12">
 			<div class="flex flex-col">
 				<h2 v-if='result' class="font-sans text-3xl" style="color: green">Victory</h2>
 				<h2 v-else class="font-sans text-3xl" style="color: red">Defeat</h2>

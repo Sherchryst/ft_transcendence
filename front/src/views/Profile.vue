@@ -6,7 +6,7 @@
 			</div>
 			<br>
 			<MainTitle>username</MainTitle>
-			<p>login</p>
+			<p>{{profile.user.login}}</p>
 			<br><br>
 			<Level text="lvl.8"></Level>
 			<LevelBar percent="68" level="8" nextLevel="9"></LevelBar>
@@ -73,8 +73,10 @@ import MatchesHistory from '@/components/MatchesHistory.vue';
 import ProfilePanel from '@/components/ProfilePanel.vue';
 import Scrool from '@/assets/scroll.svg';
 import Trophy from '@/assets/trophy.svg';
+import {defineComponent} from 'vue';
+import axios from 'axios';
 
-export default {
+export default defineComponent({
 	components: {
 		ProfilePicture,
 		MainTitle,
@@ -88,8 +90,21 @@ export default {
 		Trophy,
 		ProfilePanel,
 		LargerCard
+	},
+	data() {
+		return {
+			profile: {}
+		}
+	},
+	created() {
+		axios.get('http://localhost:3000/users/get-profile').then((res) => {
+		this.profile = res.data;
+		console.log("hop", this.profile)
+	}).catch((response) => {
+		console.log(response)
+	})
 	}
-}
+})
 </script>
 
 <style lang="scss">

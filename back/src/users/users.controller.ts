@@ -1,6 +1,9 @@
-import { Body, ConflictException, Controller, Get, NotFoundException, Post, Query, UnauthorizedException } from '@nestjs/common';
+import { Body, ConflictException, Controller, Get, NotFoundException, Post, Query, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
 
+
+@UseGuards(Jwt2faGuard)
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
@@ -28,8 +31,17 @@ export class UsersController {
     return JSON.stringify(requests.map(({ id, nickname }) => ({ id, nickname })));
   }
 
+
+  @Get('profile')
+  async profile(@Req() req) {
+    const achievements = await this.usersService.getUserAchievements(req.user.id);
+    const friends = await this.usersService.getFriends(req.user.id)
+    return {user: req.user, friends: friends, achievements: achievements}
+  }
+
   @Get('get-profile')
   async getProfile(@Query('id') id: number) {
+
     const user = await this.usersService.findOne(id);
     if (!user)
       throw new NotFoundException();
