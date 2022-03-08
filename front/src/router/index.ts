@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory, RouteRecordRaw, useRoute } from 'vu
 import Base from '@/views/Base.vue'
 import Home from '@/views/Home.vue'
 import Login from '@/views/Login.vue'
+import BaseChat from '@/views/BaseChat.vue'
 import Chat from '@/views/Chat.vue'
 import UniqueChat from '@/views/UniqueChat.vue'
 import ListChat from '@/views/ListChat.vue'
@@ -15,7 +16,7 @@ const routes: Array<RouteRecordRaw> = [
 
   {
     path: '/',
-    name: 'Base',
+    name: 'base',
     component: Base,
     children: [
     {
@@ -30,16 +31,20 @@ const routes: Array<RouteRecordRaw> = [
     },
     {
       path: 'chat',
-      name: 'chat',
-      component: Chat,
+      name: 'chat-wrapper',
+      component: BaseChat,
       children: [
-        
+        {
+          path: '',
+          name: 'chat',
+          component: Chat,
+        },
+        {
+          path: ':id',
+          name: 'unique-chat',
+          component: UniqueChat,
+        },
       ]
-    },
-    {
-      path: 'chat/:id',
-      name: 'unique-chat',
-      component: UniqueChat,
     },
     {
       path: 'channel',
