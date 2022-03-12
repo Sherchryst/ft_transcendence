@@ -1,5 +1,5 @@
 <template>
-	<div class="flex flex-rows justify-between flex-wrap sm:flex-wrap">
+	<div class="flex flex-col lg:flex-row justify-between flex-wrap">
 		<div>
 			<div class="flex place-content-center">
 				<ProfilePicture></ProfilePicture>
@@ -28,8 +28,20 @@
 					<TitlePanel title="Historique des matchs"> <Scrool></Scrool> </TitlePanel>
 				</template>
 				<template v-slot:body>
-					<MatchesHistory result type="type of battle" first="5" second="3"></MatchesHistory>
-					<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
+					<div class="overflow-auto max-h-64">
+						<MatchesHistory result type="type of battle" first="5" second="3"></MatchesHistory>
+						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
+						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
+						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
+						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
+						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
+						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
+						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
+						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
+						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
+						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
+						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
+					</div>
 				</template>
 			</ProfilePanel>
 			<ProfilePanel>
