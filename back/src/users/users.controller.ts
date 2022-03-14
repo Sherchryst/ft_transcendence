@@ -115,6 +115,8 @@ export class UsersController {
   @Post('update-avatar')
   @UseInterceptors(FileInterceptor('file', { fileFilter: imageFilter }))
   async updateAvatar(@Query('id') id: number, @UploadedFile() file: Express.Multer.File) {
+    if (!file)
+      throw new BadRequestException('No file uploaded');
     const avatar = await this.usersService.getAvatar(id);
     if (!avatar)
       throw new NotFoundException('User not found');
