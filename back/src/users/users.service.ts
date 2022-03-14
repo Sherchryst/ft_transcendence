@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { createReadStream, readFileSync } from 'fs';
 import { getRepository, Not } from 'typeorm';
+import { Avatar } from './entities/avatar.entity';
 import { UserAchievement } from './entities/user-achievement.entity';
 import { UserRelationship, UserRelationshipType } from './entities/user-relationship.entity';
 import { User } from './entities/user.entity';
@@ -40,34 +42,47 @@ export class UsersService {
   }
 
   async create(login: string): Promise<User> {
+    const defaultAvatar = readFileSync('./blank-avatar.jpg');
+    const avatar = await getRepository(Avatar).save({
+      user: { login: login },
+      data: defaultAvatar
+    });
     const repo = getRepository(User);
     const user = repo.create({
       login: login,
-      nickname: "anon-" + login
+      nickname: "anon-" + login,
+      avatar: avatar
     });
     return await repo.save(user);
   }
 
-  findAll(): Promise<User[]> {
-    return getRepository(User).find();
+  async findAll(): Promise<User[]> {
+    return await getRepository(User).find();
   }
 
-  findByLogin(login: string): Promise<User> {
-    return getRepository(User).findOne({
+  async findByLogin(login: string): Promise<User> {
+    return await getRepository(User).findOne({
       where: { login: login }
     });
   }
 
-  findOne(userId: number): Promise<User> {
-    return getRepository(User).findOne(userId);
+  async findOne(userId: number): Promise<User> {
+    return await getRepository(User).findOne(userId);
   }
 
-  getBlockedUsers(userId: number): Promise<User[]> {
-    return this.getRelationships(userId, UserRelationshipType.BLOCK);
+  async getAvatar(userId: number): Promise<Avatar> {
+    const user = await getRepository(User).findOne(userId, {
+      relations: ['avatar']
+    });
+    return user ? user.avatar : null;
   }
 
-  getFriends(userId: number): Promise<User[]> {
-    return this.getRelationships(userId, UserRelationshipType.FRIEND);
+  async getBlockedUsers(userId: number): Promise<User[]> {
+    return await this.getRelationships(userId, UserRelationshipType.BLOCK);
+  }
+
+  async getFriends(userId: number): Promise<User[]> {
+    return await this.getRelationships(userId, UserRelationshipType.FRIEND);
   }
 
   async getFriendRequests(userId: number): Promise<User[]> {
@@ -77,8 +92,8 @@ export class UsersService {
     }).then(relations => relations.map(r => r.from));
   }
 
-  getUserAchievements(userId: number): Promise<UserAchievement[]> {
-    return getRepository(UserAchievement).find({
+  async getUserAchievements(userId: number): Promise<UserAchievement[]> {
+    return await getRepository(UserAchievement).find({
       relations: ['achievement'],
       where: { user: userId }
     });
@@ -124,10 +139,16 @@ export class UsersService {
     });
   }
 
-  unlockAchievement(userId: number, achievementId: number) {
-    getRepository(UserAchievement).save({
+  async unlockAchievement(userId: number, achievementId: number): Promise<UserAchievement> {
+    return await getRepository(UserAchievement).save({
       user: { id: userId },
       achievement: { id: achievementId }
+    });
+  }
+
+  async updateAvatar(avatarId: number, data: Buffer) {
+    await getRepository(Avatar).update(avatarId, {
+      data: data
     });
   }
 
