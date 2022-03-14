@@ -1,8 +1,10 @@
-import { BadRequestException, Body, ClassSerializerInterceptor, ConflictException, Controller, Get, HttpException, NotFoundException, Post, Query, Req, Response, StreamableFile, UnauthorizedException, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, ClassSerializerInterceptor, ConflictException, Controller, Get, HttpException, NotFoundException, Post, Query, Req, Response, ServiceUnavailableException, StreamableFile, UnauthorizedException, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Readable } from 'typeorm/platform/PlatformTools';
 import { UsersService } from './users.service';
+import * as PostgresError from '@fiveem/postgres-error-codes'
 import * as sharp from 'sharp';
+import { UpdateNicknameDto } from './dto/update-nickname.dto';
 
 export const imageFilter: any = (req: any, file: { mimetype: string, size: number }, callback: (arg0: any, arg1: boolean) => void): any =>
 {
@@ -89,13 +91,13 @@ export class UsersController {
   }
 
   @Post('update-nickname')
-  async updateNickname(@Body() dto: { id: number, nickname: string }) {
-    if (dto.nickname.slice(0, 4) === 'anon')
-      throw new ConflictException('forbidden prefix : anon');
+  async updateNickname(@Body() dto: UpdateNicknameDto) {
     try {
       await this.usersService.updateNickname(dto.id, dto.nickname);
     } catch (error) {
-      throw new ConflictException('Nickname is already taken');
+      if (error.code === PostgresError.PG_UNIQUE_VIOLATION)
+        throw new ConflictException('Nickname already taken');
+      throw new ServiceUnavailableException();
     }
   }
 
