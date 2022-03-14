@@ -39,12 +39,16 @@ export class UsersController {
 
   @Get('get-friend-requests')
   async getFriendRequests(@Query('id') id: number) {
+    if (!id)
+      throw new BadRequestException('No id provided');
     const requests = await this.usersService.getFriendRequests(id);
     return JSON.stringify(requests.map(({ id, nickname }) => ({ id, nickname })));
   }
 
   @Get('get-profile')
   async getProfile(@Query('id') id: number) {
+    if (!id)
+      throw new BadRequestException('No id provided');
     const user = await this.usersService.findOne(id);
     if (!user)
       throw new NotFoundException('User not found');
@@ -103,6 +107,8 @@ export class UsersController {
 
   @Get('get-avatar')
   async getAvatar(@Query('id') id: number, @Response({ passthrough: true }) res) {
+    if (!id)
+      throw new BadRequestException('No id provided');
     const avatar = await this.usersService.getAvatar(id);
     if (!avatar)
       throw new HttpException('Avatar not found', 404);
