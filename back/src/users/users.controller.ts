@@ -1,8 +1,10 @@
-import { BadRequestException, Body, ClassSerializerInterceptor, ConflictException, Controller, Get, HttpException, NotFoundException, Post, Query, Req, Response, StreamableFile, UnauthorizedException, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, ClassSerializerInterceptor, ConflictException, Controller, Get, HttpException, NotFoundException, Post, Query, Req, Response, ServiceUnavailableException, StreamableFile, UnauthorizedException, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Readable } from 'typeorm/platform/PlatformTools';
 import { UsersService } from './users.service';
+import * as PostgresError from '@fiveem/postgres-error-codes'
 import * as sharp from 'sharp';
+import { UpdateNicknameDto } from './dto/update-nickname.dto';
 
 export const imageFilter: any = (req: any, file: { mimetype: string, size: number }, callback: (arg0: any, arg1: boolean) => void): any =>
 {
@@ -37,12 +39,16 @@ export class UsersController {
 
   @Get('get-friend-requests')
   async getFriendRequests(@Query('id') id: number) {
+    if (!id)
+      throw new BadRequestException('No id provided');
     const requests = await this.usersService.getFriendRequests(id);
     return JSON.stringify(requests.map(({ id, nickname }) => ({ id, nickname })));
   }
 
   @Get('get-profile')
   async getProfile(@Query('id') id: number) {
+    if (!id)
+      throw new BadRequestException('No id provided');
     const user = await this.usersService.findOne(id);
     if (!user)
       throw new NotFoundException('User not found');
@@ -89,18 +95,20 @@ export class UsersController {
   }
 
   @Post('update-nickname')
-  async updateNickname(@Body() dto: { id: number, nickname: string }) {
-    if (dto.nickname.slice(0, 4) === 'anon')
-      throw new ConflictException('forbidden prefix : anon');
+  async updateNickname(@Body() dto: UpdateNicknameDto) {
     try {
       await this.usersService.updateNickname(dto.id, dto.nickname);
     } catch (error) {
-      throw new ConflictException('Nickname is already taken');
+      if (error.code === PostgresError.PG_UNIQUE_VIOLATION)
+        throw new ConflictException('Nickname already taken');
+      throw new ServiceUnavailableException();
     }
   }
 
   @Get('get-avatar')
   async getAvatar(@Query('id') id: number, @Response({ passthrough: true }) res) {
+    if (!id)
+      throw new BadRequestException('No id provided');
     const avatar = await this.usersService.getAvatar(id);
     if (!avatar)
       throw new HttpException('Avatar not found', 404);
@@ -114,10 +122,13 @@ export class UsersController {
 
   @Post('update-avatar')
   @UseInterceptors(FileInterceptor('file', { fileFilter: imageFilter }))
-  async updateAvatar(@Query('id') id: number, @UploadedFile() file: Express.Multer.File) {
-    const avatar = await this.usersService.getAvatar(id);
+  async updateAvatar(@UploadedFile() file: Express.Multer.File, @Body() body: { id : number }) {
+    if (!file)
+      throw new BadRequestException('No file uploaded');
+    const avatar = await this.usersService.getAvatar(body.id);
     if (!avatar)
       throw new NotFoundException('User not found');
+    console.log("Avatar: ", avatar);
     var buffer = await sharp(file.buffer)
     .resize(400).toFormat('jpeg').jpeg({ quality: 90 }).toBuffer();
     await this.usersService.updateAvatar(avatar.id, buffer);
