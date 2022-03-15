@@ -44,6 +44,7 @@ const routes: Array<RouteRecordRaw> = [
           path: ':id',
           name: 'unique-chat',
           component: UniqueChat,
+          props: true,
         },
       ]
     },
@@ -53,10 +54,15 @@ const routes: Array<RouteRecordRaw> = [
       component: ListChat
     },
     {
-      path: '/profile',
+      path: 'profile',
       name: 'profile',
       component: Profile
     },
+    {
+      path: "game",
+      name: "game",
+      component: Game
+    }
     ]
   },
   {
@@ -77,16 +83,15 @@ const routes: Array<RouteRecordRaw> = [
 	name: 'Register',
 	component: Register
   },
-  {
-    path: "/game",
-    name: "Game",
-    component: Game
-  }
 ]
 
 const router = createRouter({
   history: createWebHashHistory(),
   routes
 })
+
+// router.beforeEach((to, form, next) => {
+//   if (to.name != 'login' && !isAuthenticated)
+// })
 
 export default router

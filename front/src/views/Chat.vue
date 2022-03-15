@@ -1,6 +1,8 @@
 <template>
     <chat-wrapper>
-        Coucou
+        <div>
+            No open conversation.
+        </div>
     </chat-wrapper>
 </template>
 
@@ -17,6 +19,7 @@ import ChatWrapper from '@/components/ChatWrapper.vue'
 export default defineComponent({
     components: {
         ChatWrapper,
+    },
     setup () {
         useMeta({ title: 'Chat' })
     },
