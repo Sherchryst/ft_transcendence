@@ -2,7 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 // import { randomBytes } from 'crypto';
 import { Board } from './interfaces/board.interface';
 import { Dimensions } from './interfaces/dimensions.interface';
-// import { ServerEngine } from 'lance-gg';
+import { User } from 'src/users/entities/user.entity';
+import { getRepository } from 'typeorm';
+import { Game } from './entities/game.entity';
 
 const speed = 1;
 const bot_speed = 3;
@@ -52,6 +54,21 @@ export class GameService
 	new_game : boolean = true;
 	bot_offset : number = 0;
     board: Board = basic_board;
+	async createGame(player1: User, player2: User, map: number): Promise<Game> {
+		const game = getRepository(Game).create({
+		  player1: player1,
+		  player2: player2,
+		  map : map
+		});
+		await getRepository(Game).save(game);
+		return game;
+	}
+	async deleteGame(gameId: number) {
+		await getRepository(Game).delete({ id: gameId });
+	}
+	async updateGame(game: Game): Promise<Game> {
+		return getRepository(Game).save(game);
+	}
 	updatePlayer(id : number, y : number)
 	{
 		if (id > 1)

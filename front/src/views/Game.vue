@@ -3,7 +3,7 @@
   body {
       margin: 0;
       padding: 0;
-      background-color:rgb(6, 40, 56);
+      /* background-color:rgb(6, 40, 56); */
   }
   #background {
     border: 5px solid #b8a500;
@@ -119,6 +119,8 @@
         const interval = ctx.canvas.height / 10;
         const start = ctx.canvas.height / 60;
         const line_width = ctx.canvas.width / 80;
+        ctx.fillStyle = "rgb(6, 40, 56)";
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         // ctx.fillStyle = "white";
           for (let i = line_width; i < ctx.canvas.width; i+= interval) {
             this.drawRect((ctx.canvas.width- line_width) / 2, i, line_width, interval * 0.65, "white", ctx);
