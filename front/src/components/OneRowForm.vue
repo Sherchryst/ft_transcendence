@@ -25,6 +25,7 @@ export default defineComponent({
 		send()
 		{
 			this.$emit('callback', this.response);
+			this.response = ""
 		}
 	}
 })
