@@ -1,15 +1,15 @@
 <template>
-	<div class="flex flex-col lg:flex-row justify-between flex-wrap">
+	<div class="flex flex-col lg:flex-row justify-between sm:flex-wrap">
 		<div>
 			<div class="flex place-content-center">
 				<ProfilePicture></ProfilePicture>
 			</div>
 			<br>
-			<MainTitle>username</MainTitle>
-			<p>{{profile.user.login}}</p>
+			<MainTitle>{{ username }}</MainTitle>
+			<p>{{ profile.user.login }}</p>
 			<br><br>
 			<Level text="lvl.8"></Level>
-			<LevelBar percent="68" level="8" nextLevel="9"></LevelBar>
+			<LevelBar :percent="68" :level="8" :nextLevel="9"></LevelBar>
 			<br>
 			<ButtonLink text="Demander en ami"></ButtonLink>
 			<br><br>
@@ -29,18 +29,18 @@
 				</template>
 				<template v-slot:body>
 					<div class="overflow-auto max-h-64">
-						<MatchesHistory result type="type of battle" first="5" second="3"></MatchesHistory>
-						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
-						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
-						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
-						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
-						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
-						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
-						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
-						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
-						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
-						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
-						<MatchesHistory type="type of battle" first="5" second="3"></MatchesHistory>
+						<MatchesHistory :result="true" type="type of battle" :first="5" :second="3"></MatchesHistory>
+						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
+						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
+						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
+						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
+						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
+						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
+						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
+						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
+						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
+						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
+						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
 					</div>
 				</template>
 			</ProfilePanel>
@@ -87,6 +87,7 @@ import Scrool from '@/assets/scroll.svg';
 import Trophy from '@/assets/trophy.svg';
 import {defineComponent} from 'vue';
 import axios from 'axios';
+import { Options, Vue } from 'vue-class-component';
 
 export default defineComponent({
 	components: {
@@ -102,6 +103,13 @@ export default defineComponent({
 		Trophy,
 		ProfilePanel,
 		LargerCard
+	},
+	props:
+	{
+		username: {
+			type: String,
+			required: true
+		}
 	},
 	data() {
 		return {

@@ -2,7 +2,7 @@
 	<div id="base" class="grid grid-cols-12 min-h-screen">
 		<nav id="nav" class="flex flex-col md:items-center md:fixed h-full w-full md:w-28 pt-24 md:pt-0 dropdown-link-container">
 			<div class="mb-5 md:mb-0 md:mt-10 md:h-36">
-				<router-link :to="{name: 'profile'}">
+				<router-link :to="{name: 'profile', params: {username: 'emmou'}}">
 					<img class="h-16 w-16" src="../assets/logo.png" alt="profile">
 				</router-link>
 			</div>

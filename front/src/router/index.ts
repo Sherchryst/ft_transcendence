@@ -33,7 +33,7 @@ const routes: Array<RouteRecordRaw> = [
       name: 'chat',
       component: Chat,
       children: [
-        
+
       ]
     },
     {
@@ -47,8 +47,9 @@ const routes: Array<RouteRecordRaw> = [
       component: ListChat
     },
     {
-      path: '/profile',
+      path: 'profile/:username',
       name: 'profile',
+      props: true,
       component: Profile
     },
     ]
