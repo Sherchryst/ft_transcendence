@@ -28,10 +28,10 @@
 <script lang="ts">
 
 import { defineComponent } from 'vue';
-import Message from '@/components/Message.vue'
+import Message from '@/components/chat/Message.vue'
 import OneRowForm from '@/components/OneRowForm.vue'
 import SendIcon from '@/assets/icon/send.svg';
-import ChatWrapper from '@/components/ChatWrapper.vue'
+import ChatWrapper from '@/components/chat/ChatWrapper.vue'
 import { useMeta } from 'vue-meta'
 
 export default defineComponent({

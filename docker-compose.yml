@@ -41,14 +41,14 @@ services:
       - ./front:/app
     command: sh -c 'npm install && npm run serve'
 
-  # adminer:
-  #   container_name: monitoring
-  #   image: adminer
-  #   restart: always
-  #   ports:
-  #     - 8888:8080
-  #   depends_on:
-  #     - db
+  adminer:
+    container_name: monitoring
+    image: adminer
+    restart: always
+    ports:
+      - 8888:8080
+    depends_on:
+      - db
 
 volumes:
   postgre:

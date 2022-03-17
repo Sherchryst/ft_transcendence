@@ -15,7 +15,7 @@
 import { defineComponent } from 'vue';
 import axios from 'axios';
 import { useMeta } from 'vue-meta'
-import ChannelView from '@/components/ChannelView.vue'
+import ChannelView from '@/components/chat/ChannelView.vue'
 import OneRowForm from '@/components/OneRowForm.vue'
 
 export default defineComponent ({

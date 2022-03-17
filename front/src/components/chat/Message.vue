@@ -1,32 +1,28 @@
 <template>
-    <div class="message flex my-3" v-bind:class="[ side == Side.RIGHT ? 'flex-row-reverse' : 'flex-row' ]">
+    <div class="message flex my-3" v-bind:class="[ side == 1 ? 'flex-row-reverse' : 'flex-row' ]">
         <div class="flex-shrink-0 h-10 w-10">
-            <img class="h-10 w-10" src="../assets/logo.png" alt="">
+            <img class="h-10 w-10" src="@/assets/logo.png" alt="">
         </div>
-         <div class="p-3 max-w-xl flex-shrink" v-bind:class="[ side == Side.RIGHT ? 'text-right mr-3' : 'text-left ml-3' ]" >
+         <div class="p-3 max-w-xl flex-shrink" v-bind:class="[ side == 1 ? 'text-right mr-3' : 'text-left ml-3' ]" >
              <slot></slot>
         </div>
     </div>
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { defineComponent } from 'vue';
 
 export enum Side {
     LEFT,
     RIGHT
 }
 
-@Options({
-	props: {
-		side: Side
-	}
+export default defineComponent({
+    name: "Message",
+    props: {
+        side: { type: Number, required: true }
+    }
 })
-
-export default class Message extends Vue {
-	side!: Side
-    Side = Side
-}
 </script>
 
 <style lang="scss" scoped>

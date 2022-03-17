@@ -35,7 +35,7 @@
 
 import { defineComponent } from 'vue';
 import axios from 'axios';
-import DiscussionPreview from '@/components/DiscussionPreview.vue'
+import DiscussionPreview from '@/components/chat/DiscussionPreview.vue'
 import { useMeta } from 'vue-meta'
 
 

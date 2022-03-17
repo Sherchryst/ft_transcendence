@@ -14,7 +14,7 @@
 
 import { defineComponent } from 'vue';
 import { useMeta } from 'vue-meta'
-import ChatWrapper from '@/components/ChatWrapper.vue'
+import ChatWrapper from '@/components/chat/ChatWrapper.vue'
 
 export default defineComponent({
     components: {
