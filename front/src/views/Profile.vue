@@ -5,8 +5,9 @@
 				<ProfilePicture></ProfilePicture>
 			</div>
 			<br>
-			<MainTitle>{{ username }}</MainTitle>
-			<p>{{ profile.user.login }}</p>
+
+			<MainTitle>{{ profile.user?.nickname }}</MainTitle>
+			<p>{{ profile.user?.login }}</p>
 			<br><br>
 			<Level text="lvl.8"></Level>
 			<LevelBar :percent="68" :level="8" :nextLevel="9"></LevelBar>
@@ -88,8 +89,11 @@ import Trophy from '@/assets/trophy.svg';
 import {defineComponent} from 'vue';
 import axios from 'axios';
 import { Options, Vue } from 'vue-class-component';
+import { Profile, User } from '@/interfaces/Profile';
+
 
 export default defineComponent({
+	name: "Profile",
 	components: {
 		ProfilePicture,
 		MainTitle,
@@ -106,23 +110,22 @@ export default defineComponent({
 	},
 	props:
 	{
-		username: {
-			type: String,
-			required: true
-		}
+		username: { type: String, required: true}
 	},
 	data() {
 		return {
-			profile: {}
+			profile: {} as Profile,
 		}
 	},
-	created() {
-		axios.get('http://localhost:3000/users/get-profile').then((res) => {
-		this.profile = res.data;
-		console.log("hop", this.profile)
-	}).catch((response) => {
-		console.log(response)
-	})
+	mounted(): void {
+		axios.get('http://localhost:3000/users/get-profile-login?username=' + this.username)
+			.then((res) => {
+				this.profile = res.data;
+				console.log("hop", this.profile)
+			}).catch((response) => {
+				console.error("FAIL GET USER");
+				console.log(response)
+			})
 	}
 })
 </script>
