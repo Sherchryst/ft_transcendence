@@ -8,11 +8,12 @@
 </template>
 
 <script lang="ts">
+import { defineComponent } from 'vue';
 import HelloWorld from '@/components/HelloWorld.vue';
 import LogInOut from '@/components/LogInOut.vue';
 import { useMeta } from 'vue-meta'
 
-export default {
+export default defineComponent({
     components: {
       HelloWorld,
       LogInOut
@@ -20,5 +21,5 @@ export default {
   setup () {
     useMeta({ title: 'Home' })
   }
-}
+})
 </script>

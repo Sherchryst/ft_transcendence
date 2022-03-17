@@ -5,11 +5,11 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { defineComponent } from 'vue';
 
-export default class MainTitle extends Vue {
+export default defineComponent({
 
-}
+})
 </script>
 
 <style lang="scss">

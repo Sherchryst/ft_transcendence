@@ -9,23 +9,19 @@
 </template>
 
 <script lang="ts">
+import { defineComponent } from 'vue';
 import ButtonLink from '@/components/ButtonLink.vue';
 
-export default {
+export default defineComponent({
+	name: "GamePanel",
 	components: {
 		ButtonLink,
 	},
 	props: {
-		title: {
-			type: String,
-			default: 'title'
-		},
-		action_name: {
-			type: String,
-			default: 'action_name'
-		},
+		title: { type: String, default: 'title' },
+		action_name: { type: String, default: 'action_name'},
 	}
-}
+})
 </script>
 
 <style lang="scss" scoped>

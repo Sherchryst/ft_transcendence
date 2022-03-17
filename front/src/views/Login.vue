@@ -10,12 +10,13 @@
 </template>
 
 <script lang="ts">
+import { defineComponent } from 'vue';
 import ButtonLink from '@/components/ButtonLink.vue';
 import SingleCardPage from '@/components/SingleCardPage.vue';
 import MainTitle from '@/components/MainTitle.vue';
 import { useMeta } from 'vue-meta'
 
-export default {
+export default defineComponent({
 	components: {
 		ButtonLink,
 		SingleCardPage,
@@ -24,7 +25,7 @@ export default {
 	setup () {
         useMeta({ title: 'Connection' })
     },
-}
+})
 </script>
 
 <style lang="scss">

@@ -8,7 +8,9 @@
 </template>
 
 <script lang="ts">
-export default {
+import { defineComponent } from 'vue';
+
+export default defineComponent({
 	name: "NavButton",
 	props: {
 		text: {
@@ -26,7 +28,7 @@ export default {
 				navElement.classList.toggle("dropdown-opened");
 		}
 	}
-}
+})
 </script>
 
 <style lang="scss">

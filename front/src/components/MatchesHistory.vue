@@ -27,26 +27,16 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { defineComponent } from 'vue';
 
-@Options({
+export default defineComponent({
   props: {
-	result: {
-		type: Boolean,
-		default: false
-	},
+	result: { type: Boolean, default: false },
 	type: String,
 	first: Number,
 	second: Number
   }
 })
-
-export default class MatchesHistory extends Vue {
-	result!: boolean;
-	type!: string;
-	first!: number;
-	second!: number;
-}
 </script>
 
 <style lang="scss">

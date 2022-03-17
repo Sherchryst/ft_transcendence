@@ -29,14 +29,15 @@
 import GamePanel from '@/components/GamePanel.vue';
 import BigRadioButton from '@/components/BigRadioButton.vue';
 import SwitchButton from '@/components/SwitchButton.vue';
+import { defineComponent } from 'vue';
 
-export default {
+export default defineComponent({
 	components: {
 		GamePanel,
 		BigRadioButton,
 		SwitchButton,
 	},
-}
+})
 </script>
 
 <style lang="scss" scoped>

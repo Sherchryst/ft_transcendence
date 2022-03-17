@@ -12,20 +12,16 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { defineComponent } from 'vue';
 
-@Options({
-  props: {
-    isChannel: { type: Boolean, default: false },
-    id: { type: [String, Number], require: true },
-    title: { type: String, default: "Title" },
-  }
+export default defineComponent({
+    name: "DiscussionPreview",
+    props: {
+      isChannel: { type: Boolean, default: false },
+      id: { type: [String, Number], require: true },
+      title: { type: String, default: "Title" },
+    }
 })
-
-export default class OneButtonLink extends Vue {
-	isChannel!: boolean
-    id!: number;
-}
 </script>
 
 <style lang="scss" scoped>

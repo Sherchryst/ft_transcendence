@@ -8,17 +8,14 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { defineComponent } from 'vue';
 
-@Options({
-  props: {
-    id: String
+export default defineComponent({
+    name: "BigRadioButton",
+    props: {
+        id: String
   }
 })
-
-export default class HelloWorld extends Vue {
-  id!: string
-}
 </script>
 
 <style lang="scss" scoped>

@@ -88,8 +88,7 @@ import Scrool from '@/assets/scroll.svg';
 import Trophy from '@/assets/trophy.svg';
 import {defineComponent} from 'vue';
 import axios from 'axios';
-import { Options, Vue } from 'vue-class-component';
-import { Profile, User } from '@/interfaces/Profile';
+import { Profile } from '@/interfaces/Profile';
 
 
 export default defineComponent({

@@ -57,6 +57,7 @@
 </template>
 
 <script lang="ts">
+import { defineComponent } from 'vue';
 import NavButton from '@/components/NavButton.vue';
 import ButtonLink from '@/components/ButtonLink.vue';
 import OneRowForm from '@/components/OneRowForm.vue';
@@ -68,7 +69,7 @@ import SearchIcon from '@/assets/icon/search.svg';
 import MenuIcon from '@/assets/icon/menu.svg'
 import Logo from '@/assets/ApongUs.svg';
 
-export default {
+export default defineComponent({
 	components: {
 		NavButton,
 		ButtonLink,
@@ -89,7 +90,7 @@ export default {
 				navElement.classList.toggle("dropdown-opened");
 		}
 	}
-}
+})
 </script>
 
 <style lang="scss" scoped>

@@ -13,21 +13,15 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { defineComponent } from 'vue';
 
-@Options({
+export default defineComponent({
   props: {
 	percent: Number,
 	level: Number,
 	nextLevel: Number
   }
 })
-
-export default class LevelBar extends Vue {
-	percent!: number;
-	level!: number;
-	nextLevel!: number;
-}
 </script>
 
 <style lang="scss">

@@ -3,24 +3,15 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { defineComponent } from 'vue';
 
-@Options({
-  props: {
-    text: {
-		type: String,
-		default: "action"
-	},
-	route: {
-		type: String,
-		default: "home"
+export default defineComponent({
+	name: "ButtonLink",
+	props: {
+		text: { type: String, default: "action" },
+		route: { type: String, default: "home" }
 	}
-  }
 })
-export default class ButtonLink extends Vue {
-  text!: string
-  route!: string
-}
 </script>
 
 <style lang="scss" scoped>

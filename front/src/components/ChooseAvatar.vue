@@ -6,11 +6,12 @@
 </template>
 
 <script>
+import { defineComponent } from 'vue';
 import {VueAvatar} from 'vue-avatar-editor-improved'
 
-export default {
+export default defineComponent({
 	components: {
 		VueAvatar
 	}
-};
+});
 </script>
