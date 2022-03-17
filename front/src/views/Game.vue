@@ -94,7 +94,7 @@
         if (ctx == null)
           ctx = this.ctx;
         ctx.fillStyle = color;
-        const dist_x = x2 / 3;
+        const dist_x = x2 > y2? y2 / 3 : x2 / 3;
         // const dist_y = y2 / 2 - dist_x;
         ctx.beginPath();
         ctx.arc((x + dist_x), (y + dist_x), dist_x, 0, 2 * Math.PI, false);
@@ -106,13 +106,13 @@
         ctx.fillRect(x, y + dist_x , x2, (y2 - 2 * dist_x));
         ctx.fillRect((x + dist_x), y, (x2 - 2 * dist_x), y2);
       },
-      drawCircle(x : number, y : number, radius : number, color = "white")
-      {
-        this.ctx.fillStyle = color;
-        this.ctx.beginPath();
-        this.ctx.arc(x * this.dimX, y * this.dimY, radius * this.dimX, 0, 2 * Math.PI, false);
-        this.ctx.fill();
-      },
+      // drawCircle(x : number, y : number, radius : number, color = "white")
+      // {
+      //   this.ctx.fillStyle = color;
+      //   this.ctx.beginPath();
+      //   this.ctx.arc(x * this.dimX, y * this.dimY, radius * this.dimX, 0, 2 * Math.PI, false);
+      //   this.ctx.fill();
+      // },
       drawBackground()
       {
         var ctx = (this.$refs.background as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
@@ -132,7 +132,22 @@
       },
       drawBall(x : number, y : number)
       {
-        this.drawRect((x - this.board.ball.half_width) * this.dimX, (y - this.board.ball.half_width) * this.dimY,  this.board.ball.half_width * 2  * this.dimX, this.board.ball.half_width * 2  * this.dimX, "#b8a500");
+        if (this.board.ball.dx > 0)
+        {
+          this.drawRect((x - this.board.ball.half_width / 2) * this.dimX, (y - this.board.ball.half_width) * this.dimY, this.board.ball.half_width * (3 / 2)  * this.dimX, this.board.ball.half_width * (5 / 3) * this.dimX, "#b8a500");
+          this.drawRect((x - this.board.ball.half_width) * this.dimX, (y + this.board.ball.half_width / 3) * this.dimY, this.board.ball.half_width * (3/2) * this.dimX, this.board.ball.half_width * (2 / 3) * this.dimX, "#b8a500");
+          this.drawRect((x - this.board.ball.half_width) * this.dimX, (y - this.board.ball.half_width) * this.dimY, this.board.ball.half_width * (3/2) * this.dimX, this.board.ball.half_width * (2 / 3) * this.dimX, "#b8a500");
+          this.drawRect((x + this.board.ball.half_width / 4) * this.dimX, (y - this.board.ball.half_width * (3/4)) * this.dimY, (this.board.ball.half_width / 2 * this.dimX), this.board.ball.half_width * this.dimX, "#AEBBBC");
+          this.drawRect((x - this.board.ball.half_width / 2) * this.dimX, (y + this.board.ball.half_width * (2/3)) * this.dimY, this.board.ball.half_width * this.dimX, this.board.ball.half_width * (2 / 3) * this.dimX, "#b8a500");
+        }
+        else
+        {
+          this.drawRect((x - this.board.ball.half_width) * this.dimX, (y - this.board.ball.half_width) * this.dimY, this.board.ball.half_width * (3 / 2)  * this.dimX, this.board.ball.half_width * (5 / 3) * this.dimX, "#b8a500");
+          this.drawRect((x - this.board.ball.half_width / 2) * this.dimX, (y - this.board.ball.half_width) * this.dimY, this.board.ball.half_width * (3/2) * this.dimX, this.board.ball.half_width * (2 / 3) * this.dimX, "#b8a500");
+          this.drawRect((x - this.board.ball.half_width / 2) * this.dimX, (y + this.board.ball.half_width / 3) * this.dimY, this.board.ball.half_width * (3/2) * this.dimX, this.board.ball.half_width * (2 / 3) * this.dimX, "#b8a500");
+          this.drawRect((x - this.board.ball.half_width * (3/4)) * this.dimX, (y - this.board.ball.half_width * (3/4)) * this.dimY, (this.board.ball.half_width / 2 * this.dimX), this.board.ball.half_width * this.dimX, "#AEBBBC");
+          this.drawRect((x - this.board.ball.half_width / 2) * this.dimX, (y + this.board.ball.half_width * (2/3)) * this.dimY, this.board.ball.half_width * this.dimX, this.board.ball.half_width * (2 / 3) * this.dimX, "#b8a500");
+        }
       },
       drawRackets(y1 : number, y2 : number)
       {
@@ -163,12 +178,12 @@
       },
       addObjects()
       {
-        this.drawScore();
-        this.drawRackets(this.board.player[0].y, this.board.player[1].y);
         if (this.board.end)
           this.drawWinner(this.board.player[0].score >= 11 ? 0 : 1)
         else
           this.drawBall(this.board.ball.x, this.board.ball.y);
+        this.drawRackets(this.board.player[0].y, this.board.player[1].y);
+        this.drawScore();
       },
       moveRackets(evt : MouseEvent)
       {

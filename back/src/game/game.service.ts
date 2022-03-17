@@ -19,7 +19,7 @@ const basic_board : Board = {
 	ball: {
 		x: 50,
 		y: 50,
-		half_width: 1.5,
+		half_width: 4.5,
 		dx: speed * (Math.floor(Math.random() * 2)? -1:1), //random player
 		dy: speed * (2/3) * (Math.floor(Math.random() * 2)? -1:1) }, //random top/bottom
 	player: [{
@@ -184,7 +184,7 @@ export class GameService
         this.board.ball.y = height / 2;
         // this.board.player[0].y = height / 2;
         // this.board.player[1].y = height / 2;
-		this.board.ball.half_width = 1.5;
+		this.board.ball.half_width = 4.5;
 		this.board.player[0].half_height = 6;
 		this.board.player[1].half_height = 6;
 		pass_count = 0;
