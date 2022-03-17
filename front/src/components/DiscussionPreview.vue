@@ -4,7 +4,8 @@
           <img class="h-16 w-16" src="../assets/logo.png" alt="_profile">
       </div>
       <div class="text-left">
-          <p class="username text-lg">Username</p>
+          <p v-if="isChannel" class="username text-lg">#-{{this.title}}</p>
+          <p v-else class="username text-lg">{{this.title}}</p>
           <p class="last-message font-thin text-xs">last message</p>
       </div>
     </router-link>
@@ -15,14 +16,9 @@ import { Options, Vue } from 'vue-class-component';
 
 @Options({
   props: {
-    isChannel: {
-        type: Boolean ,
-        default: false
-    },
-    id: {
-        type: [String, Number],
-        default: 0
-    }
+    isChannel: { type: Boolean, default: false },
+    id: { type: [String, Number], require: true },
+    title: { type: String, default: "Title" },
   }
 })
 

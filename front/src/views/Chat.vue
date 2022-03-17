@@ -1,6 +1,8 @@
 <template>
     <chat-wrapper>
-        Coucou
+        <div>
+            No open conversation.
+        </div>
     </chat-wrapper>
 </template>
 
@@ -21,10 +23,6 @@ export default defineComponent({
     setup () {
         useMeta({ title: 'Chat' })
     },
-    data() {
-        return {}
-    },
-    methods: {}
 })
 
 </script>

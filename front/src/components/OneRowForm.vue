@@ -1,7 +1,7 @@
 <template>
-	<form class="one-form-row" :action="action" :method="method">
+	<form class="one-form-row" @submit.prevent="send" >
 		<div class="flex flex-row justify-between">
-			<input class="m-2 flex-auto" type="text" :placeholder="placeholder">
+			<input v-model="response" class="m-2 flex-auto" type="text" :placeholder="placeholder">
 			<button class="p-1" type="submit">
 				<slot> + </slot>
 			</button>
@@ -10,26 +10,25 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { defineComponent } from 'vue';
 
-@Options({
+export default defineComponent({
 	props: {
-		action: String,
-		method: {
-			type: String,
-			default: "POST"
-		},
-		placeholder: {
-			type: String,
-			default: ""
+		placeholder: { type: String, default: "" },
+	},
+	data () {
+		return {
+			response: "",
+		}
+	},
+	methods: {
+		send()
+		{
+			this.$emit('callback', this.response);
+			this.response = ""
 		}
 	}
 })
-
-export default class OneButtonLink extends Vue {
-	action!: string
-	placeholder!: string
-}
 </script>
 
 <style lang="scss">

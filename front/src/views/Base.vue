@@ -6,7 +6,7 @@
 					<img class="h-16 w-16" src="../assets/logo.png" alt="profile">
 				</router-link>
 			</div>
-			<one-row-form class="md:hidden mb-6 mobile" placeholder="Recherche" action="/">
+			<one-row-form class="md:hidden mb-6 mobile" placeholder="Recherche">
 				<SearchIcon />
 			</one-row-form>
 			<div class="flex flex-col w-full md:w-min">
@@ -41,7 +41,7 @@
 					</div>
 					<div class="flex flex-row justify-between justify-items-center">
 						<div class="self-center">
-							<one-row-form placeholder="Recherche" action="/">
+							<one-row-form placeholder="Recherche">
 								<SearchIcon />
 							</one-row-form>
 						</div>

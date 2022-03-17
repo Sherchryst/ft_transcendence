@@ -16,7 +16,7 @@ stop:
 	docker-compose stop
 
 rm: stop
-	docker-compose rm
+	docker-compose rm -f
 
 down:
 	docker-compose down

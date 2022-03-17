@@ -6,7 +6,14 @@
 
 ## Users
 
-### - user(<ins>id</ins>, login, nickname, role, mmr, twofa)
+### - avatar(<ins>id</ins>, data)
+
+- avatar_id: INT
+	- The id of the avatar.
+- data: BYTEA NOT NULL
+	- The data of the avatar.
+
+### - user(<ins>id</ins>, login, nickname, role, mmr, twofa, *avatar_id*)
 
 - id: INT
 	- An unique identifier for the user which is independant from 42.
@@ -23,6 +30,8 @@
 - twofa: VARCHAR(32) DEFAULT NULL
 	- A secret used to generate a 2FA code.
 	- If NULL then the user does not use 2FA.
+- avatar_id: INT NOT NULL
+	- The id of the avatar of the user.
 
 ### - user_relationship(<ins>*from_id*, *to_id*</ins>, type)
 

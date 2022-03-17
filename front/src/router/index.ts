@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory, RouteRecordRaw, useRoute } from 'vu
 import Base from '@/views/Base.vue'
 import Home from '@/views/Home.vue'
 import Login from '@/views/Login.vue'
+import BaseChat from '@/views/BaseChat.vue'
 import Chat from '@/views/Chat.vue'
 import UniqueChat from '@/views/UniqueChat.vue'
 import ListChat from '@/views/ListChat.vue'
@@ -10,12 +11,13 @@ import Register from '@/views/Register.vue'
 import GameChoice from '@/views/GameChoice.vue'
 import Redirection from '@/components/Redirection.vue'
 import axios from 'axios'
+import Game from '@/views/Game.vue'
 
 const routes: Array<RouteRecordRaw> = [
 
   {
     path: '/',
-    name: 'Base',
+    name: 'base',
     component: Base,
     children: [
     {
@@ -30,16 +32,21 @@ const routes: Array<RouteRecordRaw> = [
     },
     {
       path: 'chat',
-      name: 'chat',
-      component: Chat,
+      name: 'chat-wrapper',
+      component: BaseChat,
       children: [
-
+        {
+          path: '',
+          name: 'chat',
+          component: Chat,
+        },
+        {
+          path: ':id',
+          name: 'unique-chat',
+          component: UniqueChat,
+          props: true,
+        },
       ]
-    },
-    {
-      path: 'chat/:id',
-      name: 'unique-chat',
-      component: UniqueChat,
     },
     {
       path: 'channel',
@@ -52,6 +59,11 @@ const routes: Array<RouteRecordRaw> = [
       props: true,
       component: Profile
     },
+    {
+      path: "game",
+      name: "game",
+      component: Game
+    }
     ]
   },
   {
@@ -72,16 +84,15 @@ const routes: Array<RouteRecordRaw> = [
 	name: 'Register',
 	component: Register
   },
-  // {
-  //   path: "/chat",
-  //   name: "Chat",
-  //   component: Chat
-  // }
 ]
 
 const router = createRouter({
   history: createWebHashHistory(),
   routes
 })
+
+// router.beforeEach((to, form, next) => {
+//   if (to.name != 'login' && !isAuthenticated)
+// })
 
 export default router
