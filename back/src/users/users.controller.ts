@@ -56,6 +56,36 @@ export class UsersController {
     return {user: req.user, friends: friends, achievements: achievements}
   }
 
+  @Get('get-profile-login')
+  async getProfileByLogin(@Query('username') username: string) {
+    if (!username)
+      throw new BadRequestException('No username provided');
+    const user = await this.usersService.findByLogin(username);
+    console.log("user");
+    if (!user)
+      throw new NotFoundException('User not found');
+    /*
+    * TODO: Add requests for achievements
+    */
+    const achievements = await this.usersService.getUserAchievements(user.id);
+    /*
+    * TODO: Add requests for friends
+    */
+    const friends = await this.usersService.getFriends(user.id);
+    /* TODO: Add relationship status with current user
+      - User can be blocked
+      - User can unblock user
+      - User can be friend
+      - User can accept friend request
+      - User can send friend request
+    */
+    return JSON.stringify({
+      user,
+      achievements,
+      friends: friends.map(({ id, nickname }) => ({ id, nickname }))
+    });
+  }
+
   @Get('get-profile')
   async getProfile(@Query('id') id: number) {
     if (!id)
