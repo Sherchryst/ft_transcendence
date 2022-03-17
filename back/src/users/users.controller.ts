@@ -1,6 +1,7 @@
-import { BadRequestException, Body, ClassSerializerInterceptor, ConflictException, Controller, Get, HttpException, NotFoundException, Post, Query, Req, Response, ServiceUnavailableException, StreamableFile, UnauthorizedException, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, ClassSerializerInterceptor, ConflictException, Controller, Get, HttpException, NotFoundException, Post, Query, Req, Response, ServiceUnavailableException, StreamableFile, UnauthorizedException, UploadedFile, UseInterceptors, UseGuards } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Readable } from 'typeorm/platform/PlatformTools';
+import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
 import { UsersService } from './users.service';
 import * as PostgresError from '@fiveem/postgres-error-codes'
 import * as sharp from 'sharp';
