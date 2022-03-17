@@ -9,9 +9,8 @@ import { ChannelVisibility } from './entities/channel.entity';
 import { ChannelModerationType } from './entities/channel-moderation.entity';
 import { User } from 'src/users/entities/user.entity';
 
-@WebSocketGateway(3002)
+@WebSocketGateway(3001, {path: "/chat"})
 export class ChatGateway implements OnGatewayConnection{
-    @WebSocketServer() private server: any;
     wsClients = new Map<number, any>();
     
     constructor(private readonly chatService: ChatService,
@@ -150,7 +149,6 @@ export class ChatGateway implements OnGatewayConnection{
         const channel = await this.chatService.findChannel(data.chanId);
         this.chatService.createInvitation(data.chanId, user, data.invitedId)
         this.wsClients.get(data.invitedId).send(JSON.stringify({event: "invited", data: {from: user, channel: channel}}))
-        return "ok";
     }
 
     @SubscribeMessage('join_with_invitation')
@@ -159,9 +157,10 @@ export class ChatGateway implements OnGatewayConnection{
         const channel = await this.chatService.findChannel(chanId);
         if (!(await this.chatService.isInvited(chanId, user)))
             throw new UnauthorizedException('not invited to chan');
-        this.chatService.joinChannel(user, chanId, ChannelMemberRole.MEMBER);
+        const member = this.chatService.joinChannel(user, chanId, ChannelMemberRole.MEMBER);
         const history = await this.chatService.getChannelMessages(chanId, new Date(), 100);
-        return { event: "joined", data: { channel: channel, history: history} };
+        this.broadcast(-1, channel.id, "joined", await this.chatService.getChannelMembers(chanId), member)
+        return JSON.stringify(history)
     }
 
     @SubscribeMessage('direct_message')
@@ -170,6 +169,5 @@ export class ChatGateway implements OnGatewayConnection{
         const to = await this.usersService.findOne(data.towardId);
         const message = await this.chatService.createMessage(user, data.content)
         this.wsClients.get(to.id).send(JSON.stringify(await this.chatService.createDirectMessage(to, message)));
-        return "ok"
     }
 }

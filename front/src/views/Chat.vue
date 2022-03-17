@@ -33,7 +33,7 @@ import axios from 'axios';
 export default defineComponent({
     data() {
         return {
-            socket : new WebSocket('ws://localhost:3002'),
+            socket : new WebSocket('ws://localhost:3001/chat'),
             history: [],
             msg: "",
             channel: null,

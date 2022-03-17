@@ -10,7 +10,7 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-@WebSocketGateway(3001)
+@WebSocketGateway(3001, {path: "/game"})
 //   , { cors: { origin: "http://localhost:*", methods: ["GET", "POST"] }, handlePreflightRequest: (req, res) => { //WARNING : change * with address
 //   const headers = {
 //     'Access-Control-Allow-Origin': '*',
