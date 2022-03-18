@@ -98,9 +98,11 @@
         // const dist_y = y2 / 2 - dist_x;
         ctx.beginPath();
         ctx.arc((x + dist_x), (y + dist_x), dist_x, 0, 2 * Math.PI, false);
+        ctx.arc((x + x2 - dist_x), (y + y2 - dist_x), dist_x, 0, 2 * Math.PI, false);
+        ctx.closePath();
+        ctx.fill();
         ctx.arc((x + x2 - dist_x), (y + dist_x), dist_x, 0, 2 * Math.PI, false);
         ctx.arc((x + dist_x), (y + y2 - dist_x), dist_x, 0, 2 * Math.PI, false);
-        ctx.arc((x + x2 - dist_x), (y + y2 - dist_x), dist_x, 0, 2 * Math.PI, false);
         ctx.closePath();
         ctx.fill();
         ctx.fillRect(x, y + dist_x , x2, (y2 - 2 * dist_x));

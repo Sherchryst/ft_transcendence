@@ -150,7 +150,7 @@ export class GameGateway implements OnGatewayConnection  {
       }
       this.broadcast('board', this.gameService.updateBall());
       if (!(timer % 200))
-        this.gameService.bot_offset = (Math.floor(Math.random() * 2) ? -1 : 1) * Math.random() * this.gameService.board.player[1].half_height;
+        this.gameService.bot_offset = (Math.floor(Math.random() * 2) ? -1 : 1) * Math.random() * this.gameService.board.player[1].half_height * 1.5;
       timer++;
     }
   }
