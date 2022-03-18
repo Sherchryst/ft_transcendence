@@ -1,6 +1,11 @@
 <template>
-	<div class="flex-1 card">
-		<slot></slot>
+	<div class="place-content-between flex flex-col flex-1 card">
+		<div>
+			<slot name="title"></slot>
+		</div>
+		<div>
+			<slot name="body"></slot>
+		</div>
 	</div>
 </template>
 

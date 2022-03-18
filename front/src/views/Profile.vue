@@ -1,23 +1,40 @@
 <template>
 	<div class="flex flex-col lg:flex-row justify-between sm:flex-wrap">
 		<div>
-			<div class="flex place-content-center mb-8">
+			<div class="flex place-content-center mb-10">
 				<ProfilePicture></ProfilePicture>
 			</div>
-			<MainTitle>{{ profile.user?.nickname }}</MainTitle>
-			<p>{{ profile.user?.login }}</p>
-			<br><br>
-			<Level text="lvl.8"></Level>
-			<LevelBar :percent="68" :level="8" :nextLevel="9"></LevelBar>
-			<br>
-			<ButtonLink text="Demander en ami"></ButtonLink>
-			<br><br>
+			<div class="mb-8">
+				<MainTitle>{{ profile.user?.nickname }}</MainTitle>
+				<p>{{ profile.user?.login }}</p>
+			</div>
+			<div class="mb-8">
+				<Level text="lvl.8"></Level>
+				<LevelBar :percent="68" :level="8" :nextLevel="9"></LevelBar>
+			</div>
+			<div class="mb-12">
+				<ButtonLink text="Demander en ami"></ButtonLink>
+			</div>
 			<div class="flex flex-rows justify-around md:flex-wrap">
 				<div class="">
-					<LittleCard><p>test</p></LittleCard>
+					<LittleCard>
+						<template v-slot:title>
+							<p>test</p>
+						</template>
+						<template v-slot:body>
+							<p>test</p>
+						</template>
+					</LittleCard>
 				</div>
 				<div class="">
-					<LittleCard><p>test</p></LittleCard>
+					<LittleCard>
+						<template v-slot:title>
+							<p>test</p>
+						</template>
+						<template v-slot:body>
+							<p>test</p>
+						</template>
+					</LittleCard>
 				</div>
 			</div>
 		</div>
@@ -72,16 +89,16 @@
 
 <script lang="ts">
 import { useMeta } from 'vue-meta'
-import ProfilePicture from '@/components/ProfilePicture.vue';
-import MainTitle from '@/components/MainTitle.vue';
-import Level from '@/components/Level.vue';
-import LevelBar from '@/components/LevelBar.vue';
+import ProfilePanel from '@/components/profile/ProfilePanel.vue';
+import ProfilePicture from '@/components/profile/ProfilePicture.vue';
+import Level from '@/components/profile/Level.vue';
+import LevelBar from '@/components/profile/LevelBar.vue';
+import MatchesHistory from '@/components/profile/MatchesHistory.vue';
+import LittleCard from '@/components/profile/LittleCard.vue';
+import LargerCard from '@/components/profile/LargerCard.vue';
+import TitlePanel from '@/components/profile/TitlePanel.vue';
 import ButtonLink from '@/components/ButtonLink.vue';
-import LittleCard from '@/components/LittleCard.vue';
-import LargerCard from '@/components/LargerCard.vue';
-import TitlePanel from '@/components/TitlePanel.vue';
-import MatchesHistory from '@/components/MatchesHistory.vue';
-import ProfilePanel from '@/components/ProfilePanel.vue';
+import MainTitle from '@/components/MainTitle.vue';
 import Scrool from '@/assets/scroll.svg';
 import Trophy from '@/assets/trophy.svg';
 import {defineComponent, watch} from 'vue';
@@ -130,7 +147,7 @@ export default defineComponent({
 	},
 	created(): void {
 		watch(
-			() => this.$route.params, 
+			() => this.$route.params,
 			(toParams) => {
 				this.getUser(toParams.username)
 			}
