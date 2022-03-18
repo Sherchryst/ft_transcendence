@@ -13,7 +13,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import axios from 'axios';
+import { API } from '@/scripts/auth.ts';
 import { useMeta } from 'vue-meta'
 import ChannelView from '@/components/chat/ChannelView.vue'
 import OneRowForm from '@/components/OneRowForm.vue'
@@ -43,7 +43,7 @@ export default defineComponent ({
 		this.socket.onclose = (reason) => {
 			console.log('disconnected', reason)
 		}
-        axios.get('http://localhost:3000/chat/list').then((response) => {
+        API.get('chat/list').then((response) => {
             this.listChannel = response.data
             console.log(this.listChannel);
         }).catch((error) => {

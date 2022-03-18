@@ -1,6 +1,6 @@
 import { InjectionKey } from 'vue'
 import { createStore, Store } from 'vuex'
-import axios from 'axios';
+import { API } from '@/scripts/auth.ts';
 
 // define your typings for the store state
 export interface State {
@@ -15,12 +15,13 @@ export const store = createStore<State>({
 	profile: {user: 0, friends: [], achievements: []}
   },
   mutations: {
-	connect() {
-		axios.get('http://localhost:3000/users/get-profile').then((res) => {
-		this.profile = res.data;
-		console.log("hop", this.profile)
-	})
-	}
+    connect() {
+      API.get('users/get-profile')
+        .then((res) => {
+          this.profile = res.data;
+          console.log("hop", this.profile)
+      })
+    }
   },
   actions: {
   },

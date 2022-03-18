@@ -34,7 +34,7 @@
 <script lang="ts">
 
 import { defineComponent } from 'vue';
-import axios from 'axios';
+import { API } from '@/scripts/auth.ts';
 import DiscussionPreview from '@/components/chat/DiscussionPreview.vue'
 import { useMeta } from 'vue-meta'
 
@@ -57,7 +57,7 @@ export default defineComponent({
         }
     },
 	mounted() {
-		axios.get('http://localhost:3000/chat/list').then((response) => {
+		API.get('chat/list').then((response) => {
 			this.listChannel = response.data
 		}).catch((error) => {
 			this.listChannel = []

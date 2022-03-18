@@ -26,7 +26,7 @@
 </template>
 
 <script lang="ts">
-import axios from 'axios';
+import { API } from '@/scripts/auth.ts';
 import router from '@/router';
 import { useRoute } from 'vue-router'
 import { defineComponent } from 'vue';
@@ -68,19 +68,19 @@ export default defineComponent({
       router.push('/42');
     },
     logout(): void {
-      axios.post('http://localhost:3000/auth/logout')
+      API.post('auth/logout')
       sessionStorage.setItem("state", State.NOTLOGIN.toString())
       this.state = State.NOTLOGIN
     },
     generate_qrcode(): void {
-      axios.post('http://localhost:3000/2fa/generate', {}, {responseType: 'arraybuffer'}).then((response) => {
+      API.post('2fa/generate', {}, {responseType: 'arraybuffer'}).then((response) => {
         var bytes = new Uint8Array(response.data);
         var binary = bytes.reduce((data, b) => data += String.fromCharCode(b), '');
         this.qrcode = "data:image/png;base64," + btoa(binary);
       })
     },
     send_digit_code(path: string): void {
-      axios.post('http://localhost:3000/2fa' + path, {twoFactorAuthenticationCode: this.digits}).then((response) => {
+      API.post('2fa' + path, {twoFactorAuthenticationCode: this.digits}).then((response) => {
         sessionStorage.setItem("state", State.AUTH.toString())
         this.state = State.AUTH
         console.log(response.data)
@@ -89,14 +89,14 @@ export default defineComponent({
       })
     },
     ping(): void {
-      axios.get('http://localhost:3000/ping').then((response) => {
+      API.get('ping').then((response) => {
         console.log(response)
       }).catch((response) => {
         console.log(response)
       })
     },
     cheat_login(): void {
-      axios.get('http://localhost:3000/auth/cheat_login').then((response) => {
+      API.get('auth/cheat_login').then((response) => {
         console.log(response)
         sessionStorage.setItem("state", State.AUTH.toString())
         this.state = State.AUTH

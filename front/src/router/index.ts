@@ -10,7 +10,6 @@ import Profile from '@/views/Profile.vue'
 import Register from '@/views/Register.vue'
 import GameChoice from '@/views/GameChoice.vue'
 import Redirection from '@/components/Redirection.vue'
-import axios from 'axios'
 import Game from '@/views/Game.vue'
 
 const routes: Array<RouteRecordRaw> = [

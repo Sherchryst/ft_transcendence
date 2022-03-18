@@ -87,7 +87,7 @@ import ProfilePanel from '@/components/ProfilePanel.vue';
 import Scrool from '@/assets/scroll.svg';
 import Trophy from '@/assets/trophy.svg';
 import {defineComponent, watch} from 'vue';
-import axios from 'axios';
+import { API } from '@/scripts/auth.ts';
 import { Profile } from '@/interfaces/Profile';
 
 
@@ -122,7 +122,7 @@ export default defineComponent({
 	},
 	methods: {
 		getUser(username: string | string[]): void {
-			axios.get('http://localhost:3000/users/get-profile-login?username=' + username)
+			API.get('users/get-profile-login?username=' + username)
 			.then((res) => {
 				this.profile = res.data;
 			}).catch((response) => {
