@@ -1,11 +1,9 @@
 <template>
 	<div class="flex flex-col lg:flex-row justify-between sm:flex-wrap">
 		<div>
-			<div class="flex place-content-center">
+			<div class="flex place-content-center mb-8">
 				<ProfilePicture></ProfilePicture>
 			</div>
-			<br>
-
 			<MainTitle>{{ profile.user?.nickname }}</MainTitle>
 			<p>{{ profile.user?.login }}</p>
 			<br><br>
