@@ -84,7 +84,7 @@ import MatchesHistory from '@/components/MatchesHistory.vue';
 import ProfilePanel from '@/components/ProfilePanel.vue';
 import Scrool from '@/assets/scroll.svg';
 import Trophy from '@/assets/trophy.svg';
-import {defineComponent} from 'vue';
+import {defineComponent, watch} from 'vue';
 import axios from 'axios';
 import { Profile } from '@/interfaces/Profile';
 
@@ -109,21 +109,36 @@ export default defineComponent({
 	{
 		username: { type: String, required: true}
 	},
+	setup(props){
+		console.log(props.username)
+		useMeta({ title: 'Profile - ' + props.username})
+	},
 	data() {
 		return {
 			profile: {} as Profile,
 		}
 	},
-	mounted(): void {
-		axios.get('http://localhost:3000/users/get-profile-login?username=' + this.username)
+	methods: {
+		getUser(username: string | string[]): void {
+			axios.get('http://localhost:3000/users/get-profile-login?username=' + username)
 			.then((res) => {
 				this.profile = res.data;
-				console.log("hop", this.profile)
 			}).catch((response) => {
 				console.error("FAIL GET USER");
-				console.log(response)
 			})
-	}
+		}
+	},
+	created(): void {
+		watch(
+			() => this.$route.params, 
+			(toParams) => {
+				this.getUser(toParams.username)
+			}
+		)
+	},
+	mounted(): void {
+		this.getUser(this.username);
+	},
 })
 </script>
 
