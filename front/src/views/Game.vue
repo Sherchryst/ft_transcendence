@@ -3,7 +3,6 @@
   body {
       margin: 0;
       padding: 0;
-      /* background-color:rgb(6, 40, 56); */
   }
   #background {
     border: 5px solid #b8a500;
@@ -62,7 +61,6 @@
       this.ctx = (this.$refs.mycanvas as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
       this.dimX = this.ctx.canvas.width / 100;
       this.dimY = this.ctx.canvas.height / 100;
-      // console.log("DIMS :", this.dimX, this.dimY)
       this.socket.onopen = () => {
           console.log('Connected');
           this.socket.send(JSON.stringify({event: 'connection', data : "HEY !"})); // faudra changer les dimensions selon la taille de l'ecran
@@ -78,7 +76,6 @@
           case "id":
             this.id = fromServer.data;
             console.log(this.id);
-          //   console.log("Updated board", this.board)
             break;
           case "login":
             this.login[fromServer.data.id] = fromServer.data.login;
@@ -89,32 +86,41 @@
     },
     methods:
     {
-      drawRect(x : number, y : number, x2 : number, y2 : number, color = "white", ctx : any = null)
+      roundRect(x : number, y : number, x2 : number, y2 : number, color = "white", ctx : any = null)
       {
         if (ctx == null)
           ctx = this.ctx;
         ctx.fillStyle = color;
         const dist_x = x2 > y2? y2 / 3 : x2 / 3;
-        // const dist_y = y2 / 2 - dist_x;
         ctx.beginPath();
-        ctx.arc((x + dist_x), (y + dist_x), dist_x, 0, 2 * Math.PI, false);
-        ctx.arc((x + x2 - dist_x), (y + y2 - dist_x), dist_x, 0, 2 * Math.PI, false);
+        ctx.arc((x + dist_x), (y + y2 - dist_x), dist_x, Math.PI / 2, Math.PI, false);
+        ctx.arc((x + dist_x), (y + dist_x), dist_x, Math.PI, 1.5 * Math.PI, false);
+        ctx.arc((x + x2 - dist_x), (y + dist_x), dist_x, 1.5 * Math.PI, Math.PI * 2, false);
+        ctx.arc((x + x2 - dist_x), (y + y2 - dist_x), dist_x, 0, Math.PI / 2, false);
         ctx.closePath();
         ctx.fill();
-        ctx.arc((x + x2 - dist_x), (y + dist_x), dist_x, 0, 2 * Math.PI, false);
-        ctx.arc((x + dist_x), (y + y2 - dist_x), dist_x, 0, 2 * Math.PI, false);
-        ctx.closePath();
-        ctx.fill();
-        ctx.fillRect(x, y + dist_x , x2, (y2 - 2 * dist_x));
-        ctx.fillRect((x + dist_x), y, (x2 - 2 * dist_x), y2);
       },
-      // drawCircle(x : number, y : number, radius : number, color = "white")
-      // {
-      //   this.ctx.fillStyle = color;
-      //   this.ctx.beginPath();
-      //   this.ctx.arc(x * this.dimX, y * this.dimY, radius * this.dimX, 0, 2 * Math.PI, false);
-      //   this.ctx.fill();
-      // },
+      roundStar(x : number, y : number, radius : number, color = "white", ctx : any = null)
+      {
+        if (ctx == null)
+          ctx = this.ctx;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        // ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+        ctx.arc(x - radius, y - radius, radius, 0, Math.PI / 2, false);
+        ctx.arc(x + radius, y - radius, radius, Math.PI / 2, Math.PI, false);
+        ctx.arc(x + radius, y + radius, radius, Math.PI, Math.PI * 1.5, false);
+        ctx.arc(x - radius, y + radius, radius, 1.5 * Math.PI, 2 * Math.PI, false);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = color;
+        ctx.beginPath();
+        ctx.lineWidth = radius / 15;
+        ctx.moveTo(x, y - radius * 1.3);
+        ctx.lineTo(x, y + radius * 1.3);
+        ctx.closePath();
+        ctx.stroke();
+      },
       drawBackground()
       {
         var ctx = (this.$refs.background as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
@@ -124,9 +130,11 @@
         ctx.fillStyle = "rgb(6, 40, 56)";
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         // ctx.fillStyle = "white";
-          for (let i = line_width; i < ctx.canvas.width; i+= interval) {
-            this.drawRect((ctx.canvas.width- line_width) / 2, i, line_width, interval * 0.65, "white", ctx);
-          }
+        for (let count = 0; count < 300; count++) //stars
+          this.roundStar(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height, Math.random() * 5, "gray", ctx);
+        for (let i = line_width; i < ctx.canvas.width; i+= interval) {
+          this.roundRect((ctx.canvas.width- line_width) / 2, i, line_width, interval * 0.65, "white", ctx);
+        }
       },
       clear()
       {
@@ -134,27 +142,33 @@
       },
       drawBall(x : number, y : number)
       {
+        var h_width = this.board.ball.half_width;
         if (this.board.ball.dx > 0)
         {
-          this.drawRect((x - this.board.ball.half_width / 2) * this.dimX, (y - this.board.ball.half_width) * this.dimY, this.board.ball.half_width * (3 / 2)  * this.dimX, this.board.ball.half_width * (5 / 3) * this.dimX, "#b8a500");
-          this.drawRect((x - this.board.ball.half_width) * this.dimX, (y + this.board.ball.half_width / 3) * this.dimY, this.board.ball.half_width * (3/2) * this.dimX, this.board.ball.half_width * (2 / 3) * this.dimX, "#b8a500");
-          this.drawRect((x - this.board.ball.half_width) * this.dimX, (y - this.board.ball.half_width) * this.dimY, this.board.ball.half_width * (3/2) * this.dimX, this.board.ball.half_width * (2 / 3) * this.dimX, "#b8a500");
-          this.drawRect((x + this.board.ball.half_width / 4) * this.dimX, (y - this.board.ball.half_width * (3/4)) * this.dimY, (this.board.ball.half_width / 2 * this.dimX), this.board.ball.half_width * this.dimX, "#AEBBBC");
-          this.drawRect((x - this.board.ball.half_width / 2) * this.dimX, (y + this.board.ball.half_width * (2/3)) * this.dimY, this.board.ball.half_width * this.dimX, this.board.ball.half_width * (2 / 3) * this.dimX, "#b8a500");
+          this.roundRect((x - h_width / 2) * this.dimX, (y - h_width) * this.dimY, h_width * (3 / 2)  * this.dimX, h_width * (5 / 3) * this.dimX, "#b8a500");
+          this.roundRect((x - h_width) * this.dimX, (y + h_width / 3) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, "#b8a500");
+          this.roundRect((x - h_width) * this.dimX, (y - h_width) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, "#b8a500");
+          this.roundRect((x + h_width / 4) * this.dimX, (y - h_width * (3/4)) * this.dimY, (h_width / 2 * this.dimX), h_width * this.dimX, "#AEBBBC");
+          this.roundRect((x - h_width / 2) * this.dimX, (y + h_width * (2/3)) * this.dimY, h_width * this.dimX, h_width * (2 / 3) * this.dimX, "#b8a500");
         }
         else
         {
-          this.drawRect((x - this.board.ball.half_width) * this.dimX, (y - this.board.ball.half_width) * this.dimY, this.board.ball.half_width * (3 / 2)  * this.dimX, this.board.ball.half_width * (5 / 3) * this.dimX, "#b8a500");
-          this.drawRect((x - this.board.ball.half_width / 2) * this.dimX, (y - this.board.ball.half_width) * this.dimY, this.board.ball.half_width * (3/2) * this.dimX, this.board.ball.half_width * (2 / 3) * this.dimX, "#b8a500");
-          this.drawRect((x - this.board.ball.half_width / 2) * this.dimX, (y + this.board.ball.half_width / 3) * this.dimY, this.board.ball.half_width * (3/2) * this.dimX, this.board.ball.half_width * (2 / 3) * this.dimX, "#b8a500");
-          this.drawRect((x - this.board.ball.half_width * (3/4)) * this.dimX, (y - this.board.ball.half_width * (3/4)) * this.dimY, (this.board.ball.half_width / 2 * this.dimX), this.board.ball.half_width * this.dimX, "#AEBBBC");
-          this.drawRect((x - this.board.ball.half_width / 2) * this.dimX, (y + this.board.ball.half_width * (2/3)) * this.dimY, this.board.ball.half_width * this.dimX, this.board.ball.half_width * (2 / 3) * this.dimX, "#b8a500");
+          this.roundRect((x - h_width) * this.dimX, (y - h_width) * this.dimY, h_width * (3 / 2)  * this.dimX, h_width * (5 / 3) * this.dimX, "#b8a500");
+          this.roundRect((x - h_width / 2) * this.dimX, (y - h_width) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, "#b8a500");
+          this.roundRect((x - h_width / 2) * this.dimX, (y + h_width / 3) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, "#b8a500");
+          this.roundRect((x - h_width * (3/4)) * this.dimX, (y - h_width * (3/4)) * this.dimY, (h_width / 2 * this.dimX), h_width * this.dimX, "#AEBBBC");
+          this.roundRect((x - h_width / 2) * this.dimX, (y + h_width * (2/3)) * this.dimY, h_width * this.dimX, h_width * (2 / 3) * this.dimX, "#b8a500");
         }
+        // this.ctx.fillStyle = "#b8a500";
+        // this.ctx.fillRect(0, 0, 400, 50);
+        // this.roundRect(0, 0, 400, 50, "white");
+        // this.ctx.fillRect(this.ctx.canvas.height, this.ctx.canvas.height, -100, -350);
+        // this.roundRect(this.ctx.canvas.height, this.ctx.canvas.height, -100, -350, "white");
       },
       drawRackets(y1 : number, y2 : number)
       {
-        this.drawRect((this.racket.x[0] - this.racket.width) * this.dimX, (y1 - this.board.player[0].half_height) * this.dimY, this.racket.width * this.dimX, this.board.player[0].half_height * 2 * this.dimY);
-        this.drawRect(this.racket.x[1] * this.dimX, (y2 - this.board.player[1].half_height) * this.dimY, this.racket.width * this.dimX, this.board.player[1].half_height * 2 * this.dimY);
+        this.roundRect((this.racket.x[0] - this.racket.width) * this.dimX, (y1 - this.board.player[0].half_height) * this.dimY, this.racket.width * this.dimX, this.board.player[0].half_height * 2 * this.dimY);
+        this.roundRect(this.racket.x[1] * this.dimX, (y2 - this.board.player[1].half_height) * this.dimY, this.racket.width * this.dimX, this.board.player[1].half_height * 2 * this.dimY);
       },
       drawScore()
       {

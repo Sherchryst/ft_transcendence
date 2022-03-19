@@ -9,7 +9,7 @@ export class Game {
   @ManyToOne(() => User, u => u.id, { nullable: false })
   player1: User;
 
-  @ManyToOne(() => User, u => u.id, { nullable: true }) // for bot mode
+  @ManyToOne(() => User, u => u.id, { nullable: true }) // null = bot
   player2: User;
 
   @Column({ default: 0 })
