@@ -2,20 +2,15 @@
 	<single-card-page>
 	<form>
 		<div class="flex flex-col justify-evenly">
-			<div class="self-center">
+			<div class="self-center mb-16">
 				<ChooseAvatar></ChooseAvatar>
 			</div>
-			<div class="self-center">
-				<br><br>
-			</div>
-			<div class="self-center">
+
+			<div class="self-center mb-12 space-y-4">
 				<label for="username">Enter username:</label>
-				<br>
 				<input type="text" class="input" id="username" name="username" placeholder="username" required>
 			</div>
-			<div class="self-center">
-				<br>
-			</div>
+
 			<div class="self-center">
 				<button type="submit" class="button px-7 py-3 pb-2"> Register </button>
 			</div>

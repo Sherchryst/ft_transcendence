@@ -1,6 +1,6 @@
 <template>
 	<div class="frame flex flex-shrink-0 w-auto h-auto ">
-		<img class="h-64 w-64" src="../assets/logo.png" alt="profile">
+		<img class="h-64 w-64" src="../../assets/logo.png" alt="profile">
 	</div>
 </template>
 
