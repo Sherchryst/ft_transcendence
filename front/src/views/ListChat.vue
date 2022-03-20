@@ -32,7 +32,7 @@ export default defineComponent ({
     },
     data() {
         return {
-            socket : new WebSocket('ws://localhost:3002'),
+            socket : new WebSocket('ws://localhost:3001/chat'),
             listChannel: [],
         }
     },

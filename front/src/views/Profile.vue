@@ -137,7 +137,12 @@ export default defineComponent({
 	},
 	methods: {
 		getUser(username: string | string[]): void {
-			API.get('users/get-profile-login?username=' + username)
+			API.get('users/get-profile', {
+				params: {
+					id: null,
+					login: username
+				}
+			})
 			.then((res) => {
 				this.profile = res.data;
 			}).catch((response) => {

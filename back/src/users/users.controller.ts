@@ -1,4 +1,4 @@
-import { BadRequestException, Body, ClassSerializerInterceptor, ConflictException, Controller, forwardRef, Get, HttpException, Inject, NotFoundException, Post, Query, Req, Response, ServiceUnavailableException, StreamableFile, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, ClassSerializerInterceptor, ConflictException, Controller, forwardRef, Get, HttpException, Inject, NotFoundException, Param, Post, Query, Req, Response, ServiceUnavailableException, StreamableFile, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Readable } from 'typeorm/platform/PlatformTools';
 import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
@@ -6,7 +6,6 @@ import { UsersService } from './users.service';
 import * as PostgresError from '@fiveem/postgres-error-codes'
 import * as sharp from 'sharp';
 import { UpdateNicknameDto } from './dto/update-nickname.dto';
-import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
 
 export const imageFilter: any = (req: any, file: { mimetype: string, size: number }, callback: (arg0: any, arg1: boolean) => void): any =>
 {
@@ -18,8 +17,6 @@ export const imageFilter: any = (req: any, file: { mimetype: string, size: numbe
   return callback(null, true);
 };
 
-
-@UseGuards(Jwt2faGuard)
 @Controller('users')
 @UseGuards(Jwt2faGuard)
 export class UsersController {
@@ -59,12 +56,12 @@ export class UsersController {
   }
 
   @Get('get-profile')
-  async getProfile(@Body() data: {id: number, login: string}) {
+  async getProfile(@Query('id') id: number, @Query('login') login: string) {
     let user;
-    if (data.id)
-      user = await this.usersService.findOne(data.id);
-    else if (data.login)
-      user = await this.usersService.findByLogin(data.login);
+    if (id)
+      user = await this.usersService.findOne(id);
+    else if (login)
+      user = await this.usersService.findByLogin(login);
     else
       throw new BadRequestException('No id nor login provided');
     if (!user)
