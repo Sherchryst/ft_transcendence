@@ -1,4 +1,4 @@
-import { ConnectedSocket, MessageBody, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException} from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException, BaseWsExceptionFilter} from '@nestjs/websockets';
 import { ChatService } from './chat.service';
 import { CustomJwtService } from 'src/auth/jwt/jwt.service';
 import { IncomingMessage } from 'http';
@@ -7,8 +7,22 @@ import { ChannelMember, ChannelMemberRole } from './entities/channel-member.enti
 import { ChannelVisibility } from './entities/channel.entity';
 import { ChannelModerationType } from './entities/channel-moderation.entity';
 import { User } from 'src/users/entities/user.entity';
+import { ExceptionFilter, UseFilters} from '@nestjs/common';
+
+import { Catch, ArgumentsHost } from '@nestjs/common';
+import { stringify } from 'querystring';
+
+@Catch()
+export class WsExceptionFilter implements ExceptionFilter{
+  catch(exception: unknown, host: ArgumentsHost) {
+      console.log("HOP");
+      (host.getArgByIndex(0) as WebSocket).close();
+  }
+}
+
 
 @WebSocketGateway(3001, {path: "/chat"})
+@UseFilters(new WsExceptionFilter())
 export class ChatGateway implements OnGatewayConnection{
     wsClients = new Map<number, any>();
     
@@ -18,7 +32,13 @@ export class ChatGateway implements OnGatewayConnection{
         
     async handleConnection(client: any, msg: IncomingMessage) {
         try {
-            const jwt = msg.headers.cookie.slice(4)
+            let jwt;
+            const cookie = msg.headers.cookie.split(';').map(v => v.split('='));
+            cookie.forEach((v) => {
+                if (v[0].trim() === "jwt") {
+                    jwt = v[1].trim();
+                }
+            })
             const payload = this.customJwtService.verify(jwt)
             const user = await this.usersService.findOne(payload.sub)
             if (user.twofa && !payload.isSecondFactorAuth)
@@ -41,22 +61,29 @@ export class ChatGateway implements OnGatewayConnection{
     }
 
     private async auth(client: any): Promise<User> {
+        let user;
         try {
-            return this.usersService.findOne(this.customJwtService.verify(client.jwt).sub)
+           user = await this.usersService.findOne(this.customJwtService.verify(client.jwt).sub);
         }
         catch(error) {
-            throw new WsException("you're not an user");
+            client.close();
         }
+        if (!user)
+            client.close();
+        return user;
     }
 
     async handleDisconnect(client: any) {
         const user = await this.auth(client);
-        this.wsClients.delete(user.id)
+        if (user)
+            this.wsClients.delete(user.id)
     }
 
     @SubscribeMessage('join')
     async join(@ConnectedSocket() client, @MessageBody() data: {channelId: number, password: string}) {
         const user = await this.auth(client)
+        if (!user)
+            return
         let channel = await this.chatService.findChannel(data.channelId);
         if (channel.password && channel.password !== data.password)
             throw new WsException("wrong password");
