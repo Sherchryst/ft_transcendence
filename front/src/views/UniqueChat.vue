@@ -1,9 +1,9 @@
 <template>
     <chat-wrapper hasConv>
         <!-- <div class="col-span-8 conversation flex flex-col justify-between px-7 py-5"> -->
-            <div id="chat" class="flex-auto flex flex-col-reverse mb-5 overflow-x-auto">
+            <div id="chat" class="flex-auto flex flex-col-reverse mb-5 overflow-x-auto" :key="history">
                 <message side="0" v-for="omsg in history" :key="omsg">
-                    {{omsg.from}}: {{omsg.content}}
+                    {{omsg.content}}
                 </message>
             </div>
             <one-row-form placeholder="Message" @callback="send">
@@ -33,6 +33,8 @@ import OneRowForm from '@/components/OneRowForm.vue'
 import SendIcon from '@/assets/icon/send.svg';
 import ChatWrapper from '@/components/chat/ChatWrapper.vue'
 import { useMeta } from 'vue-meta'
+import { useStore } from 'vuex'
+import { key } from '@/store'
 
 export default defineComponent({
     components: {
@@ -46,23 +48,30 @@ export default defineComponent({
         name: {type : String}
     },
     beforeRouteLeave(to, from, next) {
-        this.socket.close()
         next()
     },
     setup () {
         useMeta({ title: 'Chat' })
+
+        const store = useStore(key)
     },
     data() {
         return {
-            socket : new WebSocket('ws://localhost:3001/chat'),
+            socket : {} as WebSocket,
             history: [],
             msg: "",
             channel: null,
         }
     },
+    unmounted() {
+        this.socket.close();
+    },
 	mounted() {
+        this.socket = new WebSocket('ws://localhost:3001/chat');
         this.socket.onopen = () => {
             console.log('connected', this.socket)
+            if (this.id && this.socket)
+                this.join(parseInt(this.id))
 		}
 		this.socket.onclose = (reason) => {
 			console.log('disconnected', reason)
@@ -76,13 +85,13 @@ export default defineComponent({
                     this.channel = fromServer.data.channel
 					this.history = []
 					for (let i = 0; i < fromServer.data.history.length; i++) {
-                        (this.history as any).push({content: fromServer.data.history[i].content, from: fromServer.data.history[i].from.nickname})
+                        (this.history as any).unshift({content: fromServer.data.history[i].content, from: fromServer.data.history[i].from.nickname})
 					}
 					console.log("channel", this.channel)
 					console.log("history", this.history)
 					break;
 				case "message":
-                    (this.history as any).push({content: fromServer.data.channelMessage.message.content, from: fromServer.data.channelMessage.message.from.login})
+                    (this.history as any).unshift({content: fromServer.data.channelMessage.message.content, from: fromServer.data.channelMessage.message.from.login})
 					console.log(fromServer.data)
 					break;
 				
@@ -98,9 +107,6 @@ export default defineComponent({
 					break;
 			}
 		}
-        console.log("ID:"+this.id)
-        // if (this.id && this.socket)
-        //     this.join(parseInt(this.id))
 	},
 	methods: {
         send(message: string): void {
@@ -108,6 +114,7 @@ export default defineComponent({
 		},
 
 		join(chanId: number): void {
+            console.log("alo");
 			this.socket.send(JSON.stringify({event: 'join', data : {channelId: parseInt(this.id), password: ""}}));
 		},
 
