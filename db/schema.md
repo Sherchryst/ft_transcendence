@@ -166,10 +166,25 @@
 
 ## Game
 
-### - match(<ins>id</ins>, *player1_id*, *player2_id*, mode, begin_at, finished_at, *winner_id*, score1, score2)
+### - map(<ins>id</ins>, ball_color, background_color, stars_color, racket_color)
+
+- id: INT
+	- An unique identifier for the map.
+- ball_color: INT NOT NULL
+	- The color of the ball.
+- background_color: INT NOT NULL
+	- The color of the background.
+- stars_color: INT NOT NULL
+	- The color of the stars.
+- racket_color: INT NOT NULL
+	- The color of the racket.
+
+### - match(<ins>id</ins>, *map_id*, *player1_id*, *player2_id*, mode, begin_at, finished_at, *winner_id*, score1, score2)
 
 - id: INT
 	- An unique identifier for the match.
+- map_id: INT NOT NULL
+	- The unique id of the map.
 - player1_id: INT NOT NULL
 	- The id of the first user.
 - player2_id: INT NOT NULL
