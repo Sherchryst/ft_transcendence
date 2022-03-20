@@ -1,10 +1,11 @@
-import { BadRequestException, Body, ClassSerializerInterceptor, ConflictException, Controller, Get, HttpException, NotFoundException, Post, Query, Req, Response, ServiceUnavailableException, StreamableFile, UnauthorizedException, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, ClassSerializerInterceptor, ConflictException, Controller, forwardRef, Get, HttpException, Inject, NotFoundException, Post, Query, Req, Response, ServiceUnavailableException, StreamableFile, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Readable } from 'typeorm/platform/PlatformTools';
 import { UsersService } from './users.service';
 import * as PostgresError from '@fiveem/postgres-error-codes'
 import * as sharp from 'sharp';
 import { UpdateNicknameDto } from './dto/update-nickname.dto';
+import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
 
 export const imageFilter: any = (req: any, file: { mimetype: string, size: number }, callback: (arg0: any, arg1: boolean) => void): any =>
 {
@@ -19,6 +20,7 @@ export const imageFilter: any = (req: any, file: { mimetype: string, size: numbe
 
 @UseGuards(Jwt2faGuard)
 @Controller('users')
+@UseGuards(Jwt2faGuard)
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
