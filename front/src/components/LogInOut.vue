@@ -70,6 +70,7 @@ export default defineComponent({
     logout(): void {
       API.post('auth/logout')
       sessionStorage.setItem("state", State.NOTLOGIN.toString())
+      sessionStorage.clear()
       this.state = State.NOTLOGIN
     },
     generate_qrcode(): void {

@@ -66,14 +66,6 @@ const routes: Array<RouteRecordRaw> = [
     ]
   },
   {
-    path: "/42",
-    name: 'ft-api',
-    component: Home,
-    beforeEnter() {
-      window.location.href = "http://localhost:3000/auth/login42";
-    }
-  },
-  {
     path: '/login',
     name: 'login',
     component: Login,
@@ -91,7 +83,10 @@ const router = createRouter({
 })
 
 // router.beforeEach((to, form, next) => {
-//   if (to.name != 'login' && !isAuthenticated)
+//   if (to.name != 'login' && sessionStorage.getItem("state") == null)
+//     next({ name: 'login' });
+//   else
+//     next()
 // })
 
 export default router

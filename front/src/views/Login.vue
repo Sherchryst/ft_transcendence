@@ -5,7 +5,7 @@
 			<h2 class="font-sans font-bold text-3xl pb-5"></h2>
 			<p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Aliquid ipsum natus doloribus voluptas praesentium, ut quis nam sit, quam adipisci totam repellendus necessitatibus quas unde expedita. Asperiores impedit maxime labore?</p>
 		</div>
-		<ButtonLink text="Connection avec 42" route="ft-api" />
+		<ButtonLink text="Connection avec 42" href="http://localhost:3000/auth/login42" />
 	</single-card-page>
 </template>
 
