@@ -3,8 +3,10 @@ import { IncomingMessage, Server } from 'http';
 import { CustomJwtService } from 'src/auth/jwt/jwt.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
+import { MatchType } from './entities/match.entity';
 import { GameService } from './game.service';
 import { Player } from './interfaces/player.interface';
+import { MatchService } from './match.service';
 
 const interval = 20;
 var   calc = false;
@@ -21,6 +23,7 @@ export class GameGateway implements OnGatewayConnection  {
     this.server.emit('testing', { do: 'stuff' });
   }
   constructor(private readonly gameService : GameService,
+    private readonly matchService : MatchService,
     private readonly customJwtService: CustomJwtService,
     private readonly usersService: UsersService) {}
 
@@ -56,14 +59,21 @@ export class GameGateway implements OnGatewayConnection  {
   }
 
   @SubscribeMessage('connection')
-  handleMessage(
+  async handleMessage(
   @MessageBody() message: string,
   @ConnectedSocket() client: any) {
-    client.send(JSON.stringify({event: "id" , data: this.clients_count() - 1}));
+    const user = await this.auth(client);
+    var map = await this.matchService.findMap(1);
+    if (!map)
+      map = await this.matchService.findMap(1);
+    const data = JSON.stringify({event: "id" , data: { id: this.clients_count() - 1, map: map } });
+    client.send(data);
     console.log("New connection : ", this.clients_count() - 1);
+    console.log(data);
     if (!calc)
     {
       calc = true;
+      var match = await this.matchService.createMatch(map, user, null, MatchType.CASUAL);
       this.sendUpdateBoard(this.clients_count());
     }
     return { event : 'board', data : this.gameService.updateBall() }
@@ -104,7 +114,7 @@ export class GameGateway implements OnGatewayConnection  {
       this.broadcast('board', this.gameService.updateBall());
       if (!(timer % 200))
         this.gameService.bot_offset = (Math.floor(Math.random() * 2) ? -1 : 1) * Math.random()
-                                    * this.gameService.board.player[1].half_height * 1.3;
+                                    * this.gameService.board.player[1].half_height * 1.1 * this.gameService.board.ball.dx;
       timer++;
     }
   }

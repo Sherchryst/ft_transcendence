@@ -17,3 +17,6 @@ INSERT INTO "user_relationship" VALUES
 ('friend', 1, 3),
 ('friend', 3, 1),
 ('block', 1, 2);
+
+INSERT INTO "map" ("ball_color", "background_color", "stars_color", "racket_color") VALUES
+(CAST(x'fcba03' AS int), CAST(x'054257' AS int), CAST(x'bfbeb2' AS int), CAST(x'ffffff' AS int));

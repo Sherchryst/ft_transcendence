@@ -7,4 +7,5 @@ export interface Board
 	player : Player[];
 	dead : boolean;
 	end : boolean;
+  update_needed : boolean;
 }

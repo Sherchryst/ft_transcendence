@@ -6,7 +6,14 @@
 
 ## Users
 
-### - user(<ins>id</ins>, login, nickname, role, mmr, twofa)
+### - avatar(<ins>id</ins>, data)
+
+- avatar_id: INT
+	- The id of the avatar.
+- data: BYTEA NOT NULL
+	- The data of the avatar.
+
+### - user(<ins>id</ins>, login, nickname, role, mmr, twofa, *avatar_id*)
 
 - id: INT
 	- An unique identifier for the user which is independant from 42.
@@ -23,6 +30,8 @@
 - twofa: VARCHAR(32) DEFAULT NULL
 	- A secret used to generate a 2FA code.
 	- If NULL then the user does not use 2FA.
+- avatar_id: INT NOT NULL
+	- The id of the avatar of the user.
 
 ### - user_relationship(<ins>*from_id*, *to_id*</ins>, type)
 
@@ -157,21 +166,54 @@
 
 ## Game
 
-### - match(<ins>id</ins>, *player1_id*, *player2_id*, mode, begin_at, finished_at, *winner_id*, score1, score2)
+### - map(<ins>id</ins>, ball_color, background_color, stars_color, racket_color)
+
+- id: INT
+	- An unique identifier for the map.
+- ball_color: INT NOT NULL
+	- The color of the ball.
+- background_color: INT NOT NULL
+	- The color of the background.
+- stars_color: INT NOT NULL
+	- The color of the stars.
+- racket_color: INT NOT NULL
+	- The color of the racket.
+
+### - match_invitation(<ins>*match_id*, *to_id*, *from_id*</ins>, *map_id*, sent_at, is_accepted)
+
+- match_id: INT
+	- The id of the match.
+- to_id: INT NOT NULL
+	- The id of the user who was invited to the match.
+- from_id: INT NOT NULL
+	- The id of the user who sent the invitation.
+- map_id: INT NOT NULL
+	- The id of the map used in the match.
+- sent_at: TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+	- The date at which the invitation was sent.
+- is_accepted: BOOLEAN NOT NULL DEFAULT FALSE
+	- The invitation was accepted.
+
+### - match_request(<ins>*match_id*</ins>, )
+
+### - match(<ins>id</ins>, *map_id*, *player1_id*, *player2_id*, mode, begin_at, end_at, *winner_id*, score1, score2)
 
 - id: INT
 	- An unique identifier for the match.
+- map_id: INT NOT NULL
+	- The unique id of the map.
 - player1_id: INT NOT NULL
 	- The id of the first user.
-- player2_id: INT NOT NULL
+- player2_id: INT
 	- The id of the second user.
+	- If NULL then the match is a single player match.
 	- player2_id <> player1_id.
 - mode: ENUM NOT NULL
 	- `casual`: The match is a casual match.
 	- `ranked`: The match is a ranked match.
 - begin_at: TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 	- The date at which the match was started.
-- finished_at: TIMESTAMP DEFAULT NULL
+- end_at: TIMESTAMP DEFAULT NULL
 	- The date at which the match was finished.
 	- If NULL then the match is not finished.
 - winner_id: INT DEFAULT NULL
