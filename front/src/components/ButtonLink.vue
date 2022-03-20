@@ -1,5 +1,6 @@
 <template>
-	<router-link :to="{name: route}" class="button px-7 py-3 pb-2">{{ text }}</router-link>
+	<router-link v-if="route" :to="{name: route}" class="button px-7 py-3 pb-2">{{ text }}</router-link>
+	<a v-else :href="href" class="button px-7 py-3 pb-2">{{ text }}</a>
 </template>
 
 <script lang="ts">
@@ -9,7 +10,8 @@ export default defineComponent({
 	name: "ButtonLink",
 	props: {
 		text: { type: String, default: "action" },
-		route: { type: String, default: "home" }
+		route: { type: String },
+		href: { type: String }
 	}
 })
 </script>
