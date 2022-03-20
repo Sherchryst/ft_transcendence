@@ -46,7 +46,7 @@
     },
     data() {
       return {
-        socket : new WebSocket('ws://localhost:3001'),
+        socket : new WebSocket('ws://localhost:3001/game'),
         ctx : null as any,
         id : 123,
         dimX : 0,

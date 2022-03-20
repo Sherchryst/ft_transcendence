@@ -1,4 +1,4 @@
-import { BadRequestException, Body, ClassSerializerInterceptor, ConflictException, Controller, Get, HttpException, NotFoundException, Post, Query, Req, Response, ServiceUnavailableException, StreamableFile, UnauthorizedException, UploadedFile, UseInterceptors, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, ClassSerializerInterceptor, ConflictException, Controller, forwardRef, Get, HttpException, Inject, NotFoundException, Post, Query, Req, Response, ServiceUnavailableException, StreamableFile, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Readable } from 'typeorm/platform/PlatformTools';
 import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
@@ -6,6 +6,7 @@ import { UsersService } from './users.service';
 import * as PostgresError from '@fiveem/postgres-error-codes'
 import * as sharp from 'sharp';
 import { UpdateNicknameDto } from './dto/update-nickname.dto';
+import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
 
 export const imageFilter: any = (req: any, file: { mimetype: string, size: number }, callback: (arg0: any, arg1: boolean) => void): any =>
 {
@@ -20,6 +21,7 @@ export const imageFilter: any = (req: any, file: { mimetype: string, size: numbe
 
 @UseGuards(Jwt2faGuard)
 @Controller('users')
+@UseGuards(Jwt2faGuard)
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
@@ -56,41 +58,15 @@ export class UsersController {
     return {user: req.user, friends: friends, achievements: achievements}
   }
 
-  @Get('get-profile-login')
-  async getProfileByLogin(@Query('username') username: string) {
-    if (!username)
-      throw new BadRequestException('No username provided');
-    const user = await this.usersService.findByLogin(username);
-    console.log("user");
-    if (!user)
-      throw new NotFoundException('User not found');
-    /*
-    * TODO: Add requests for achievements
-    */
-    const achievements = await this.usersService.getUserAchievements(user.id);
-    /*
-    * TODO: Add requests for friends
-    */
-    const friends = await this.usersService.getFriends(user.id);
-    /* TODO: Add relationship status with current user
-      - User can be blocked
-      - User can unblock user
-      - User can be friend
-      - User can accept friend request
-      - User can send friend request
-    */
-    return JSON.stringify({
-      user,
-      achievements,
-      friends: friends.map(({ id, nickname }) => ({ id, nickname }))
-    });
-  }
-
   @Get('get-profile')
-  async getProfile(@Query('id') id: number) {
-    if (!id)
-      throw new BadRequestException('No id provided');
-    const user = await this.usersService.findOne(id);
+  async getProfile(@Body() data: {id: number, login: string}) {
+    let user;
+    if (data.id)
+      user = await this.usersService.findOne(data.id);
+    else if (data.login)
+      user = await this.usersService.findByLogin(data.login);
+    else
+      throw new BadRequestException('No id nor login provided');
     if (!user)
       throw new NotFoundException('User not found');
     /*

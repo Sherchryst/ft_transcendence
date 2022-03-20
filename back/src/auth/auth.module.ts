@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { CustomJwtService } from './jwt/jwt.service'
 import { UsersModule } from '../users/users.module';
 import { PassportModule } from '@nestjs/passport';
@@ -14,9 +14,9 @@ import { Jwt2faStrategy } from './jwt/jwt.strategy';
 @Module({
   controllers: [AuthController, TwoFactorController],
   imports: [
-    UsersModule,
     PassportModule,
     Repository,
+    forwardRef(() => UsersModule),
     JwtModule.register({secret: jwtConstants.secret})
   ],
   providers: [CustomJwtService, FortyTwoStrategy, JwtAuthStrategy, Jwt2faStrategy, TwoFactorService],
