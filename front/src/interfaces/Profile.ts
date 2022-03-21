@@ -1,6 +1,6 @@
 export interface Profile {
-	achivements?: [],
-	friends?: [],
+	achievements: [],
+	friends: [],
 	user: User
 }
 

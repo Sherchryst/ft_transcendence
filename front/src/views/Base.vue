@@ -2,7 +2,7 @@
 	<div id="base" class="grid grid-cols-12 min-h-screen">
 		<nav id="nav" class="flex flex-col md:items-center md:fixed h-full w-full md:w-28 pt-24 md:pt-0 dropdown-link-container">
 			<div class="mb-5 md:mb-0 md:mt-10 md:h-36">
-				<router-link :to="{name: 'profile', params: {username: 'emmou'}}">
+				<router-link :to="{name: 'profile', params: {username: whoiam}}">
 					<img class="h-16 w-16" src="../assets/logo.png" alt="profile">
 				</router-link>
 			</div>
@@ -37,7 +37,7 @@
 				<div class="hidden sm:flex flex-row justify-between justify-items-center h-16">
 					<div class="self-center">
 						<!-- If connected -->
-						<ButtonLink text="Connection" route="login" />
+						<ButtonLink @click="logout()" text="Deconnection" route="login" />
 					</div>
 					<div class="flex flex-row justify-between justify-items-center">
 						<div class="self-center">
@@ -68,6 +68,11 @@ import GameIcon from '@/assets/icon/game.svg';
 import SearchIcon from '@/assets/icon/search.svg';
 import MenuIcon from '@/assets/icon/menu.svg'
 import Logo from '@/assets/ApongUs.svg';
+import { useStore } from 'vuex'
+import { key } from '@/store/index.ts'
+import { API } from '@/scripts/auth.ts';
+import router from '@/router';
+import { Profile, User } from '@/interfaces/Profile';
 
 export default defineComponent({
 	components: {
@@ -88,6 +93,17 @@ export default defineComponent({
 
 			if (navElement != null)
 				navElement.classList.toggle("dropdown-opened");
+		},
+		logout(): void {
+			API.post('auth/logout')
+			sessionStorage.clear()
+			router.push({name: "login"})
+		},
+	},
+	computed: {
+		whoiam() : string {
+			const store = useStore(key)
+			return store.state.profile.user.login || 'unknown'
 		}
 	}
 })

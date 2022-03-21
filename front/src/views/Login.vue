@@ -15,6 +15,10 @@ import ButtonLink from '@/components/ButtonLink.vue';
 import SingleCardPage from '@/components/SingleCardPage.vue';
 import MainTitle from '@/components/MainTitle.vue';
 import { useMeta } from 'vue-meta'
+import router from '@/router';
+import { useRoute } from 'vue-router';
+import { useStore } from 'vuex'
+import { key } from '@/store/index.ts'
 
 export default defineComponent({
 	components: {
@@ -25,6 +29,17 @@ export default defineComponent({
 	setup () {
         useMeta({ title: 'Connection' })
     },
+	created() {
+		const route = useRoute()
+		const store = useStore(key)
+
+		if (route.query.is2fa !== undefined)
+		{
+			store.dispatch('connection').then(r => {
+				router.push({name: "home"})
+			});
+		}
+	}
 })
 </script>
 

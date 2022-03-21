@@ -2,8 +2,8 @@
     <chat-wrapper hasConv>
         <!-- <div class="col-span-8 conversation flex flex-col justify-between px-7 py-5"> -->
             <div id="chat" class="flex-auto flex flex-col-reverse mb-5 overflow-x-auto" :key="history">
-                <message side="0" v-for="omsg in history" :key="omsg">
-                    {{omsg.content}}
+                <message :self="message.self" v-for="message in history" :key="message">
+                    {{message.content}}
                 </message>
             </div>
             <one-row-form placeholder="Message" @callback="send">
@@ -27,7 +27,7 @@
 
 <script lang="ts">
 
-import { defineComponent } from 'vue';
+import { defineComponent, PropType, computed } from 'vue';
 import Message from '@/components/chat/Message.vue'
 import OneRowForm from '@/components/OneRowForm.vue'
 import SendIcon from '@/assets/icon/send.svg';
@@ -35,6 +35,7 @@ import ChatWrapper from '@/components/chat/ChatWrapper.vue'
 import { useMeta } from 'vue-meta'
 import { useStore } from 'vuex'
 import { key } from '@/store'
+import { Message_t, ServerMessage } from '@/interfaces/Message.ts'
 
 export default defineComponent({
     components: {
@@ -52,13 +53,16 @@ export default defineComponent({
     },
     setup () {
         useMeta({ title: 'Chat' })
-
         const store = useStore(key)
+
+        return {
+            nickname: computed( () => store.getters.getNickname)
+        }
     },
     data() {
         return {
             socket : {} as WebSocket,
-            history: [],
+            history: [] as Message_t[],
             msg: "",
             channel: null,
         }
@@ -85,14 +89,14 @@ export default defineComponent({
                     this.channel = fromServer.data.channel
 					this.history = []
 					for (let i = 0; i < fromServer.data.history.length; i++) {
-                        (this.history as any).unshift({content: fromServer.data.history[i].content, from: fromServer.data.history[i].from.nickname})
+                        this.recv(fromServer.data.history[i])
 					}
 					console.log("channel", this.channel)
 					console.log("history", this.history)
 					break;
 				case "message":
-                    (this.history as any).unshift({content: fromServer.data.channelMessage.message.content, from: fromServer.data.channelMessage.message.from.login})
-					console.log(fromServer.data)
+                    this.recv(fromServer.data.channelMessage.message)
+					console.log("message : ", fromServer.data)
 					break;
 				
 				case "created":
@@ -101,10 +105,12 @@ export default defineComponent({
 					console.log("channel", this.channel)
 					console.log("history", this.history)
 					break;
-
 				case "left":
 					this.channel = null
 					break;
+                
+                case "error":
+                    console.log(fromServer.data)
 			}
 		}
 	},
@@ -114,13 +120,22 @@ export default defineComponent({
 		},
 
 		join(chanId: number): void {
-            console.log("alo");
 			this.socket.send(JSON.stringify({event: 'join', data : {channelId: parseInt(this.id), password: ""}}));
 		},
 
 		leave_channel(): void {
 			this.socket.send(JSON.stringify({event: 'leave', data : this.id}));
-		}
+		},
+        recv(data: ServerMessage ): void {
+            let message: Message_t = {
+                content: data.content,
+                from: data.from.nickname,
+                self: false
+            }
+            if (this.nickname == message.from)
+                message.self = true
+            this.history.unshift(message)
+        }
 	}
 })
 

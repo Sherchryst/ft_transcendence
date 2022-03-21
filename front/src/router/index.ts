@@ -11,6 +11,9 @@ import Register from '@/views/Register.vue'
 import GameChoice from '@/views/GameChoice.vue'
 import Redirection from '@/components/Redirection.vue'
 import Game from '@/views/Game.vue'
+import { useCookies } from "vue3-cookies";
+
+const { cookies } = useCookies();
 
 const routes: Array<RouteRecordRaw> = [
 
@@ -82,11 +85,11 @@ const router = createRouter({
   routes
 })
 
-// router.beforeEach((to, form, next) => {
-//   if (to.name != 'login' && sessionStorage.getItem("state") == null)
-//     next({ name: 'login' });
-//   else
-//     next()
-// })
+router.beforeEach((to, form, next) => {
+  if (to.name != 'login' && !cookies.isKey('jwt'))
+    next({ name: 'login' });
+  else
+    next()
+})
 
 export default router
