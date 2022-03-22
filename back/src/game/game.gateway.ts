@@ -15,7 +15,7 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-@WebSocketGateway(3001)
+@WebSocketGateway(3001, {path: "/game"})
 export class GameGateway implements OnGatewayConnection  {
   @WebSocketServer() private server: any;
   wsClients = new Map<number, any>();

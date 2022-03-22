@@ -1,23 +1,35 @@
-<style>
-  html, 
-  body {
-      margin: 0;
-      padding: 0;
-  }
-  #background {
-    border: 5px solid #b8a500;
-  }
-  #mycanvas {
-    border: 5px solid #b8a500;
+<style lang="scss">
+  .game{
+    overflow: hidden;
+    canvas{
+      transform: translateX(-50%) translateY(-50%);
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+    &-container{
+      left: 50%;
+      top: 50%;
+      height: 80vh;
+    }
+    &-bg{
+      border: 5px solid $action;
+      z-index: 0;
+    }
+    &-fg{
+      border: 5px solid $secondary-color;
+      z-index: 1;
+    }
   }
 </style>
 
 <template>
-<div id="canvas-div" style="position: relative;">
- <canvas ref="background" id="background" width="800" height="600"
-   style="position: absolute; left: 0; top: 0; z-index: 0;"></canvas>
- <canvas ref="mycanvas" id="mycanvas" width="800" height="600"
-   style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
+<div class="game">
+  <div id="canvas-div" class="game-container w-full relative">
+    <canvas ref="background" id="background" class="game-bg" height="750" width="850">
+    </canvas>
+    <canvas ref="mycanvas" id="mycanvas" class="game-fg" height="600" width="800"></canvas>
+  </div>
 </div>
 </template>
 
@@ -34,7 +46,8 @@
     },
     data() {
       return {
-        socket : new WebSocket('ws://localhost:3001'),
+        login : ["player1", "player2"],
+        socket : new WebSocket('ws://localhost:3001/game'),
         ctx : null as any,
         id : 123,
         map: {
@@ -43,7 +56,6 @@
           starsColor: 0,
           racketColor : 0 
         },
-        login : ["player1", "player2"],
         dimX : 0,
         dimY : 0,
         racket : {

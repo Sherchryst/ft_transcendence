@@ -1,7 +1,24 @@
-import { Body, ConflictException, Controller, Get, NotFoundException, Post, Query, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Body, ClassSerializerInterceptor, ConflictException, Controller, forwardRef, Get, HttpException, Inject, NotFoundException, Param, Post, Query, Req, Response, ServiceUnavailableException, StreamableFile, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Readable } from 'typeorm/platform/PlatformTools';
+import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
 import { UsersService } from './users.service';
+import * as PostgresError from '@fiveem/postgres-error-codes'
+import * as sharp from 'sharp';
+import { UpdateNicknameDto } from './dto/update-nickname.dto';
+
+export const imageFilter: any = (req: any, file: { mimetype: string, size: number }, callback: (arg0: any, arg1: boolean) => void): any =>
+{
+  const validExtension: Array<string> = ['image/png', 'image/jpg', 'image/jpeg', 'image/gif'];
+  if (!validExtension.includes(file.mimetype))
+    return callback(new BadRequestException('Only image files are allowed'), false);
+  if (file.size > 1000000)
+    return callback(new BadRequestException('Image must be less than 1MB'), false);
+  return callback(null, true);
+};
 
 @Controller('users')
+@UseGuards(Jwt2faGuard)
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
@@ -24,15 +41,31 @@ export class UsersController {
 
   @Get('get-friend-requests')
   async getFriendRequests(@Query('id') id: number) {
+    if (!id)
+      throw new BadRequestException('No id provided');
     const requests = await this.usersService.getFriendRequests(id);
     return JSON.stringify(requests.map(({ id, nickname }) => ({ id, nickname })));
   }
 
+
+  @Get('profile')
+  async profile(@Req() req) {
+    const achievements = await this.usersService.getUserAchievements(req.user.id);
+    const friends = await this.usersService.getFriends(req.user.id)
+    return {user: req.user, friends: friends, achievements: achievements}
+  }
+
   @Get('get-profile')
-  async getProfile(@Query('id') id: number) {
-    const user = await this.usersService.findOne(id);
+  async getProfile(@Query('id') id: number, @Query('login') login: string) {
+    let user;
+    if (id)
+      user = await this.usersService.findOne(id);
+    else if (login)
+      user = await this.usersService.findByLogin(login);
+    else
+      throw new BadRequestException('No id nor login provided');
     if (!user)
-      throw new NotFoundException();
+      throw new NotFoundException('User not found');
     /*
     * TODO: Add requests for achievements
     */
@@ -76,13 +109,42 @@ export class UsersController {
   }
 
   @Post('update-nickname')
-  async updateNickname(@Body() dto: { id: number, nickname: string }) {
-    if (dto.nickname.slice(0, 4) === 'anon')
-      throw new ConflictException('forbidden prefix : anon');
+  async updateNickname(@Body() dto: UpdateNicknameDto) {
     try {
       await this.usersService.updateNickname(dto.id, dto.nickname);
     } catch (error) {
-      throw new ConflictException('Nickname is already taken');
+      if (error.code === PostgresError.PG_UNIQUE_VIOLATION)
+        throw new ConflictException('Nickname already taken');
+      throw new ServiceUnavailableException();
     }
+  }
+
+  @Get('get-avatar')
+  async getAvatar(@Query('id') id: number, @Response({ passthrough: true }) res) {
+    if (!id)
+      throw new BadRequestException('No id provided');
+    const avatar = await this.usersService.getAvatar(id);
+    if (!avatar)
+      throw new HttpException('Avatar not found', 404);
+    const stream = Readable.from(avatar.data);
+    res.set({
+      'Content-Disposition': 'inline',
+      'Content-Type': 'image'
+    });
+    return new StreamableFile(stream);
+  }
+
+  @Post('update-avatar')
+  @UseInterceptors(FileInterceptor('file', { fileFilter: imageFilter }))
+  async updateAvatar(@UploadedFile() file: Express.Multer.File, @Body() body: { id : number }) {
+    if (!file)
+      throw new BadRequestException('No file uploaded');
+    const avatar = await this.usersService.getAvatar(body.id);
+    if (!avatar)
+      throw new NotFoundException('User not found');
+    console.log("Avatar: ", avatar);
+    var buffer = await sharp(file.buffer)
+    .resize(400).toFormat('jpeg').jpeg({ quality: 90 }).toBuffer();
+    await this.usersService.updateAvatar(avatar.id, buffer);
   }
 }

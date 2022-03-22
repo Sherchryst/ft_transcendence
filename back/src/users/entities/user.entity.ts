@@ -1,5 +1,6 @@
 import { Exclude } from 'class-transformer';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Avatar } from './avatar.entity';
 import { UserAchievement } from './user-achievement.entity';
 import { UserRelationship } from './user-relationship.entity';
 
@@ -39,4 +40,8 @@ export class User {
 
   @OneToMany(() => UserRelationship, r => r.from)
   userRelationships: UserRelationship[];
+
+  @OneToOne(() => Avatar, { nullable: false })
+  @JoinColumn()
+  avatar: Avatar;
 }

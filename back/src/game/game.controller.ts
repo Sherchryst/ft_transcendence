@@ -3,7 +3,7 @@ import { GameService } from './game.service';
 import { GameGateway } from './game.gateway';
 import { Board } from './interfaces/board.interface';
 
-@Controller('game')
+@Controller('game') // listen on localhost:3000/game
 export class GameController
 {
 	constructor(private readonly gameService : GameService)
