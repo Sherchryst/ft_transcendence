@@ -39,10 +39,7 @@ export const store = createStore<State>({
     },
     ADD_MESSAGE(state, message) {
       state.chatMessages.push(message);
-    },
-      DELETE_MESSAGE(state, message) {
-		state.chatMessages = state.chatMessages.filter(m => m.id !== message.id);
-      }
+    }
   },
   actions: {
     connection({commit}){

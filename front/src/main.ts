@@ -5,21 +5,18 @@ import './index.css'
 import { store, key } from './store'
 import { createMetaManager } from 'vue-meta'
 import VueCookies from 'vue3-cookies'
-import VueSocketIO from 'vue-3-socket.io'
+// import VueSocketIO from 'vue-3-socket.io'
+// import io from "socket.io-client"
 
+// export const SocketInstance = new io("http://localhost:3001");
 
 createApp(App)
 	.use(store, key)
 	.use(router)
 	.use(createMetaManager())
 	.use(VueCookies)
-	.use(new VueSocketIO({
-		debug: true,
-		connection: 'ws://localhost:3001/chat',
-		vuex: {
-			store,
-			actionPrefix: 'SOCKET_',
-			mutationPrefix: 'SOCKET_'
-		}
-	}))
+	// .use(new VueSocketIO({
+	// 	debug: true,
+	// 	connection: 'http://localhost:3001'
+	// }))
 	.mount('#app')

@@ -21,7 +21,7 @@ export class WsExceptionFilter implements ExceptionFilter{
 }
 
 
-@WebSocketGateway(3001, {path: "/chat"})
+@WebSocketGateway(3005, {path: "/chat"})
 @UseFilters(new WsExceptionFilter())
 export class ChatGateway implements OnGatewayConnection{
     wsClients = new Map<number, any>();
