@@ -5,7 +5,7 @@
                 <span class="px-2">Create</span>
             </one-row-form>
         </div>
-        <div class="grid-cols-1 md:grid grid-cols-3 gap-4 span-4">
+        <div class="grid-cols-1 md:grid grid-cols-3 gap-4 span-4" :key="listChannel">
             <channel-view v-for="chan in listChannel" :id="chan.id" :title="chan.name" :key="chan.id"/>
         </div>
     </div>
@@ -32,7 +32,7 @@ export default defineComponent ({
     },
     data() {
         return {
-            socket : new WebSocket('ws://localhost:3001/chat'),
+            socket : new WebSocket('ws://' + window.location.hostname + ':3001/chat'),
             listChannel: [],
         }
     },
@@ -43,17 +43,19 @@ export default defineComponent ({
 		this.socket.onclose = (reason) => {
 			console.log('disconnected', reason)
 		}
-        API.get('chat/list').then((response) => {
-            this.listChannel = response.data
-            console.log(this.listChannel);
-        }).catch((error) => {
-            this.listChannel = [];
-        })
+        this.getChat()
     },
     methods: {
         create(name_chan: string): void {
 			this.socket.send(JSON.stringify({event: 'create', data : {name : name_chan, visibility : "public"}}));
 		},
+        getChat(): void {
+             API.get('chat/list').then((response) => {
+                this.listChannel = response.data
+            }).catch((error) => {
+                this.listChannel = [];
+            })
+        }
     }
 })
 </script>

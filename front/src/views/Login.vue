@@ -5,7 +5,7 @@
 			<h2 class="font-sans font-bold text-3xl pb-5"></h2>
 			<p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Aliquid ipsum natus doloribus voluptas praesentium, ut quis nam sit, quam adipisci totam repellendus necessitatibus quas unde expedita. Asperiores impedit maxime labore?</p>
 		</div>
-		<ButtonLink text="Connection avec 42" href="http://localhost:3000/auth/login42" />
+		<ButtonLink text="Connection avec 42" :href="this.hostname" />
 	</single-card-page>
 </template>
 
@@ -39,6 +39,15 @@ export default defineComponent({
 				router.push({name: "home"})
 			});
 		}
+	},
+	computed: {
+		hostname() {
+			return ('http://' + window.location.hostname + ':3000/auth/login42')
+		}
+	},
+	mounted() {
+		console.log("Host : ", window.location.host)
+		console.log("Hostname : ", window.location.hostname)
 	}
 })
 </script>

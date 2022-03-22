@@ -71,7 +71,7 @@ export default defineComponent({
         this.socket.close();
     },
 	mounted() {
-        this.socket = new WebSocket('ws://localhost:3001/chat');
+        this.socket = new WebSocket('ws://' + window.location.hostname + ':3001/chat');
         this.socket.onopen = () => {
             console.log('connected', this.socket)
             if (this.id && this.socket)
