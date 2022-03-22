@@ -1,5 +1,4 @@
-import { UnauthorizedException } from '@nestjs/common';
-import { ConnectedSocket, MessageBody, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException} from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException, BaseWsExceptionFilter} from '@nestjs/websockets';
 import { ChatService } from './chat.service';
 import { CustomJwtService } from 'src/auth/jwt/jwt.service';
 import { IncomingMessage } from 'http';
@@ -8,8 +7,22 @@ import { ChannelMember, ChannelMemberRole } from './entities/channel-member.enti
 import { ChannelVisibility } from './entities/channel.entity';
 import { ChannelModerationType } from './entities/channel-moderation.entity';
 import { User } from 'src/users/entities/user.entity';
+import { ExceptionFilter, UseFilters} from '@nestjs/common';
+
+import { Catch, ArgumentsHost } from '@nestjs/common';
+import { stringify } from 'querystring';
+
+@Catch()
+export class WsExceptionFilter implements ExceptionFilter{
+  catch(exception: unknown, host: ArgumentsHost) {
+      console.log("HOP");
+      (host.getArgByIndex(0) as WebSocket).close();
+  }
+}
+
 
 @WebSocketGateway(3001, {path: "/chat"})
+@UseFilters(new WsExceptionFilter())
 export class ChatGateway implements OnGatewayConnection{
     wsClients = new Map<number, any>();
     
@@ -19,7 +32,13 @@ export class ChatGateway implements OnGatewayConnection{
         
     async handleConnection(client: any, msg: IncomingMessage) {
         try {
-            const jwt = msg.headers.cookie.slice(4)
+            let jwt;
+            const cookie = msg.headers.cookie.split(';').map(v => v.split('='));
+            cookie.forEach((v) => {
+                if (v[0].trim() === "jwt") {
+                    jwt = v[1].trim();
+                }
+            })
             const payload = this.customJwtService.verify(jwt)
             const user = await this.usersService.findOne(payload.sub)
             if (user.twofa && !payload.isSecondFactorAuth)
@@ -42,20 +61,32 @@ export class ChatGateway implements OnGatewayConnection{
     }
 
     private async auth(client: any): Promise<User> {
-        return this.usersService.findOne(this.customJwtService.verify(client.jwt).sub)
+        let user;
+        try {
+           user = await this.usersService.findOne(this.customJwtService.verify(client.jwt).sub);
+        }
+        catch(error) {
+            client.close();
+        }
+        if (!user)
+            client.close();
+        return user;
     }
 
     async handleDisconnect(client: any) {
         const user = await this.auth(client);
-        this.wsClients.delete(user.id)
+        if (user)
+            this.wsClients.delete(user.id)
     }
 
     @SubscribeMessage('join')
     async join(@ConnectedSocket() client, @MessageBody() data: {channelId: number, password: string}) {
         const user = await this.auth(client)
+        if (!user)
+            return
         let channel = await this.chatService.findChannel(data.channelId);
         if (channel.password && channel.password !== data.password)
-            throw new UnauthorizedException("wrong password");
+            throw new WsException("wrong password");
         this.chatService.joinChannel(user, data.channelId, ChannelMemberRole.MEMBER);
         const history = await this.chatService.getChannelMessages(data.channelId, new Date(), 100);
         return { event: "joined", data: { channel: channel, history: history} };
@@ -75,8 +106,7 @@ export class ChatGateway implements OnGatewayConnection{
         const message = await this.chatService.createMessage(user, data.msg);
         const channelMessage = await this.chatService.createChannelMessage(data.chanId, message);
         const members = await this.chatService.getChannelMembers(data.chanId);
-        console.log(members)
-        this.broadcast(user.id, data.chanId, "message", members, { channelMessage: channelMessage });
+        this.broadcast(-1, data.chanId, "message", members, { channelMessage: channelMessage });
     }
 
     @SubscribeMessage('leave')
@@ -96,7 +126,7 @@ export class ChatGateway implements OnGatewayConnection{
         const user = await this.auth(client)
         const admin = await this.chatService.getChannelMember(data.chanId, user.id);
         if (admin.role !== ChannelMemberRole.ADMIN)
-            throw new UnauthorizedException('you\'re not an administrator')
+            throw new WsException('you\'re not an administrator')
         const members = await this.chatService.getChannelMembers(data.chanId);
         this.broadcast(-1, data.chanId, data.action, members, {user: user, duration: data.duration, reason: data.reason})
         this.chatService.createChannelModeration(data.chanId, data.userId, user, data.action, data.reason, data.duration)
@@ -107,7 +137,7 @@ export class ChatGateway implements OnGatewayConnection{
         const user = await this.auth(client)
         const channel = await this.chatService.findChannel(chanId);
         if (user.id != channel.owner.id)
-            throw new UnauthorizedException('you\'re not the owner');
+            throw new WsException('you\'re not the owner');
         this.chatService.deleteChannel(chanId)
     }
 
@@ -116,7 +146,7 @@ export class ChatGateway implements OnGatewayConnection{
         const user = await this.auth(client)
         const channel = await this.chatService.findChannel(data.chanId);
         if (user.id != channel.owner.id)
-            throw new UnauthorizedException('you\'re not the owner');
+            throw new WsException('you\'re not the owner');
         channel.owner = await this.usersService.findOne(data.newOwnerId);
         this.chatService.updateChannel(channel);
     }
@@ -126,7 +156,7 @@ export class ChatGateway implements OnGatewayConnection{
         const user = await this.auth(client)
         const channel = await this.chatService.findChannel(data.chanId);
         if (user.id != channel.owner.id)
-            throw new UnauthorizedException('you\'re not the owner');
+            throw new WsException('you\'re not the owner');
         const member = await this.chatService.getChannelMember(channel.id, user.id);
         member.role = ChannelMemberRole.ADMIN;
         this.chatService.updateMember(member);
@@ -137,7 +167,7 @@ export class ChatGateway implements OnGatewayConnection{
         const user = await this.auth(client)
         const channel = await this.chatService.findChannel(data.chanId);
         if (user.id != channel.owner.id)
-            throw new UnauthorizedException('you\'re not the owner');
+            throw new WsException('you\'re not the owner');
         const member = await this.chatService.getChannelMember(channel.id, user.id);
         member.role = ChannelMemberRole.MEMBER;
         this.chatService.updateMember(member);
@@ -156,7 +186,7 @@ export class ChatGateway implements OnGatewayConnection{
         const user = await this.auth(client)
         const channel = await this.chatService.findChannel(chanId);
         if (!(await this.chatService.isInvited(chanId, user)))
-            throw new UnauthorizedException('not invited to chan');
+            throw new WsException('not invited to chan');
         const member = this.chatService.joinChannel(user, chanId, ChannelMemberRole.MEMBER);
         const history = await this.chatService.getChannelMessages(chanId, new Date(), 100);
         this.broadcast(-1, channel.id, "joined", await this.chatService.getChannelMembers(chanId), member)

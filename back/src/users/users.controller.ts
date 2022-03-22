@@ -1,11 +1,11 @@
-import { BadRequestException, Body, ClassSerializerInterceptor, ConflictException, Controller, forwardRef, Get, HttpException, Inject, NotFoundException, Post, Query, Req, Response, ServiceUnavailableException, StreamableFile, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, ClassSerializerInterceptor, ConflictException, Controller, forwardRef, Get, HttpException, Inject, NotFoundException, Param, Post, Query, Req, Response, ServiceUnavailableException, StreamableFile, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Readable } from 'typeorm/platform/PlatformTools';
+import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
 import { UsersService } from './users.service';
 import * as PostgresError from '@fiveem/postgres-error-codes'
 import * as sharp from 'sharp';
 import { UpdateNicknameDto } from './dto/update-nickname.dto';
-import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
 
 export const imageFilter: any = (req: any, file: { mimetype: string, size: number }, callback: (arg0: any, arg1: boolean) => void): any =>
 {
@@ -47,16 +47,23 @@ export class UsersController {
     return JSON.stringify(requests.map(({ id, nickname }) => ({ id, nickname })));
   }
 
+
   @Get('profile')
   async profile(@Req() req) {
-    return req.user;
+    const achievements = await this.usersService.getUserAchievements(req.user.id);
+    const friends = await this.usersService.getFriends(req.user.id)
+    return {user: req.user, friends: friends, achievements: achievements}
   }
 
   @Get('get-profile')
-  async getProfile(@Query('id') id: number) {
-    if (!id)
-      throw new BadRequestException('No id provided');
-    const user = await this.usersService.findOne(id);
+  async getProfile(@Query('id') id: number, @Query('login') login: string) {
+    let user;
+    if (id)
+      user = await this.usersService.findOne(id);
+    else if (login)
+      user = await this.usersService.findByLogin(login);
+    else
+      throw new BadRequestException('No id nor login provided');
     if (!user)
       throw new NotFoundException('User not found');
     /*
