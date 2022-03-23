@@ -20,14 +20,14 @@ export class GameGateway implements OnGatewayConnection{
   afterInit() {
     this.server.emit('testing', { do: 'stuff' });
   }
-  handleConnection(client) {
+  handleConnection(server) {
     connectCounter++;
-    console.log("connection to socket... token = ", client.handshake.query.token)
+    console.log("connection to socket... token = ", server.handshake.query.token, "coucou", connectCounter)
     this.gameService.bot = (connectCounter < 2)
   }
-  handleDisconnection(client) {
+  handleDisconnect(server) {
     connectCounter--;
-    console.log("disconnection", client.handshake.query.token)
+    console.log("disconnection", server.handshake.query.token)
     // for (let i = 0; i < connectCounter; i++) {
     //   if (this.wsClients[i] === client) {
     //     this.wsClients.splice(i, 1);
@@ -48,7 +48,9 @@ export class GameGateway implements OnGatewayConnection{
       // this.gameService.reset();
       // client.emit('gameParams', this.gameService.findBoard(), (data) => console.log("DATA SENT : ", data));
       // console.log("LENGTH = ", connectCounter);
+      console.log("HEEEEEEEEEEEEEERRRRRRRRRRRRRRRREEEEEEEEEEEEEEEE", connectCounter)
       socket.emit("id" , connectCounter - 1);
+      calc = false
       if (!calc)
       {
         calc = true;
@@ -103,3 +105,4 @@ export class GameGateway implements OnGatewayConnection{
 //     this.server.emit('testing', { do: 'stuff' });
 //   }
 //   // server: Server;
+}
