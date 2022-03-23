@@ -74,7 +74,6 @@
             this.board = {...this.board, ...data}
             this.clear();
             this.addObjects();
-
         },
         id: function (data: any) {
             this.id = data;

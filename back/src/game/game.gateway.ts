@@ -62,7 +62,6 @@ export class GameGateway implements OnGatewayConnection{
   @SubscribeMessage('player')
   handlePlayer(
     @MessageBody() tmp: Player) {
-      // console.log("PLAYER :", tmp.id, " MOVES TO ", tmp.y);
       // var tmp : Player = JSON.parse(message)
       this.gameService.updatePlayer(tmp.id, tmp.y);
   }
