@@ -63,7 +63,6 @@ export class GameGateway implements OnGatewayConnection{
   @SubscribeMessage('player')
   handlePlayer(
     @MessageBody() tmp: Player) {
-      // console.log("PLAYER :", tmp.id, " MOVES TO ", tmp.y);
       // var tmp : Player = JSON.parse(message)
       this.gameService.updatePlayer(tmp.id, tmp.y);
   }
@@ -78,7 +77,8 @@ export class GameGateway implements OnGatewayConnection{
         await sleep(1000);
         this.gameService.new_game = false;
       }
-      socket.broadcast.emit('board', this.gameService.updateBall());
+      // console.log("coucou");
+      socket.emit('board', this.gameService.updateBall());
       if (!(timer % 200))
         this.gameService.bot_offset = (Math.floor(Math.random() * 2) ? -1 : 1) * Math.random() * this.gameService.board.player[1].half_height;
       timer++;

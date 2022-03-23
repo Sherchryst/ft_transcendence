@@ -72,17 +72,10 @@
         disconnect: function() {
             console.log('Disconnect this shit up');
         },
-        customEmit: function (data: string) {
-            console.log('this method was fired by the socket server. eg: io.emit("customEmit", data)');
-            console.log(data);
-        },
         board: function (data: any) {
-            console.log("this is data", data);
             this.board = {...this.board, ...data}
-            console.log("this is board", this.board);
             this.clear();
             this.addObjects();
-
         },
         id: function (data: any) {
             this.id = data;
