@@ -36,7 +36,7 @@
 <script lang="ts">
   import {defineComponent} from 'vue'
   // import VueSocketIO from 'vue-3-socket.io'
-  import { socket } from '../../socket';
+  import { socket } from '../socket';
   // import VueSocketIO from "vue-socket.io";
   export default defineComponent({
     name: 'mycanvas',
@@ -52,25 +52,26 @@
         ctx : null as any
         }
     },
-    // sockets: {
-    //     connect: function () {
-    //         console.log('socket connected')
-    //     },
-        // customEmit: function (data) {
-        //     console.log('this method was fired by the socket server. eg: io.emit("customEmit", data)')
-        // }
-    // },
-    // methods: {
-    //     clickButton: function (data) {
-    //         // $socket is socket.io-client instance
-    //         socket.emit('emit_method', data)
-    //     }
-    // },
-    created() {
-      // var io = require("socket.io-client");
-      // socket = io("http://localhost:3001");
-      console.log("Connection socket", socket);
+    sockets: {
+        connect: function () {
+            console.log('socket connected');
+			console.log("connect", socket.id);
+        },
+        customEmit: function () {
+            console.log('this method was fired by the socket server. eg: io.emit("customEmit", data)')
+        }
     },
+    methods: {
+        clickButton: function (data: string) {
+            // $socket is socket.io-client instance
+            socket.emit('emit_method', data)
+        }
+    },
+    // created() {
+    //   // var io = require("socket.io-client");
+    //   // socket = io("http://localhost:3001");
+    //   // console.log("Connection socket", socket);
+    // },
     mounted() {
       console.log("asking for params");
       // this.ctx = (this.$refs.mycanvas as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;

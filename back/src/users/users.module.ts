@@ -19,7 +19,7 @@ import { AuthModule } from 'src/auth/auth.module';
   ]),
   forwardRef(() => AuthModule)
 ],
-  providers: [UsersService, UsersGateway],
+  providers: [UsersService],
   exports: [UsersService],
 })
 export class UsersModule {}

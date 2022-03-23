@@ -22,9 +22,9 @@ import { GameModule } from './game/game.module';
       migrations: [__dirname + "/migrations/*{.ts,.js}"],
       synchronize: true
     }),
-    // AuthModule,
+    AuthModule,
     // ChatModule,
-    // UsersModule,
+    UsersModule,
     GameModule
   ]
 })
