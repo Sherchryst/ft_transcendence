@@ -65,21 +65,13 @@
     },
     sockets: {
         connect: function () {
-            console.log("connect", socket.id);
-            socket.emit('connection', 'HEY !');
             console.log('socket connected');
         },
         disconnect: function() {
-            console.log('Disconnect this shit up');
-        },
-        customEmit: function (data: string) {
-            console.log('this method was fired by the socket server. eg: io.emit("customEmit", data)');
-            console.log(data);
+            console.log('socket Disconnected');
         },
         board: function (data: any) {
-            console.log("this is data", data);
             this.board = {...this.board, ...data}
-            console.log("this is board", this.board);
             this.clear();
             this.addObjects();
 
@@ -90,7 +82,6 @@
     },
     mounted() {
         this.drawBackground();
-      console.log("asking for params");
       this.ctx = (this.$refs.mycanvas as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
       this.dimX = this.ctx.canvas.width / 100;
       this.dimY = this.ctx.canvas.height / 100;

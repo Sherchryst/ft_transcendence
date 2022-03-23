@@ -48,7 +48,6 @@ export class GameGateway implements OnGatewayConnection{
       // this.gameService.reset();
       // client.emit('gameParams', this.gameService.findBoard(), (data) => console.log("DATA SENT : ", data));
       // console.log("LENGTH = ", connectCounter);
-      console.log("HEEEEEEEEEEEEEERRRRRRRRRRRRRRRREEEEEEEEEEEEEEEE", connectCounter)
       socket.emit("id" , connectCounter - 1);
       calc = false
       if (!calc)
@@ -78,7 +77,7 @@ export class GameGateway implements OnGatewayConnection{
         await sleep(1000);
         this.gameService.new_game = false;
       }
-      socket.broadcast.emit('board', this.gameService.updateBall());
+      socket.emit('board', this.gameService.updateBall());
       if (!(timer % 200))
         this.gameService.bot_offset = (Math.floor(Math.random() * 2) ? -1 : 1) * Math.random() * this.gameService.board.player[1].half_height;
       timer++;
