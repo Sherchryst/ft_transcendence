@@ -7,7 +7,7 @@ const interval = 20;
 var connectCounter = 0;
 var   calc = false;
 
-function sleep(ms) {
+function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -20,12 +20,12 @@ export class GameGateway implements OnGatewayConnection{
   afterInit() {
     this.server.emit('testing', { do: 'stuff' });
   }
-  handleConnection(server) {
+  handleConnection(server: { handshake: { query: { token: any; }; }; }) {
     connectCounter++;
     console.log("connection to socket... token = ", server.handshake.query.token, "coucou", connectCounter)
     this.gameService.bot = (connectCounter < 2)
   }
-  handleDisconnect(server) {
+  handleDisconnect(server: { handshake: { query: { token: any; }; }; }) {
     connectCounter--;
     console.log("disconnection", server.handshake.query.token)
     // for (let i = 0; i < connectCounter; i++) {
