@@ -6,7 +6,7 @@ import { store, key } from './store'
 import { createMetaManager } from 'vue-meta'
 import VueCookies from 'vue3-cookies'
 import VueSocketIO from 'vue-3-socket.io'
-import io from "socket.io-client"
+import { socket } from './socket'
 
 createApp(App)
 	.use(store, key)
@@ -15,7 +15,7 @@ createApp(App)
 	.use(VueCookies)
 	.use(new VueSocketIO({
 		debug: true,
-		connection: io("http://localhost:3001", {transports: ['websocket']}),
+		connection: socket,
 		vuex: {
 			store,
 			actionPrefix: "SOCKET_",
