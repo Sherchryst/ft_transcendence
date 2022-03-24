@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { createReadStream, readFileSync } from 'fs';
+import { ChannelMember } from 'src/chat/entities/channel-member.entity';
+import { Channel } from 'src/chat/entities/channel.entity';
 import { getRepository, Not } from 'typeorm';
 import { Avatar } from './entities/avatar.entity';
 import { UserAchievement } from './entities/user-achievement.entity';
@@ -157,4 +159,11 @@ export class UsersService {
       nickname: nickname
     });
   }
+  // À corriger :
+  async listUserChannels(userId: number): Promise<ChannelMember[]> {
+    return getRepository(ChannelMember).find({
+      where: { user: userId }
+    });
+  }
 }
+

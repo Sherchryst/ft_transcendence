@@ -35,7 +35,7 @@
 
 <script lang="ts">
   import {defineComponent, ssrContextKey} from 'vue'
-  import { socket } from '../socket';
+  import { gameSocket } from '../socket';
 
   export default defineComponent({
     name: 'mycanvas',
@@ -63,24 +63,29 @@
           end: false}
       }
     },
-    sockets: {
-        connect: function () {
-            console.log('socket connected');
-        },
-        disconnect: function() {
-            console.log('socket Disconnected');
-        },
-        board: function (data: any) {
+    // gamesockets: {
+    //     board: function (data: any) {
+
+    //     },
+    //     id: function (data: any) {
+    //         this.id = data;
+    //         // socket.off("id");
+    //     }
+    // },
+    mounted() {
+      this.drawBackground();
+      gameSocket.on("connect", () => {
+      gameSocket.emit('connection');
+      console.log('socket connected');
+      });
+      gameSocket.on("board", (data : any) => {
             this.board = {...this.board, ...data}
             this.clear();
             this.addObjects();
-        },
-        id: function (data: any) {
-            this.id = data;
-        }
-    },
-    mounted() {
-        this.drawBackground();
+      });
+      gameSocket.on("id", (data : any) => {
+        this.id = data;
+      });
       this.ctx = (this.$refs.mycanvas as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
       this.dimX = this.ctx.canvas.width / 100;
       this.dimY = this.ctx.canvas.height / 100;
@@ -90,7 +95,7 @@
     {
       clickButton: function (data: string) {
             // $socket is socket.io-client instance
-            socket.emit('emit_method', data)
+            gameSocket.emit('emit_method', data)
       },
       drawRect(x : number, y : number, x2 : number, y2 : number, color = "white", ctx : any = null)
       {
@@ -173,8 +178,8 @@
           return ;
         let rect : DOMRect = this.ctx.canvas.getBoundingClientRect();
         // this.board.player[0].y = evt.clientY - rect.top;
- //       socket.send(JSON.stringify({event: 'player', data : {"id" : this.id, "y" : (evt.clientY - rect.top) / this.dimY}}));
-        socket.emit('player', {"id" : this.id, "y" : (evt.clientY - rect.top) / this.dimY})
+ //       gameSocket.send(JSON.stringify({event: 'player', data : {"id" : this.id, "y" : (evt.clientY - rect.top) / this.dimY}}));
+        gameSocket.emit('player', {"id" : this.id, "y" : (evt.clientY - rect.top) / this.dimY})
         // this.updatePlayer(this.id, (evt.clientY - rect.top) / this.dimY);
       },
       updatePlayer(id : number, y : number)

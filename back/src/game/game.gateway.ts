@@ -11,8 +11,8 @@ function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-@WebSocketGateway(3001)
-export class GameGateway implements OnGatewayConnection{
+@WebSocketGateway(3001, { namespace : "game" })
+export class GameGateway implements OnGatewayConnection {
   @WebSocketServer()
   server : Server;
   constructor(private readonly gameService : GameService){}
@@ -20,14 +20,14 @@ export class GameGateway implements OnGatewayConnection{
   afterInit() {
     this.server.emit('testing', { do: 'stuff' });
   }
-  handleConnection(server: { handshake: { query: { token: any; }; }; }) {
+  handleConnection(server : any) {
     connectCounter++;
-    console.log("connection to socket... token = ", server.handshake.query.token, "coucou", connectCounter)
-    this.gameService.bot = (connectCounter < 2)
+    console.log("connection to game...");
+    this.gameService.bot = (connectCounter < 2);
   }
-  handleDisconnect(server: { handshake: { query: { token: any; }; }; }) {
+  handleDisconnect(server : any) {
     connectCounter--;
-    console.log("disconnection", server.handshake.query.token)
+    console.log("disconnection from game");
     // for (let i = 0; i < connectCounter; i++) {
     //   if (this.wsClients[i] === client) {
     //     this.wsClients.splice(i, 1);
