@@ -59,7 +59,7 @@ export class GameGateway implements OnGatewayConnection {
   handleDisconnect(@ConnectedSocket() socket : Socket) {
     const id : string = socket.id;
     var ret_delete = boards.delete(id);
-    console.log("disconnection from game : ", id, " Board :", boards, "DELETE : ", ret_delete);
+    console.log("disconnection from game : ", id);
     // for (let i = 0; i < connectCounter; i++) {
     //   if (this.wsClients[i] === client) {
     //     this.wsClients.splice(i, 1);
@@ -78,7 +78,6 @@ export class GameGateway implements OnGatewayConnection {
       boards.set(socket.id, basic_board);
       this.server.to(socket.id).emit("id" , 0);
       // console.log("Has connection", client);
-      console.log("back from connection", socket.id);
       // this.gameService.reset();
       // client.emit('gameParams', this.gameService.findBoard(), (data) => console.log("DATA SENT : ", data));
       // console.log("LENGTH = ", connectCounter);
@@ -107,7 +106,7 @@ export class GameGateway implements OnGatewayConnection {
     var timer = 0;
     // if (!boards.get(socket.id))
     //   return ;
-    console.log("Update Board", boards);
+    // console.log("Update Board", boards);
     if (!boards.has(socket.id))
         return ;
     var tmp_board : Board = JSON.parse(JSON.stringify(boards.get(socket.id)));
