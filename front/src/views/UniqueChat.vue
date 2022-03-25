@@ -89,48 +89,6 @@ export default defineComponent({
                     this.recv(data.channelMessage.message)
             })
         ;
-        // this.socket = new WebSocket('ws://localhost:3002/chat');
-        // this.socket.onopen = () => {
-        //     console.log('connected', this.socket)
-        //     if (this.id && this.socket)
-        //         this.join(parseInt(this.id))
-		// }
-		// this.socket.onclose = (reason) => {
-		// 	console.log('disconnected', reason)
-		// }
-		// this.socket.onmessage = (msg) => {
-        //     console.log("message");
-		// 	const fromServer = JSON.parse(msg.data)
-		// 	console.log(fromServer)
-		// 	switch (fromServer.event) {
-		// 		case "joined":
-        //             this.channel = fromServer.data.channel
-		// 			this.history = []
-		// 			for (let i = 0; i < fromServer.data.history.length; i++) {
-        //                 this.recv(fromServer.data.history[i])
-		// 			}
-		// 			console.log("channel", this.channel)
-		// 			console.log("history", this.history)
-		// 			break;
-		// 		case "message":
-        //             this.recv(fromServer.data.channelMessage.message)
-		// 			console.log("message : ", fromServer.data)
-		// 			break;
-				
-		// 		case "created":
-        //             this.channel = fromServer.data.channel
-		// 			this.history = []
-		// 			console.log("channel", this.channel)
-		// 			console.log("history", this.history)
-		// 			break;
-		// 		case "left":
-		// 			this.channel = null
-		// 			break;
-                
-        //         case "error":
-        //             console.log(fromServer.data)
-		// 	}
-		// }
 	},
 	methods: {
         send(message: string): void {

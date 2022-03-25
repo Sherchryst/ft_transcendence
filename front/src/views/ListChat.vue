@@ -5,7 +5,7 @@
                 <span class="px-2">Create</span>
             </one-row-form>
         </div>
-        <div class="grid-cols-1 md:grid grid-cols-3 gap-4 span-4">
+        <div class="grid-cols-1 md:grid grid-cols-3 gap-4 span-4" :key="listChannel">
             <channel-view v-for="chan in listChannel" :id="chan.id" :title="chan.name" :key="chan.id"/>
         </div>
     </div>
@@ -26,7 +26,6 @@ export default defineComponent ({
         OneRowForm,
     },
     beforeRouteLeave(to, from, next) {
-        // this.socket.close()
         next()
     },
     setup () {
