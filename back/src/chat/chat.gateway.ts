@@ -1,4 +1,5 @@
-import { ConnectedSocket, MessageBody, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException, BaseWsExceptionFilter} from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import { CustomJwtService } from 'src/auth/jwt/jwt.service';
 import { IncomingMessage } from 'http';
@@ -7,97 +8,71 @@ import { ChannelMember, ChannelMemberRole } from './entities/channel-member.enti
 import { ChannelVisibility } from './entities/channel.entity';
 import { ChannelModerationType } from './entities/channel-moderation.entity';
 import { User } from 'src/users/entities/user.entity';
-import { ExceptionFilter, UseFilters} from '@nestjs/common';
-
-import { Catch, ArgumentsHost } from '@nestjs/common';
-import { stringify } from 'querystring';
-
-@Catch()
-export class WsExceptionFilter implements ExceptionFilter{
-  catch(exception: unknown, host: ArgumentsHost) {
-      console.log("HOP");
-      (host.getArgByIndex(0) as WebSocket).close();
-  }
-}
+import { callbackify } from 'util';
 
 
-@WebSocketGateway(3005, {path: "/chat"})
-@UseFilters(new WsExceptionFilter())
+@WebSocketGateway(3001, {namespace: "chat"})
 export class ChatGateway implements OnGatewayConnection{
-    wsClients = new Map<number, any>();
+    @WebSocketServer()
+    server : Server;
+    wsClients = new Map<number, string>();
     
     constructor(private readonly chatService: ChatService,
         private readonly customJwtService: CustomJwtService,
         private readonly usersService: UsersService) {}
-        
-    async handleConnection(client: any, msg: IncomingMessage) {
-        try {
-            let jwt;
-            const cookie = msg.headers.cookie.split(';').map(v => v.split('='));
-            cookie.forEach((v) => {
-                if (v[0].trim() === "jwt") {
-                    jwt = v[1].trim();
-                }
-            })
-            const payload = this.customJwtService.verify(jwt)
-            const user = await this.usersService.findOne(payload.sub)
-            if (user.twofa && !payload.isSecondFactorAuth)
-                throw new WsException("")
-            client.jwt = jwt;
-            this.wsClients.set(user.id, client);
-        }
-        catch {
-            client.close(1008, "Unauthorized")
-            return
-        }
-    }
-
-    private async broadcast(fromId: number, channelId: number, event: string, members: ChannelMember[], data: any) {
-        for (const member of members) {
-          if (fromId != member.user.id && !await this.chatService.isBanned(member.user, channelId) && await this.wsClients.has(member.user.id)) {
-            this.wsClients.get(member.user.id).send(JSON.stringify({ event: event, data: data }));
-          }
-        }
-    }
 
     private async auth(client: any): Promise<User> {
         let user;
         try {
-           user = await this.usersService.findOne(this.customJwtService.verify(client.jwt).sub);
+            user = await this.usersService.findOne(this.customJwtService.verify(client.jwt).sub);
         }
         catch(error) {
-            client.close();
+            client.disconnect();
         }
         if (!user)
-            client.close();
+            client.disconnect();
         return user;
     }
 
-    async handleDisconnect(client: any) {
+    async handleConnection(client: any) {
+        console.log("connection to chat...");
+        try {
+        client.request.headers.cookie.split(';').forEach((field: string) => {
+            if (field.includes('jwt='))
+                client.jwt = field.slice(4);
+        });
         const user = await this.auth(client);
-        if (user)
-            this.wsClients.delete(user.id)
+        this.wsClients[user.id] = client.id;
+        }
+        catch {
+            client.disconnect();
+        }
     }
 
     @SubscribeMessage('join')
     async join(@ConnectedSocket() client, @MessageBody() data: {channelId: number, password: string}) {
         const user = await this.auth(client)
-        if (!user)
-            return
         let channel = await this.chatService.findChannel(data.channelId);
         if (channel.password && channel.password !== data.password)
-            throw new WsException("wrong password");
+            return client.emit("error", "wrong password")
         this.chatService.joinChannel(user, data.channelId, ChannelMemberRole.MEMBER);
         const history = await this.chatService.getChannelMessages(data.channelId, new Date(), 100);
-        return { event: "joined", data: { channel: channel, history: history} };
+        client.emit("joined", {channel: channel, history: history});
+        try {
+        if (!client.adapter.rooms.get(data.channelId).has(client.id)) {
+            client.join(channel.id);
+            this.handleMsg(client, {chanId: channel.id, msg: "HELLO"});
+        } }
+        catch {}
     }
 
     @SubscribeMessage('create')
-    async createChannel(@ConnectedSocket() client, @MessageBody() data: {name: string, visibility: ChannelVisibility}) {
+    async createChannel(@ConnectedSocket() client: Socket, @MessageBody() data: {name: string, visibility: ChannelVisibility}) {
         const user = await this.auth(client)
         const channel = await this.chatService.createChannel(data.name, user, data.visibility);
         this.chatService.joinChannel(user, channel.id, ChannelMemberRole.ADMIN);
-        return { event: "created", data: { channel: channel } };
+        client.emit("created", channel);
+        client.join(String(channel.id));
     }
 
     @SubscribeMessage('message')
@@ -105,8 +80,8 @@ export class ChatGateway implements OnGatewayConnection{
         const user = await this.auth(client)
         const message = await this.chatService.createMessage(user, data.msg);
         const channelMessage = await this.chatService.createChannelMessage(data.chanId, message);
-        const members = await this.chatService.getChannelMembers(data.chanId);
-        this.broadcast(-1, data.chanId, "message", members, { channelMessage: channelMessage });
+        console.log(channelMessage)
+        client.in(String(data.chanId)).emit("message", channelMessage);
     }
 
     @SubscribeMessage('leave')
@@ -116,9 +91,7 @@ export class ChatGateway implements OnGatewayConnection{
         const members = await this.chatService.getChannelMembers(channelId);
         if (members.length == 0)
           this.chatService.deleteChannel(channelId);
-        else
-          this.broadcast(user.id, channelId, "left", members, { channelId: channelId });
-        return { event: "left", data: { channelId: channelId } };
+        client.emit("left", { channelId: channelId });
     }
 
     @SubscribeMessage('chanModeration')
@@ -128,7 +101,6 @@ export class ChatGateway implements OnGatewayConnection{
         if (admin.role !== ChannelMemberRole.ADMIN)
             throw new WsException('you\'re not an administrator')
         const members = await this.chatService.getChannelMembers(data.chanId);
-        this.broadcast(-1, data.chanId, data.action, members, {user: user, duration: data.duration, reason: data.reason})
         this.chatService.createChannelModeration(data.chanId, data.userId, user, data.action, data.reason, data.duration)
     }
 
@@ -178,7 +150,7 @@ export class ChatGateway implements OnGatewayConnection{
         const user = await this.auth(client)
         const channel = await this.chatService.findChannel(data.chanId);
         this.chatService.createInvitation(data.chanId, user, data.invitedId)
-        this.wsClients.get(data.invitedId).send(JSON.stringify({event: "invited", data: {from: user, channel: channel}}))
+        //this.wsClients.get(data.invitedId).send(JSON.stringify({event: "invited", data: {from: user, channel: channel}}))
     }
 
     @SubscribeMessage('join_with_invitation')
@@ -189,7 +161,6 @@ export class ChatGateway implements OnGatewayConnection{
             throw new WsException('not invited to chan');
         const member = this.chatService.joinChannel(user, chanId, ChannelMemberRole.MEMBER);
         const history = await this.chatService.getChannelMessages(chanId, new Date(), 100);
-        this.broadcast(-1, channel.id, "joined", await this.chatService.getChannelMembers(chanId), member)
         return JSON.stringify(history)
     }
 
@@ -198,6 +169,7 @@ export class ChatGateway implements OnGatewayConnection{
         const user = await this.auth(client);
         const to = await this.usersService.findOne(data.towardId);
         const message = await this.chatService.createMessage(user, data.content)
-        this.wsClients.get(to.id).send(JSON.stringify(await this.chatService.createDirectMessage(to, message)));
+        //this.wsClients.get(to.id).send(JSON.stringify(await this.chatService.createDirectMessage(to, message)));
     }
 }
+

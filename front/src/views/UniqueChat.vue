@@ -36,6 +36,7 @@ import { useMeta } from 'vue-meta'
 import { useStore } from 'vuex'
 import { key } from '@/store'
 import { Message_t, ServerMessage } from '@/interfaces/Message.ts'
+import {chatSocket} from '../socket'
 
 export default defineComponent({
     components: {
@@ -61,70 +62,51 @@ export default defineComponent({
     },
     data() {
         return {
-            socket : {} as WebSocket,
             history: [] as Message_t[],
             msg: "",
             channel: null,
         }
     },
-    unmounted() {
-        this.socket.close();
-    },
 	mounted() {
-        this.socket = new WebSocket('ws://localhost:3002/chat');
-        this.socket.onopen = () => {
-            console.log('connected', this.socket)
-            if (this.id && this.socket)
+        chatSocket.on("connect", () => {
+            console.log('connected')
+            if (this.id)
                 this.join(parseInt(this.id))
-		}
-		this.socket.onclose = (reason) => {
+		});
+		chatSocket.on("disconnect", (reason) => {
 			console.log('disconnected', reason)
-		}
-		this.socket.onmessage = (msg) => {
-            console.log("message");
-			const fromServer = JSON.parse(msg.data)
-			console.log(fromServer)
-			switch (fromServer.event) {
-				case "joined":
-                    this.channel = fromServer.data.channel
-					this.history = []
-					for (let i = 0; i < fromServer.data.history.length; i++) {
-                        this.recv(fromServer.data.history[i])
-					}
-					console.log("channel", this.channel)
-					console.log("history", this.history)
-					break;
-				case "message":
-                    this.recv(fromServer.data.channelMessage.message)
-					console.log("message : ", fromServer.data)
-					break;
-				
-				case "created":
-                    this.channel = fromServer.data.channel
-					this.history = []
-					console.log("channel", this.channel)
-					console.log("history", this.history)
-					break;
-				case "left":
-					this.channel = null
-					break;
-                
-                case "error":
-                    console.log(fromServer.data)
-			}
-		}
+		})
+        chatSocket.on("joined", (data: any) => {
+            this.channel = data.channel
+            this.history = []
+            for (let i = 0; i < data.history.length; i++) {
+                this.recv(data.history[i])
+            }
+            console.log("channel", this.channel)
+            console.log("history", this.history)
+        })
+        chatSocket.on("message", (data: any) => {
+            console.log("message : ", data)
+            this.recv(data.channelMessage.message)
+        })  
+        chatSocket.on("left", (data: any) => {
+			this.channel = null
+        })
+        chatSocket.on("error", (data: any) => {
+            console.log(data)
+        })
 	},
 	methods: {
         send(message: string): void {
-			this.socket.send(JSON.stringify({event: 'message', data: {chanId: parseInt(this.id), msg : message}}))
+            chatSocket.emit('message', {chanId: parseInt(this.id), msg : message})
 		},
 
 		join(chanId: number): void {
-			this.socket.send(JSON.stringify({event: 'join', data : {channelId: parseInt(this.id), password: ""}}));
+            chatSocket.emit('join', {channelId: parseInt(this.id), password: ""})
 		},
 
 		leave_channel(): void {
-			this.socket.send(JSON.stringify({event: 'leave', data : this.id}));
+            chatSocket.emit('leave', this.id)
 		},
         recv(data: ServerMessage ): void {
             let message: Message_t = {
