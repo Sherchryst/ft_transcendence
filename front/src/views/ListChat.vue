@@ -5,7 +5,7 @@
                 <span class="px-2">Create</span>
             </one-row-form>
         </div>
-        <div class="grid-cols-1 md:grid grid-cols-3 gap-4 span-4">
+        <div class="grid-cols-1 md:grid grid-cols-3 gap-4 span-4" :key="listChannel">
             <channel-view v-for="chan in listChannel" :id="chan.id" :title="chan.name" :key="chan.id"/>
         </div>
     </div>
@@ -17,6 +17,7 @@ import { API } from '@/scripts/auth.ts';
 import { useMeta } from 'vue-meta'
 import ChannelView from '@/components/chat/ChannelView.vue'
 import OneRowForm from '@/components/OneRowForm.vue'
+import { chatSocket } from '../socket'
 
 export default defineComponent ({
     components: {
@@ -24,7 +25,6 @@ export default defineComponent ({
         OneRowForm,
     },
     beforeRouteLeave(to, from, next) {
-        this.socket.close()
         next()
     },
     setup () {
@@ -32,17 +32,19 @@ export default defineComponent ({
     },
     data() {
         return {
-            socket : new WebSocket('ws://localhost:3001/chat'),
             listChannel: [],
         }
     },
     mounted() {
-        this.socket.onopen = () => {
-			console.log('connected', this.socket)
-		}
-		this.socket.onclose = (reason) => {
+        chatSocket.on("connect", () => {
+			console.log('connected', chatSocket)
+		})
+        chatSocket.on("disconnect", (reason: string) => {
 			console.log('disconnected', reason)
-		}
+		})
+        chatSocket.on("created", (data) => {
+            (this.listChannel as any).push(data)
+        })
         API.get('chat/list').then((response) => {
             this.listChannel = response.data
             console.log(this.listChannel);
@@ -52,7 +54,7 @@ export default defineComponent ({
     },
     methods: {
         create(name_chan: string): void {
-			this.socket.send(JSON.stringify({event: 'create', data : {name : name_chan, visibility : "public"}}));
+			chatSocket.emit('create', {name : name_chan, visibility : "public"});
 		},
     }
 })
