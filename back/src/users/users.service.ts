@@ -101,6 +101,13 @@ export class UsersService {
     });
   }
 
+  async getAllChannelsConnected(userId: number): Promise<Channel[]> {
+    return  await getRepository(ChannelMember).find({
+      relations: ['channel'],
+      where: { user: userId }
+    }).then(relations => relations.map(r => r.channel));
+  }
+
   async hasSentFriendRequest(fromUserId: number, toUserId: number): Promise<boolean> {
     return await getRepository(UserRelationship).findOne({
       where: { from: fromUserId, to: toUserId, type: UserRelationshipType.PENDING }

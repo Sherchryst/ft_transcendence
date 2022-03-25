@@ -23,7 +23,7 @@ import { GameModule } from './game/game.module';
       synchronize: true
     }),
     AuthModule,
-    // ChatModule,
+    ChatModule,
     UsersModule,
     GameModule
   ]
