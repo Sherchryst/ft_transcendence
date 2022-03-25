@@ -12,7 +12,6 @@ import { callbackify } from 'util';
 
 import { Catch, ArgumentsHost } from '@nestjs/common';
 import { stringify } from 'querystring';
-import { Socket } from 'socket.io';
 import { channel } from 'diagnostics_channel';
 import { SocketAddress } from 'net';
 @WebSocketGateway(3001, {namespace: "chat"})
@@ -101,12 +100,12 @@ export class ChatGateway implements OnGatewayConnection{
         this.chatService.joinChannel(user, data.channelId, ChannelMemberRole.MEMBER);
         const history = await this.chatService.getChannelMessages(data.channelId, new Date(), 100);
         client.emit("joined", {channel: channel, history: history});
-        try {
-        if (!client.adapter.rooms.get(data.channelId).has(client.id)) {
-            client.join(channel.id);
-            this.handleMsg(client, {chanId: channel.id, msg: "HELLO"});
-        } }
-        catch {}
+        // try {
+        // if (!client.adapter.rooms.get(data.channelId).has(client.id)) {
+        //     client.join(channel.id);
+        //     this.handleMsg(client, {chanId: channel.id, msg: "HELLO"});
+        // } }
+        // catch {}
     }
 
     @SubscribeMessage('create')
@@ -124,7 +123,7 @@ export class ChatGateway implements OnGatewayConnection{
         const message = await this.chatService.createMessage(user, data.msg);
         const channelMessage = await this.chatService.createChannelMessage(data.chanId, message);
         console.log(channelMessage)
-        client.in(String(data.chanId)).emit("message", channelMessage);
+        this.server.in("channel:" + data.chanId).emit("message", { channelMessage: channelMessage });
     }
 
     @SubscribeMessage('leave')

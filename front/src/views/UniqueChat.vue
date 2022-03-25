@@ -72,10 +72,10 @@ export default defineComponent({
         // this.socket.close();
     },
 	mounted() {
+        this.join(parseInt(this.id))
         this.socket
             .on('connect', () => {
                 console.log('connected', this.socket.id)
-                this.join(parseInt(this.id))
             })
             .on('joined', (data) => {
                 console.log('joined')
