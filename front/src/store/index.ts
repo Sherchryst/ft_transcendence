@@ -2,7 +2,6 @@ import { InjectionKey }
  from 'vue'
 import { createStore, Store } from 'vuex';
 import { Profile, User } from '@/interfaces/Profile';
-import { io, Socket } from "socket.io-client";
 import { API } from '@/scripts/auth';
 // define your typings for the store state
 export interface State {
@@ -22,11 +21,13 @@ export const store = createStore<State>({
     displayMessages(state) {
       return state.chatMessages
     },
-    getLogin(state) : string{
-      return state.profile.user.login
+    getLogin() : string{
+      const profile : Profile = JSON.parse(localStorage.getItem('user') || '')
+      return profile?.user?.login
     },
     getNickname(state) : string{
-      return state.profile.user.nickname
+      const profile : Profile = JSON.parse(localStorage.getItem('user') || '')
+      return profile?.user?.nickname
     }
   },
   mutations: {
@@ -40,7 +41,8 @@ export const store = createStore<State>({
   actions: {
     async connection({commit}){
       const response = await API.get('users/profile');
-       commit("setProfile", response.data);
+        commit("setProfile", response.data);
+        localStorage.setItem('user', JSON.stringify(response.data))
     },
     SOCKET_addMessage({ commit }, message) {
       commit('ADD_MESSAGE', message);

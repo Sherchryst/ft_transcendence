@@ -37,7 +37,7 @@
 				<div class="hidden sm:flex flex-row justify-between justify-items-center h-16">
 					<div class="self-center">
 						<!-- If connected -->
-						<ButtonLink @click="logout()" text="Deconnection" route="login" />
+						<ButtonLink @click="logout()" text="Deconnection" />
 					</div>
 					<div class="flex flex-row justify-between justify-items-center">
 						<div class="self-center">
@@ -97,13 +97,15 @@ export default defineComponent({
 		logout(): void {
 			API.post('auth/logout')
 			sessionStorage.clear()
+			localStorage.removeItem('user')
 			router.push({name: "login"})
 		},
 	},
 	computed: {
 		whoiam() : string {
 			const store = useStore(key)
-			return store.state.profile.user.login || 'unknown'
+			console.log("user : ", localStorage.getItem('user'))
+			return store.getters.getLogin || 'unknown'
 		}
 	}
 })

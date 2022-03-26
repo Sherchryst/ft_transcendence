@@ -21,6 +21,7 @@ button, a, .button{
 	color: $action;
 	background: $bg-action;
 	border-radius: 10px;
+	cursor: pointer;
 }
 
 </style>
