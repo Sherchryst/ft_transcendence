@@ -1,11 +1,11 @@
 <template>
 	<div class="flex flex-col">
-		<div class="flex flew-rows jus">
-			<div class="icon">
+		<div class="flex flew-rows items-center">
+			<div class="icon mr-4 w-13">
 				<slot></slot>
 			</div>
 			<div class="title justify-self-start">
-				<h2 class="font-sans text-3xl">{{title}}</h2>
+				<h2 class="font-bold font-sans text-2xl">{{title}}</h2>
 			</div>
 		</div>
 	</div>
@@ -21,11 +21,12 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .icon{
 	width: 44px;
 	height: 44px;
 	border-radius: 25px;
+	fill: $secondary-color;
 }
 .title{
 	width: auto;

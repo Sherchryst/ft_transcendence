@@ -16,7 +16,7 @@
 .chat{
 	> div{
 		
-		}
+	}
 	.conversation{
 		height: 77vh;
 		background: #E2E3F2;

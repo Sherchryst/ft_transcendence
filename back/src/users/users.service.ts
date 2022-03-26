@@ -52,7 +52,7 @@ export class UsersService {
     const repo = getRepository(User);
     const user = repo.create({
       login: login,
-      nickname: "anon-" + login,
+      nickname: login,
       avatar: avatar
     });
     return await repo.save(user);
@@ -163,13 +163,8 @@ export class UsersService {
 
   async updateNickname(userId: number, nickname: string) {
     await getRepository(User).update(userId, {
-      nickname: nickname
-    });
-  }
-  // À corriger :
-  async listUserChannels(userId: number): Promise<ChannelMember[]> {
-    return getRepository(ChannelMember).find({
-      where: { user: userId }
+      nickname: nickname,
+      newUser: false
     });
   }
 }

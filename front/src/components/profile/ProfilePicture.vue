@@ -1,6 +1,6 @@
 <template>
-	<div class="frame flex flex-shrink-0 w-auto h-auto ">
-		<img class="h-64 w-64" src="../../assets/logo.png" alt="profile">
+	<div class="flex flex-shrink-0 w-auto h-auto ">
+		<img class="frame h-64 w-64" src="../../assets/blank-avatar.jpg" alt="profile">
 	</div>
 </template>
 
@@ -16,7 +16,8 @@ export default defineComponent({
 .frame {
   border: 10px solid ;
   margin: auto;
-  padding: 15px 25px;
+  // padding: 15px 25px;
   border-radius: 94px;
+  filter: drop-shadow(0px 4px 4px rgba(7, 53, 70, 0.22));
 }
 </style>

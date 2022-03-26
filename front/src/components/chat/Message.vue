@@ -1,7 +1,7 @@
 <template>
     <div class="message flex my-3" v-bind:class="[ self ? 'flex-row-reverse' : 'flex-row' ]">
         <div class="flex-shrink-0 h-10 w-10">
-            <img class="h-10 w-10" src="@/assets/logo.png" alt="">
+            <img class="h-10 w-10" src="@/assets/blank-avatar.jpg" alt="">
         </div>
          <div class="p-3 max-w-xl flex-shrink" v-bind:class="[ self ? 'text-right mr-3' : 'text-left ml-3' ]" >
              <slot></slot>

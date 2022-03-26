@@ -32,6 +32,8 @@
 	- If NULL then the user does not use 2FA.
 - avatar_id: INT NOT NULL
 	- The id of the avatar of the user.
+- new_user: BOOL NOT UNKNOWN
+	- True if the user has not set a nickname yet False otherwise.
 
 ### - user_relationship(<ins>*from_id*, *to_id*</ins>, type)
 

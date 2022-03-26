@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
+    <img alt="Vue logo" src="../assets/blank-avatar.jpg">
     <HelloWorld msg="Welcome to Hell"/>
     <LogInOut/>
 
