@@ -19,3 +19,14 @@ export class CustomJwtService {
     return this.jwtService.verify(token, {secret:jwtConstants.secret})
   }
 }
+
+export function getJwtFromSocket(socket: any): string {
+  let jwt
+  const cookies = socket.handshake?.headers?.cookie.split(';').map(v => v.split('='));
+  cookies.forEach((v) => {
+      if (v[0].trim() === "jwt") {
+          jwt = v[1].trim();
+      }
+  })
+  return jwt
+}
