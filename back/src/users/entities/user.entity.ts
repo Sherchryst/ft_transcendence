@@ -44,4 +44,7 @@ export class User {
   @OneToOne(() => Avatar, { nullable: false })
   @JoinColumn()
   avatar: Avatar;
+
+  @Column({ default: true})
+  newUser: boolean;
 }
