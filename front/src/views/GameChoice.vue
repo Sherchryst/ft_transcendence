@@ -21,13 +21,9 @@
 				</div>
 			</form>
 		</game-panel>
-<<<<<<< HEAD
 		<game-panel title="Entrainement" action_name="Lancer" link="http://localhost:8080/#/game">
 			<!-- <ButtonLink text="Bot game" href= /> -->
 		</game-panel>
-=======
-		<GamePanel title="Entrainement" action_name="Lancer" />
->>>>>>> main
 	</div>
 </template>
 
@@ -35,22 +31,15 @@
 import GamePanel from '@/components/GamePanel.vue';
 import BigRadioButton from '@/components/BigRadioButton.vue';
 import SwitchButton from '@/components/SwitchButton.vue';
-<<<<<<< HEAD
 // import ButtonLink from '@/components/ButtonLink.vue';
-=======
->>>>>>> main
 import { defineComponent } from 'vue';
 
 export default defineComponent({
 	components: {
 		GamePanel,
 		BigRadioButton,
-<<<<<<< HEAD
 		SwitchButton
 		// ButtonLink
-=======
-		SwitchButton,
->>>>>>> main
 	},
 })
 </script>
