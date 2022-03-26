@@ -2,15 +2,12 @@ import { ExceptionFilter, Injectable, NotFoundException } from '@nestjs/common';
 // import { randomBytes } from 'crypto';
 import { Board } from './interfaces/board.interface';
 import { Dimensions } from './interfaces/dimensions.interface';
-// import { ServerEngine } from 'lance-gg';
 
 const speed = 1;
 const max_x = 1 / Math.sqrt(10.0);
 const max_y = 3 * max_x;
 const width = 100;
 const height = 100;
-// const min = [9 * Math.PI / 16, 23 * Math.PI / 16];
-// const max = [25 * Math.PI / 16, 7 * Math.PI / 16];
 
 @Injectable()
 export class GameService
@@ -39,11 +36,10 @@ export class GameService
 			player.y = y;
 		return board;
 	}
-	racketCollision(dist, idx, board : Board)
+	racketCollision(dist, idx, racket_dy, board : Board)
 	{
 		board.pass_count++;
 		var ball = board.ball;
-		// var ball_speed = Math.sqrt(Math.pow(ball.dx, 2) + Math.pow(ball.dy, 2));
 		if (!(board.pass_count % 10))
 		{
 			board.player[0].half_height *= .9;
@@ -52,27 +48,10 @@ export class GameService
 		else if (!(board.pass_count % 5))
 			ball.half_width *= 0.9
 		ball.dx *= -1.05;
-		ball.dy = 1.05 * ball.dy + (board.player[idx].y - board.player[idx].old_y);
-		// var collideAngle = dist * Math.sign(ball.dx) * Math.PI / (2 * board.player[idx].half_height);
-		// console.log("VECTOR SPEED BEF COLL" ,Math.sqrt(Math.pow(ball.dx, 2) + Math.pow(ball.dy, 2)));
-		ball.dy += dist * Math.abs(ball.dx) / board.player[idx].half_height;
-			// var new_dx = ball.dx * Math.cos(collideAngle) - ball.dy * Math.sin(collideAngle); 
-			// var new_dy = ball.dx * Math.sin(collideAngle) + ball.dy * Math.cos(collideAngle);
-			// console.log("VECTOR SPEED AFTER COLL :", Math.sqrt(Math.pow(new_dx, 2) + Math.pow(new_dy, 2)));
+    ball.dy = 1.05 * ball.dy + racket_dy
+        + dist * Math.abs(ball.dx) / board.player[idx].half_height;
 		if (Math.abs(ball.dx) * 2 < Math.abs(ball.dy))
 			ball.dy = 2 * Math.sign(ball.dy) * Math.abs(ball.dx);
-			// && Math.sign(ball.dx) == Math.sign(new_dx)) // limits the angle of collision of the ball
-			// {
-			// 	ball.dx = new_dx;
-			// 	ball.dy = new_dy;
-			// }
-			// else
-			// {
-			// 	ball.dx = Math.sign(ball.dx) * max_x * ball_speed;
-			// 	ball.dy = Math.sign(ball.dy) * max_y * ball_speed;
-			// 	// console.log("EXTREME ANGLE", Math.sign(ball.dx));
-			// }
-			// console.log("VECTOR SPEED AFTER COLL" , Math.sqrt(Math.pow(ball.dx, 2) + Math.pow(ball.dy, 2)));
 	}
     updateBall(board : Board) : Board
     {
@@ -88,18 +67,38 @@ export class GameService
 		{
 			var player = ball.dx < 0? 0 : 1;
 			var dist = tmpy - board.player[player].y;
+      var racket_dy = board.player[player].y - board.player[player].old_y;
 			if (Math.abs(dist) <= board.player[player].half_height + ball.half_width && !board.dead) //racket collision
-				this.racketCollision(dist, player, board);
+				this.racketCollision(dist, player, racket_dy, board);
 			else if (tmpx < -ball.half_width
 				|| tmpx  >= width + ball.half_width) //ball out of map
 			{
 				board.player[player? 0 : 1].score++;
 				this.reset(false, board);
 			}
+    // else if ((tmpx > dim.racket.x[0] - dim.racket.width - (ball.half_width * 2)
+      // || tmpx <= dim.racket.x[1] + dim.racket.width + (ball.half_width * 2))
+      // && Math.abs(dist) <= this.board.player[player].half_height + ball.half_width
+      // && Math.sign(dist) == Math.sign(ball.dy)
+      // && (Math.sign(dist) == Math.sign(racket_dy) || racket_dy < 0.001)) //ball side of racket
+      // {
+      // 	ball.dy = Math.abs(ball.dy) * Math.sign(dist) + racket_dy;
+      // 	if (Math.abs(ball.dx) * 2 < Math.abs(ball.dy))
+      // 		ball.dy = 2 * Math.sign(ball.dy) * Math.abs(ball.dx);
+      // 	// ball.dy = -1 * Math.sign(dist) + ball.dy + (Math.sign(dist) != Math.sign(racket_dy)? racket_dy:0);
+      // 	ball.y = this.board.player[player].y + Math.sign(dist) * (ball.half_width + this.board.player[player].half_height);
+      // 	if (ball.y < ball.half_width)
+      // 		ball.y = ball.half_width;
+      // 	else if (ball.y > height - ball.half_width)
+      // 		ball.y = height - ball.half_width;
+      // 	this.board.dead = true;
+      // }
 			else //ball behind racket
 			{
 				this.moveBall(board)
-				board.dead = true;
+        if (tmpx - ball.half_width < dim.racket.x[0] - dim.racket.width
+          || tmpx + ball.half_width >= dim.racket.x[1] + dim.racket.width)
+				  board.dead = true;
 			}
 		}
 		else
@@ -116,8 +115,9 @@ export class GameService
 		if (board.bot && !board.dead && ball.dx > 0) // move Bot only if the ball goes in his direction
 		{
 			const weight = (this.dimensions.racket.x[1] - ball.x) / this.dimensions.canvas.width;
-			var dy = (weight * this.dimensions.canvas.height / 2 + (1 - weight) * board.ball.y + board.bot_offset);
-			dy -= board.player[1].y; // < dy ? 1 : -1;
+			var dy = (weight * this.dimensions.canvas.height / 2
+          + (1 - weight) * board.ball.y + board.bot_offset)
+          - board.player[1].y;
 			// var dy = (ball.dy)/2 + (ball.y - board.player[1].y) / speed;
 			this.updatePlayer(1, board.player[1].y + (Math.abs(dy) > Math.abs(board.bot_speed) ? board.bot_speed * Math.sign(dy) : dy), board); //limit speed of bot
 		}
@@ -136,16 +136,15 @@ export class GameService
 			board.end = true;
 		board.new_game = true;
 		board.dead = false;
-		board.ball.dx = speed * (board.ball.x < this.dimensions.canvas.width / 2? -1:1);
-		board.ball.dy = speed * (2/3) * (Math.floor(Math.random() * 2)? -1:1);
+    board.ball.dx = speed * (board.ball.x < this.dimensions.canvas.width / 2? -1:1);
+    board.ball.dy = Math.random() * speed * 1.5 * (Math.floor(Math.random() * 2)? -1:1);
         board.ball.x = 50;
-        board.ball.y = height / 2;
-        // board.player[0].y = height / 2;
-        // board.player[1].y = height / 2;
-		board.ball.half_width = 1.5;
+        board.ball.y = Math.random() * height / 2 + height / 4;
+    board.ball.half_width = 2;
 		board.player[0].half_height = 6;
 		board.player[1].half_height = 6;
 		board.pass_count = 0;
+    board.update_needed = true;
 		return board;
     }
 }

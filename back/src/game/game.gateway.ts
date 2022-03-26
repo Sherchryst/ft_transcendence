@@ -3,7 +3,11 @@ import { Server, Socket } from 'socket.io';
 import { GameService } from './game.service';
 import { Player } from './interfaces/player.interface';
 import { Board } from './interfaces/board.interface';
-import { SocketAddress } from 'net';
+import { MatchService } from './match.service';
+import { CustomJwtService, getJwtFromSocket } from 'src/auth/jwt/jwt.service';
+import { UsersService } from 'src/users/users.service';
+import { WsJwt2faGuard } from 'src/auth/jwt/jwt.guard';
+import { Req, UseGuards } from '@nestjs/common';
 
 const interval = 20;
 var calc = false;
@@ -11,92 +15,98 @@ const speed = 1;
 var boards = new Map<string, Board>();
 const basic_board : Board = {
 	ball: {
-		x: 50,
-		y: 50,
-		half_width: 1.5,
-		dx: speed * (Math.floor(Math.random() * 2)? -1:1), //random player
-		dy: speed * (2/3) * (Math.floor(Math.random() * 2)? -1:1) }, //random top/bottom
-	player: [{
-		id: 0,
-		y: 50,
-		old_y: 50,
-		score : 0,
-		half_height : 6 },{
-		id: 1,
-		y: 50,
-		old_y: 50,
-		score : 0,
-		half_height : 6 }],
+    x: 50,
+    y: Math.random() * 50 + 25,
+    half_width: 2,
+    dx: speed * (Math.floor(Math.random() * 2)? -1:1), //random player
+    dy: Math.random() * speed * 1.5 * (Math.floor(Math.random() * 2)? -1:1) }, //random top/bottom
+  player: [{
+    id: 0,
+    y: 50,
+    old_y: 50,
+    score : 0,
+    half_height : 6 },{
+    id: 1,
+    y: 50,
+    old_y: 50,
+    score : 0,
+    half_height : 6 }],
 	dead : false,
   bot : true,
   bot_speed : 3,
   bot_offset : 0,
 	end : false,
   pass_count : 0,
-  new_game : true
+  new_game : true,
+  update_needed : true
 }
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+@UseGuards(WsJwt2faGuard)
 @WebSocketGateway(3001, { namespace : "game" })
 export class GameGateway implements OnGatewayConnection {
   @WebSocketServer()
   server : Server;
-  constructor(private readonly gameService : GameService){}
+  constructor(private readonly gameService : GameService,
+    private readonly matchService : MatchService,
+    private readonly customJwtService: CustomJwtService,
+    private readonly usersService: UsersService) {}
 
   afterInit() {
     this.server.emit('testing', { do: 'stuff' });
   }
 
-  handleConnection(@ConnectedSocket() socket : Socket) {
-      // socket.join(id.toString());
-      console.log("connection to game... id :", socket.id);
-    // boards[connectCounter].bot = (connectCounter < 2);
+  async handleConnection(@ConnectedSocket() socket : Socket) {
+    try {
+      let jwt = getJwtFromSocket(socket);
+      const payload = this.customJwtService.verify(jwt);
+      const user = await this.usersService.findOne(payload.sub);
+      if (user.twofa && !payload.isSecondFactorAuth)
+        throw new WsException("");
+    }
+    catch {
+      console.log("Game: Unauthorized connection");
+      socket.disconnect(false);
+      return;
+    }
+    console.log("connection to game... id :", socket.id);
   }
 
   handleDisconnect(@ConnectedSocket() socket : Socket) {
     const id : string = socket.id;
-    var ret_delete = boards.delete(id);
+    // if (boards.get(id).player[0]?.score == 11 || boards.get(id).player[1]?.score == 11)
+    //   boards.delete(id); // tmp solution, will change when db is set
     console.log("disconnection from game : ", id);
-    // for (let i = 0; i < connectCounter; i++) {
-    //   if (this.wsClients[i] === client) {
-    //     this.wsClients.splice(i, 1);
-    //     break;
-    //   }
-    // }
-    // if (!connectCounter)
-    //   calc = false;
-      // boards[connectCounter].bot = (connectCounter < 2)
   }
 
   @SubscribeMessage('connection')
-  handleMessage(
+  async handleMessage(
+    @Req() req,
     @MessageBody() id: string,
     @ConnectedSocket() socket: Socket) {
-      boards.set(socket.id, basic_board);
-      this.server.to(socket.id).emit("id" , 0);
-      // console.log("Has connection", client);
-      // this.gameService.reset();
-      // client.emit('gameParams', this.gameService.findBoard(), (data) => console.log("DATA SENT : ", data));
-      // console.log("LENGTH = ", connectCounter);
-      // calc = false
-      // if (!calc)
-      // {
-      //   calc = true;
-      this.sendUpdateBoard(socket);
-      // }
-      // return { event : 'board', data : "coucou" }
-      // this.server.emit(JSON.stringify({event : 'gameParams', data : this.gameService.findBoard()}));
+    boards.set(socket.id, basic_board);
+    var map = await this.matchService.findMap(1);
+    if (!map)
+      map = {
+        id: 1,
+        ballColor: 16562691,
+        backgroundColor: 344663,
+        starsColor: 12566194,
+        racketColor: 16777215
+      };
+    this.server.to(socket.id).emit("id" , { id: 0, map: map });
+    this.server.to(socket.id).emit("login" , { id: 0, login: req.user.login });
+    //       var match = await this.matchService.createMatch(map, user, null, MatchType.CASUAL);
+    this.sendUpdateBoard(socket);
   }
 
   @SubscribeMessage('player')
   handlePlayer(
     @MessageBody() tmp: Player,
     @ConnectedSocket() socket: Socket) {
-      // var tmp : Player = JSON.parse(message)
-      // console.log("player id :", socket.id);
       if (!boards.has(socket.id))
         return ;
       var tmp_board : Board = JSON.parse(JSON.stringify(boards.get(socket.id)));
@@ -104,16 +114,12 @@ export class GameGateway implements OnGatewayConnection {
   }
   async sendUpdateBoard(socket: Socket) {
     var timer = 0;
-    // if (!boards.get(socket.id))
-    //   return ;
-    // console.log("Update Board", boards);
     if (!boards.has(socket.id))
         return ;
     var tmp_board : Board = JSON.parse(JSON.stringify(boards.get(socket.id)));
     boards.set(socket.id, this.gameService.reset(true, tmp_board));
-    while (boards.has(socket.id) && !boards.get(socket.id).end) // & calc
+    while (boards.has(socket.id) && !boards.get(socket.id).end)
     {
-      // console.log("coucou");
       await sleep(interval);
       if (boards.get(socket.id).new_game)
       {
@@ -126,7 +132,12 @@ export class GameGateway implements OnGatewayConnection {
       boards.set(socket.id, this.gameService.updateBall(tmp_board));
       this.server.to(socket.id).emit('board', tmp_board);
       if (!(timer % 200))
-      boards.get(socket.id).bot_offset = (Math.floor(Math.random() * 2) ? -1 : 1) * Math.random() * boards.get(socket.id).player[1].half_height;
+      {
+        tmp_board = JSON.parse(JSON.stringify(boards.get(socket.id)));
+        tmp_board.bot_offset = (Math.floor(Math.random() * 2) ? -1 : 1) * Math.random()
+          * boards.get(socket.id).player[1].half_height * 1.1 * boards.get(socket.id).ball.dx;
+        boards.set(socket.id, tmp_board);
+      }
       timer++;
     }
   }
