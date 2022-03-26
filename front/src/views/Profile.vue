@@ -14,7 +14,12 @@
 				<LevelBar :percent="68" :level="8" :nextLevel="9"></LevelBar>
 			</div>
 			<div class="mb-12">
-				<ButtonLink class="flex justify-center w-full" text="Demander en ami"></ButtonLink>
+				<ButtonLink v-if="this.username == this.selfLogin" class="flex justify-center w-full" text="Edit Profile"></ButtonLink>
+				<div v-else>
+					<ButtonLink class="flex justify-center w-full mb-4" text="Ask a friend"></ButtonLink>
+					<ButtonLink class="flex justify-center w-full btn-neutral" text="Block User"></ButtonLink>
+				</div>
+
 			</div>
 			<div class="flex flex-rows justify-around md:flex-wrap">
 				<div class="">
@@ -68,7 +73,7 @@
 					<TitlePanel title="Achievements"> <Trophy /> </TitlePanel>
 				</template>
 				<template v-slot:body>
-					<div class="grid md:grid-cols-2 max-h-10 gap-x-10 gap-y-4">
+					<div class="grid md:grid-cols-2 max-h-10 gap-x-10 gap-y-5">
 						<div>
 							<LargerCard></LargerCard>
 						</div>
@@ -102,9 +107,11 @@ import ButtonLink from '@/components/ButtonLink.vue';
 import MainTitle from '@/components/MainTitle.vue';
 import Scrool from '@/assets/icon/list-game.svg';
 import Trophy from '@/assets/icon/achievement.svg';
-import {defineComponent, watch} from 'vue';
+import {defineComponent, watch, computed} from 'vue';
 import { API } from '@/scripts/auth.ts';
 import { Profile } from '@/interfaces/Profile';
+import { useStore } from 'vuex'
+import { key } from '@/store/index.ts'
 
 
 export default defineComponent({
@@ -128,8 +135,12 @@ export default defineComponent({
 		username: { type: String, required: true}
 	},
 	setup(props){
-		console.log(props.username)
 		useMeta({ title: 'Profile - ' + props.username})
+		const store = useStore(key)
+
+        return {
+            selfLogin: computed( () => store.getters.getLogin)
+        }
 	},
 	data() {
 		return {

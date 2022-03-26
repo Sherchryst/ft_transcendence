@@ -37,7 +37,7 @@
 				<div class="hidden sm:flex flex-row justify-between justify-items-center h-16">
 					<div class="self-center">
 						<!-- If connected -->
-						<ButtonLink @click="logout()" text="Deconnection" />
+						<ButtonLink @click="logout()" class="btn-neutral" text="Deconnection" />
 					</div>
 					<div class="flex flex-row justify-between justify-items-center">
 						<div class="self-center">
