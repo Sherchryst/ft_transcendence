@@ -6,6 +6,7 @@
 			<p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Aliquid ipsum natus doloribus voluptas praesentium, ut quis nam sit, quam adipisci totam repellendus necessitatibus quas unde expedita. Asperiores impedit maxime labore?</p>
 		</div>
 		<ButtonLink text="Connection avec 42" href="http://localhost:3000/auth/login42" />
+		<!-- <ButtonLink text="Cheat Login" @click="this.cheat_login" /> -->
 		<a clas="cheat mt-2" @click="this.cheat_login">cheat login</a>
 	</single-card-page>
 </template>
@@ -55,8 +56,8 @@ export default defineComponent({
 })
 </script>
 
-<style lang="scss">
-.cheat{
+<style lang="scss" scoped>
+a {
 	&:hover{
 		cursor: pointer;
 	}
