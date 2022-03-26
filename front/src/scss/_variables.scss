@@ -11,3 +11,9 @@ $panel--dk-color: #5D686C;
 $action: #062B62;
 $bg-action: #C2D3EC;
 $secondary-color: #FFC300;
+$secondary--alt-clor: #FFDA61;
+$secondary-gradiant: linear-gradient(to right, $secondary-color, $secondary--alt-clor);
+$secondary--trans-gradiant: linear-gradient(to bottom, $secondary-color, #ffffff00);
+$defeat-color: #FE5D5D;
+$victory-color: #3EAF87;
+
