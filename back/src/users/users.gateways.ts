@@ -5,7 +5,7 @@ import { CustomJwtService } from "src/auth/jwt/jwt.service";
 import { User } from "./entities/user.entity";
 import { UsersService } from "./users.service";
 
-@WebSocketGateway(3001, {path: "/status"})
+@WebSocketGateway(3002, {path: "/status"})
 export class UsersGateway implements OnGatewayConnection {
     wsClients = new Map<number, any>();
 
