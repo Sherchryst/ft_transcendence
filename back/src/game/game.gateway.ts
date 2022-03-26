@@ -1,9 +1,13 @@
-import { ConnectedSocket, MessageBody, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GameService } from './game.service';
 import { Player } from './interfaces/player.interface';
 import { Board } from './interfaces/board.interface';
 import { MatchService } from './match.service';
+import { CustomJwtService, getJwtFromSocket } from 'src/auth/jwt/jwt.service';
+import { UsersService } from 'src/users/users.service';
+import { WsJwt2faGuard } from 'src/auth/jwt/jwt.guard';
+import { Req, UseGuards } from '@nestjs/common';
 
 const interval = 20;
 var calc = false;
@@ -41,30 +45,46 @@ function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+@UseGuards(WsJwt2faGuard)
 @WebSocketGateway(3001, { namespace : "game" })
 export class GameGateway implements OnGatewayConnection {
   @WebSocketServer()
   server : Server;
   constructor(private readonly gameService : GameService,
-    private readonly matchService : MatchService) {}
+    private readonly matchService : MatchService,
+    private readonly customJwtService: CustomJwtService,
+    private readonly usersService: UsersService) {}
 
   afterInit() {
     this.server.emit('testing', { do: 'stuff' });
   }
 
-  handleConnection(@ConnectedSocket() socket : Socket) {
-      console.log("connection to game... id :", socket.id);
+  async handleConnection(@ConnectedSocket() socket : Socket) {
+    try {
+      let jwt = getJwtFromSocket(socket);
+      const payload = this.customJwtService.verify(jwt);
+      const user = await this.usersService.findOne(payload.sub);
+      if (user.twofa && !payload.isSecondFactorAuth)
+        throw new WsException("");
+    }
+    catch {
+      console.log("Game: Unauthorized connection");
+      socket.disconnect(false);
+      return;
+    }
+    console.log("connection to game... id :", socket.id);
   }
 
   handleDisconnect(@ConnectedSocket() socket : Socket) {
     const id : string = socket.id;
-    if (boards.get(id).player[0].score == 11 || boards.get(id).player[1].score == 11)
-      boards.delete(id); // tmp solution, will change when db is set
+    // if (boards.get(id).player[0]?.score == 11 || boards.get(id).player[1]?.score == 11)
+    //   boards.delete(id); // tmp solution, will change when db is set
     console.log("disconnection from game : ", id);
   }
 
   @SubscribeMessage('connection')
   async handleMessage(
+    @Req() req,
     @MessageBody() id: string,
     @ConnectedSocket() socket: Socket) {
     boards.set(socket.id, basic_board);
@@ -78,6 +98,7 @@ export class GameGateway implements OnGatewayConnection {
         racketColor: 16777215
       };
     this.server.to(socket.id).emit("id" , { id: 0, map: map });
+    this.server.to(socket.id).emit("login" , { id: 0, login: req.user.login });
     //       var match = await this.matchService.createMatch(map, user, null, MatchType.CASUAL);
     this.sendUpdateBoard(socket);
   }
