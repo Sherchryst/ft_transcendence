@@ -1,4 +1,4 @@
-import { ConnectedSocket, MessageBody, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException } from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer, WsException, BaseWsExceptionFilter } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import { CustomJwtService } from 'src/auth/jwt/jwt.service';
@@ -9,22 +9,22 @@ import { ChannelVisibility } from './entities/channel.entity';
 import { ChannelModerationType } from './entities/channel-moderation.entity';
 import { User } from 'src/users/entities/user.entity';
 import { callbackify } from 'util';
-
 import { Catch, ArgumentsHost } from '@nestjs/common';
 import { stringify } from 'querystring';
 import { channel } from 'diagnostics_channel';
 import { SocketAddress } from 'net';
+
 @WebSocketGateway(3001, {namespace: "chat"})
 export class ChatGateway implements OnGatewayConnection{
     wsClients = new Map<number, any>();
 
     @WebSocketServer()
     server
-    
+
     constructor(private readonly chatService: ChatService,
         private readonly customJwtService: CustomJwtService,
         private readonly usersService: UsersService) {}
-    
+
     async handleConnection(socket: Socket) {
         try {
             let jwt = this.getJwtFromSocket(socket)
@@ -214,4 +214,3 @@ export class ChatGateway implements OnGatewayConnection{
         //this.wsClients.get(to.id).send(JSON.stringify(await this.chatService.createDirectMessage(to, message)));
     }
 }
-
