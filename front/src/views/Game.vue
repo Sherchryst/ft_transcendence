@@ -26,7 +26,7 @@
 <template>
 <div class="game">
   <div id="canvas-div" class="game-container w-full relative">
-    <canvas ref="background" id="background" class="game-bg" height="750" width="850">
+    <canvas ref="background" id="background" class="game-bg" height="600" width="800">
     </canvas>
     <canvas ref="mycanvas" id="mycanvas" class="game-fg" height="600" width="800"></canvas>
   </div>
@@ -71,15 +71,6 @@
           end: false}
       }
     },
-    // gamesockets: {
-    //     board: function (data: any) {
-
-    //     },
-    //     id: function (data: any) {
-    //         this.id = data;
-    //         // socket.off("id");
-    //     }
-    // },
     mounted() {
       gameSocket.on("connect", () => {
       gameSocket.emit('connection');
@@ -213,7 +204,6 @@
         this.ctx.font = "70px courier new" // absolute size /!\
         this.ctx.textAlign = "center";
         this.ctx.fillText(this.login[winner] + " wins", this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
-        // this.ctx.fillText("wins", this.ctx.canvas.width / 2, this.ctx.canvas.height / 2 + 70);
       },
       addObjects()
       {
@@ -229,20 +219,7 @@
         if (this.id > 1)
           return ;
         let rect : DOMRect = this.ctx.canvas.getBoundingClientRect();
-        // this.board.player[0].y = evt.clientY - rect.top;
- //       gameSocket.send(JSON.stringify({event: 'player', data : {"id" : this.id, "y" : (evt.clientY - rect.top) / this.dimY}}));
         gameSocket.emit('player', {"id" : this.id, "y" : (evt.clientY - rect.top) / this.dimY})
-        // this.updatePlayer(this.id, (evt.clientY - rect.top) / this.dimY);
-      },
-      updatePlayer(id : number, y : number)
-      {
-        var player = this.board.player[id];
-        if (y < player.half_height) // check if the racket position runs out of the canvas
-                player.y = player.half_height;
-            else if (y >= 100 - player.half_height)
-                player.y = 100 - player.half_height;
-        else
-          player.y = y;
       }
     }
   })
