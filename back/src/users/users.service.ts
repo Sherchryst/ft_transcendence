@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { createReadStream, readFileSync } from 'fs';
+import { ChannelMember } from 'src/chat/entities/channel-member.entity';
+import { Channel } from 'src/chat/entities/channel.entity';
 import { getRepository, Not } from 'typeorm';
 import { Avatar } from './entities/avatar.entity';
 import { UserAchievement } from './entities/user-achievement.entity';
@@ -99,6 +101,13 @@ export class UsersService {
     });
   }
 
+  async getAllChannelsConnected(userId: number): Promise<Channel[]> {
+    return  await getRepository(ChannelMember).find({
+      relations: ['channel'],
+      where: { user: userId }
+    }).then(relations => relations.map(r => r.channel));
+  }
+
   async hasSentFriendRequest(fromUserId: number, toUserId: number): Promise<boolean> {
     return await getRepository(UserRelationship).findOne({
       where: { from: fromUserId, to: toUserId, type: UserRelationshipType.PENDING }
@@ -157,4 +166,11 @@ export class UsersService {
       nickname: nickname
     });
   }
+  // À corriger :
+  async listUserChannels(userId: number): Promise<ChannelMember[]> {
+    return getRepository(ChannelMember).find({
+      where: { user: userId }
+    });
+  }
 }
+

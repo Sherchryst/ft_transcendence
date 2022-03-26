@@ -34,7 +34,8 @@
 </template>
 
 <script lang="ts">
-  import {defineComponent} from 'vue'
+  import {defineComponent, ssrContextKey} from 'vue'
+  import { gameSocket } from '../socket';
 
   export default defineComponent({
     name: 'mycanvas',
@@ -64,44 +65,43 @@
         },
         board: {
           ball: {x: 400, y: 300, dx: 0, dy: 20, half_width: 25},
-          player: [{id:0, y: 300, old_y:300, score: 0, half_height: 40}, 
+          player: [{id:0, y: 300, old_y:300, score: 0, half_height: 40},
                   {id:1, y: 300, old_y:300, score: 0, half_height: 40}],
           dead: false,
           end: false}
       }
     },
-    created() {
-      console.log("Connection socket", this.socket);
-    },
+    // gamesockets: {
+    //     board: function (data: any) {
+
+    //     },
+    //     id: function (data: any) {
+    //         this.id = data;
+    //         // socket.off("id");
+    //     }
+    // },
     mounted() {
-      console.log("asking for params");
+      gameSocket.on("connect", () => {
+      gameSocket.emit('connection');
+      console.log('socket connected');
+      });
+      gameSocket.on("board", (data : any) => {
+        this.board = {...this.board, ...data}
+        this.clear();
+        this.addObjects();
+      });
+      gameSocket.on("login", (data : any) => {
+        this.login[data.id] = data.login;
+      });
+      gameSocket.on("id", (data : any) => {
+        this.id = data.id;
+        this.map = data.map;
+        this.drawBackground();
+      });
       this.ctx = (this.$refs.mycanvas as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
       this.dimX = this.ctx.canvas.width / 100;
       this.dimY = this.ctx.canvas.height / 100;
-      this.socket.onopen = () => {
-          console.log('Connected');
-          this.socket.send(JSON.stringify({event: 'connection', data : "HEY !"})); // faudra changer les dimensions selon la taille de l'ecran
-      }
-      this.socket.onmessage = (evt) => {
-        const fromServer = JSON.parse(evt.data);
-        switch (fromServer.event) {
-          case "board":
-            this.board = { ...this.board, ...fromServer.data }
-            this.clear();
-            this.addObjects();
-            break;
-          case "id":
-            this.id = fromServer.data.id;
-            this.map = fromServer.data.map;
-            this.drawBackground();
-            console.log(this.id);
-            break;
-          case "login":
-            this.login[fromServer.data.id] = fromServer.data.login;
-            break;
-        }
       document.addEventListener("mousemove", this.moveRackets);
-      }
     },
     methods:
     {
@@ -230,8 +230,9 @@
           return ;
         let rect : DOMRect = this.ctx.canvas.getBoundingClientRect();
         // this.board.player[0].y = evt.clientY - rect.top;
-        this.socket.send(JSON.stringify({event: 'player', data : {"id" : this.id, "y" : (evt.clientY - rect.top) / this.dimY}}));
-        this.updatePlayer(this.id, (evt.clientY - rect.top) / this.dimY);
+ //       gameSocket.send(JSON.stringify({event: 'player', data : {"id" : this.id, "y" : (evt.clientY - rect.top) / this.dimY}}));
+        gameSocket.emit('player', {"id" : this.id, "y" : (evt.clientY - rect.top) / this.dimY})
+        // this.updatePlayer(this.id, (evt.clientY - rect.top) / this.dimY);
       },
       updatePlayer(id : number, y : number)
       {

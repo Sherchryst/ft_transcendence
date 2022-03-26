@@ -1,12 +1,13 @@
-import { InjectionKey } from 'vue'
-import { createStore, Store } from 'vuex'
-import { API } from '@/scripts/auth.ts';
+import { InjectionKey }
+ from 'vue'
+import { createStore, Store } from 'vuex';
 import { Profile, User } from '@/interfaces/Profile';
-
+import { io, Socket } from "socket.io-client";
+import { API } from '@/scripts/auth';
 // define your typings for the store state
 export interface State {
   profile: Profile,
-  socket: WebSocket | undefined
+  chatMessages: string[]
 }
 
 // define injection key
@@ -15,11 +16,11 @@ export const key: InjectionKey<Store<State>> = Symbol()
 export const store = createStore<State>({
   state: {
     profile: {user: {} as User, friends: [], achievements: []},
-    socket: undefined,
+    chatMessages: []
   },
   getters: {
-    getChatSocket(state) {
-      return state.socket;
+    displayMessages(state) {
+      return state.chatMessages
     },
     getLogin(state) : string{
       return state.profile.user.login
@@ -31,14 +32,21 @@ export const store = createStore<State>({
   mutations: {
     setProfile(state, _profile) {
       state.profile = _profile
+    },
+    SOCKET_ADD_MESSAGE(state, message) {
+      state.chatMessages.push(message);
     }
   },
   actions: {
-    connection({commit}){
-      return API.get('users/profile')
-        .then((response) => {
-          commit("setProfile", response.data)
-        })
+    async connection({commit}){
+      const response = await API.get('users/profile');
+       commit("setProfile", response.data);
+    },
+    SOCKET_addMessage({ commit }, message) {
+      commit('ADD_MESSAGE', message);
+    },
+    SOCKET_deleteMessage({ commit }, message) {
+      commit('DELETE_MESSAGE', message);
     }
   },
   modules: {

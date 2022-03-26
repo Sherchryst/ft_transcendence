@@ -5,7 +5,7 @@
                 <span class="px-2">Create</span>
             </one-row-form>
         </div>
-        <div class="grid-cols-1 md:grid grid-cols-3 gap-4 span-4">
+        <div class="grid-cols-1 md:grid grid-cols-3 gap-4 span-4" :key="listChannel">
             <channel-view v-for="chan in listChannel" :id="chan.id" :title="chan.name" :key="chan.id"/>
         </div>
     </div>
@@ -17,6 +17,8 @@ import { API } from '@/scripts/auth.ts';
 import { useMeta } from 'vue-meta'
 import ChannelView from '@/components/chat/ChannelView.vue'
 import OneRowForm from '@/components/OneRowForm.vue'
+import { chatSocket } from '@/socket.ts'
+import { Channel } from '@/interfaces/Channel'
 
 export default defineComponent ({
     components: {
@@ -24,7 +26,6 @@ export default defineComponent ({
         OneRowForm,
     },
     beforeRouteLeave(to, from, next) {
-        this.socket.close()
         next()
     },
     setup () {
@@ -32,17 +33,22 @@ export default defineComponent ({
     },
     data() {
         return {
-            socket : new WebSocket('ws://localhost:3001/chat'),
-            listChannel: [],
+            socket : chatSocket,
+            listChannel: [] as Channel[],
         }
     },
     mounted() {
-        this.socket.onopen = () => {
-			console.log('connected', this.socket)
-		}
-		this.socket.onclose = (reason) => {
-			console.log('disconnected', reason)
-		}
+        this.socket
+            .on("connect", () => {
+                console.log("Connected, ", this.socket.id);
+            })
+            .on("disconnect", (reason) => {
+                console.log("Deconnected", reason);
+            })
+            .on("created", (data: {channel: Channel}) => {
+                this.listChannel.push(data.channel)
+            })
+        ;
         API.get('chat/list').then((response) => {
             this.listChannel = response.data
             console.log(this.listChannel);
@@ -52,7 +58,10 @@ export default defineComponent ({
     },
     methods: {
         create(name_chan: string): void {
-			this.socket.send(JSON.stringify({event: 'create', data : {name : name_chan, visibility : "public"}}));
+            this.socket.emit("create", {
+                name : name_chan, 
+                visibility : "public"
+            })
 		},
     }
 })
