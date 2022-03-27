@@ -1,5 +1,4 @@
-import { ExceptionFilter, Injectable, NotFoundException } from '@nestjs/common';
-// import { randomBytes } from 'crypto';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Board } from './interfaces/board.interface';
 import { Dimensions } from './interfaces/dimensions.interface';
 
@@ -12,7 +11,6 @@ const height = 100;
 @Injectable()
 export class GameService
 {
-	// constructor(private socket: Socket){}
 	dimensions: Dimensions = {
 		canvas: {
 			height : height,
@@ -22,11 +20,10 @@ export class GameService
 			x : [6,94]
 		}
 	}
-	updatePlayer(id : number, y : number, board : Board) : Board
+	updatePlayer(id : number, y : number, board : Board)
 	{
 		if (id > 1)
-			return board;
-		// 	return new NotFoundException('no player with this id');
+			return new NotFoundException('no player with this id');
 		var player = board.player[id];
 		if (y < player.half_height) // check if the racket position runs out of the canvas
             player.y = player.half_height;
@@ -34,7 +31,6 @@ export class GameService
             player.y = height - player.half_height;
 		else
 			player.y = y;
-		return board;
 	}
 	racketCollision(dist, idx, racket_dy, board : Board)
 	{
@@ -53,8 +49,8 @@ export class GameService
 		if (Math.abs(ball.dx) * 2 < Math.abs(ball.dy))
 			ball.dy = 2 * Math.sign(ball.dy) * Math.abs(ball.dx);
 	}
-    updateBall(board : Board) : Board
-    {
+	updateBall(board : Board) : Board
+	{
 		var ball = board.ball;
 		const dim = this.dimensions;
 		var tmpx = ball.x + ball.dx;
@@ -105,8 +101,8 @@ export class GameService
 			this.moveBall(board);
 		board.player[0].old_y = board.player[0].y;
 		board.player[1].old_y = board.player[1].y;
-		return board;
-    }
+		return board ;
+	}
 	moveBall(board : Board)
 	{
 		var ball = board.ball;
@@ -118,13 +114,12 @@ export class GameService
 			var dy = (weight * this.dimensions.canvas.height / 2
           + (1 - weight) * board.ball.y + board.bot_offset)
           - board.player[1].y;
-			// var dy = (ball.dy)/2 + (ball.y - board.player[1].y) / speed;
 			this.updatePlayer(1, board.player[1].y + (Math.abs(dy) > Math.abs(board.bot_speed) ? board.bot_speed * Math.sign(dy) : dy), board); //limit speed of bot
 		}
 		// this.updatePlayer(1, ball.y);
 		// this.updatePlayer(0, ball.y);
 	}
-    reset(all : boolean, board : Board) : Board
+    reset(all : boolean, board : Board)
     {
 		if (all) // for testing only
 		{
@@ -145,6 +140,5 @@ export class GameService
 		board.player[1].half_height = 6;
 		board.pass_count = 0;
     board.update_needed = true;
-		return board;
     }
 }

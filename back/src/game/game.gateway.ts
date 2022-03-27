@@ -87,7 +87,7 @@ export class GameGateway implements OnGatewayConnection {
     @Req() req,
     @MessageBody() id: string,
     @ConnectedSocket() socket: Socket) {
-    boards.set(socket.id, basic_board);
+    boards.set(socket.id, JSON.parse(JSON.stringify(basic_board)));
     var map = await this.matchService.findMap(1);
     if (!map)
       map = {
@@ -105,38 +105,32 @@ export class GameGateway implements OnGatewayConnection {
 
   @SubscribeMessage('player')
   handlePlayer(
-    @MessageBody() tmp: Player,
-    @ConnectedSocket() socket: Socket) {
-      if (!boards.has(socket.id))
-        return ;
-      var tmp_board : Board = JSON.parse(JSON.stringify(boards.get(socket.id)));
-      boards.set(socket.id, this.gameService.updatePlayer(0, tmp.y, tmp_board));
+  @MessageBody() tmp: Player,
+  @ConnectedSocket() socket: Socket) {
+    var board = boards.get(socket.id);
+    if (!board)
+      return ;
+    this.gameService.updatePlayer(0, tmp.y, board);
   }
   async sendUpdateBoard(socket: Socket) {
     var timer = 0;
-    if (!boards.has(socket.id))
+    var board = boards.get(socket.id);
+    if (!board)
         return ;
-    var tmp_board : Board = JSON.parse(JSON.stringify(boards.get(socket.id)));
-    boards.set(socket.id, this.gameService.reset(true, tmp_board));
-    while (boards.has(socket.id) && !boards.get(socket.id).end)
+    this.gameService.reset(true, board);
+    while (board && !board.end)
     {
       await sleep(interval);
-      if (boards.get(socket.id).new_game)
+      if (board.new_game)
       {
         await sleep(1000);
-        var tmp : Board = JSON.parse(JSON.stringify(boards.get(socket.id)));
-        tmp.new_game = false;
-        boards.set(socket.id, tmp);
+        board.new_game = false;
       }
-      var tmp_board : Board = JSON.parse(JSON.stringify(boards.get(socket.id)));
-      boards.set(socket.id, this.gameService.updateBall(tmp_board));
-      this.server.to(socket.id).emit('board', tmp_board);
+      this.server.to(socket.id).emit('board', this.gameService.updateBall(board));
       if (!(timer % 200))
       {
-        tmp_board = JSON.parse(JSON.stringify(boards.get(socket.id)));
-        tmp_board.bot_offset = (Math.floor(Math.random() * 2) ? -1 : 1) * Math.random()
-          * boards.get(socket.id).player[1].half_height * 1.1 * boards.get(socket.id).ball.dx;
-        boards.set(socket.id, tmp_board);
+        board.bot_offset = (Math.floor(Math.random() * 2) ? -1 : 1) * Math.random()
+          * board.player[1].half_height * 1.1 * board.ball.dx;
       }
       timer++;
     }
