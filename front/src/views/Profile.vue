@@ -1,6 +1,5 @@
 <template>
-	<div class="grid grid-cols-12 lg:gap-x-32">
-	<!-- <div class="flex flex-col lg:flex-row justify-between sm:flex-wrap"> -->
+	<div class="grid grid-cols-12 lg:gap-x-16 2xl:gap-x-32">
 		<div class="col-span-12 md:col-span-4 flex flex-col max-w-sm">
 			<div class="flex place-content-center mb-10">
 				<ProfilePicture></ProfilePicture>
@@ -19,7 +18,6 @@
 					<ButtonLink class="flex justify-center w-full mb-4" text="Ask a friend"></ButtonLink>
 					<ButtonLink class="flex justify-center w-full btn-neutral" text="Block User"></ButtonLink>
 				</div>
-
 			</div>
 			<div class="flex flex-rows justify-around md:flex-wrap">
 				<div class="">
@@ -46,7 +44,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="col-span-12 md:col-span-7 flex flex-col">
+		<div class="col-span-12 lg:col-span-8 2xl:col-span-7 flex flex-col">
 			<ProfilePanel>
 				<template v-slot:title>
 					<TitlePanel title="Historique des matchs"> <Scrool/> </TitlePanel>

@@ -39,6 +39,12 @@ button, a, .btn{
 			background: darken($color: #dfdfdf, $amount: 5%);
 		}
 	}
+	&-used{
+		background: $dark-font;
+	}
+	&-danger{
+		
+	}
 }
 
 </style>

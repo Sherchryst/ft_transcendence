@@ -1,5 +1,5 @@
 <template>
-	<div class="grid grid-cols-4 items-center py-3">
+	<div class="grid grid-cols-4 items-center pb-7">
 		<div class="col-span-2 md:col-span-1 text-left flex flex-col">
 			<h2 v-if='result' class="victory font-sans font-bold text-3xl">VICTORY</h2>
 			<h2 v-else class="defeat font-sans font-bold text-3xl">DEFEAT</h2>
