@@ -9,23 +9,23 @@ import { MatchInvitation } from './entities/match-invitation.entity';
 @Injectable()
 export class MatchService
 {
-  async createMatch(map: Map, player1: User, player2: User, mode: MatchType): Promise<Match> {
+  async createMatch(map: Map, player1: number, player2: number, mode: MatchType): Promise<Match> {
     const match = getRepository(Match).create({
       map: map,
-      player1: player1,
-      player2: player2,
+      player1: { id: player1 },
+      player2: { id: player2 },
       mode: mode,
-      begin_at: new Date(),
+      beginAt: new Date(),
       winner: null
     });
     await getRepository(Match).save(match);
     return match;
   }
 
-  async createMatchInvitation(from: User, to: User, map: Map): Promise<MatchInvitation> {
+  async createMatchInvitation(from: number, to: number, map: Map): Promise<MatchInvitation> {
     const matchInvitation = getRepository(MatchInvitation).create({
-      from: from,
-      to: to,
+      from: { id: from },
+      to: { id: to },
       map: map,
       sentAt: new Date()
     });
@@ -37,19 +37,27 @@ export class MatchService
     await getRepository(Match).delete({ id: matchId });
   }
 
-  async findMatchInvitations(userId: number): Promise<MatchInvitation[]> {
-    return await getRepository(MatchInvitation).find({
+  async deleteMatchInvitation(fromId: number) {
+    await getRepository(MatchInvitation).delete({
+      from: { id: fromId }
+    });
+  }
+
+  async findMatchInvitations(userId: number, fromId: number): Promise<MatchInvitation> {
+    return await getRepository(MatchInvitation).findOne({
       relations: ['to', 'map'],
       where: {
+        from: { id: fromId },
         to: { id: userId }
       }
     });
   }
 
-  async setWinner(matchId: number, winner: User) {
+  async setWinner(matchId: number, winnerId: number) {
     await getRepository(Match).save({
       id: matchId,
-      winner: winner
+      endAt: new Date(),
+      winner: { id: winnerId }
     });
   }
 

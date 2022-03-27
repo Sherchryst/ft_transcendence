@@ -18,17 +18,17 @@ export class Match {
   @ManyToOne(() => User, u => u.id, { nullable: false })
   player1: User;
 
-  @ManyToOne(() => User, u => u.id, { nullable: true })
+  @ManyToOne(() => User, u => u.id, { nullable: false })
   player2: User;
 
-  @Column({ nullable: true })
+  @Column({ nullable: false })
   mode: MatchType;
 
   @Column()
-  begin_at: Date;
+  beginAt: Date;
 
   @Column({ nullable: true })
-  end_at!: Date;
+  endAt!: Date;
 
   @ManyToOne(() => User, u => u.id, { nullable: true })
   winner!: User;

@@ -5,10 +5,10 @@ import { Map } from './map.entity';
 @Entity()
 export class MatchInvitation {
   @ManyToOne(() => User, u => u.id, { primary: true })
-  to: User;
+  from: User;
 
   @ManyToOne(() => User, u => u.id, { primary: true })
-  from: User;
+  to: User;
 
   @ManyToOne(() => Map, m => m.id, { nullable: false })
   map: Map;

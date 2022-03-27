@@ -45,6 +45,6 @@ export class User {
   @JoinColumn()
   avatar: Avatar;
 
-  @Column({ default: true})
+  @Column({ default: true, nullable: false })
   newUser: boolean;
 }
