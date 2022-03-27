@@ -19,7 +19,7 @@
 				<nav-button text="Channels" route="channel">
 					<GroupIcon />
 				</nav-button>
-				<nav-button text="Chat" route="chat" class="chat-link" :notification="1">
+				<nav-button text="Chat" route="chat" class="chat-link" :notification="this.newMessage">
 					<ChatIcon />
 				</nav-button>
 			</div>
@@ -73,6 +73,8 @@ import { key } from '@/store/index.ts'
 import { API } from '@/scripts/auth.ts';
 import router from '@/router';
 import { Profile, User } from '@/interfaces/Profile';
+import { SocketMessage } from '@/interfaces/Message';
+import { chatSocket } from '@/socket.ts'
 
 export default defineComponent({
 	components: {
@@ -86,6 +88,20 @@ export default defineComponent({
 		SearchIcon,
 		MenuIcon,
 		Logo,
+	},
+	data() {
+		return {
+			socket : chatSocket,
+			history: [] as SocketMessage[]
+		}
+	},
+	mounted() {
+		this.socket
+			.on('message', (data: {channelMessage: SocketMessage}) => {
+				// console.log("NEW MESSAGE")
+				// if (data.channelMessage.message.user.)
+				// this.history.push(data.channelMessage)
+			})
 	},
 	methods: {
 		toggle_nav(): void {
@@ -104,8 +120,10 @@ export default defineComponent({
 	computed: {
 		whoiam() : string {
 			const store = useStore(key)
-			console.log("user : ", localStorage.getItem('user'))
 			return store.getters.getLogin || 'unknown'
+		},
+		newMessage() : number {
+			return this.history.length
 		}
 	}
 })
