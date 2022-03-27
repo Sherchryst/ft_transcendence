@@ -21,11 +21,13 @@ const basic_board : Board = {
     dx: speed * (Math.floor(Math.random() * 2)? -1:1), //random player
     dy: Math.random() * speed * 1.5 * (Math.floor(Math.random() * 2)? -1:1) }, //random top/bottom
   player: [{
+    user_id : "player1",
     id: 0,
     y: 50,
     old_y: 50,
     score : 0,
     half_height : 6 },{
+    user_id : "player2",
     id: 1,
     y: 50,
     old_y: 50,
@@ -76,10 +78,8 @@ export class GameGateway implements OnGatewayConnection {
   }
 
   handleDisconnect(@ConnectedSocket() socket : Socket) {
-    const id : string = socket.id;
-    // if (boards.get(id).player[0]?.score == 11 || boards.get(id).player[1]?.score == 11)
-    //   boards.delete(id); // tmp solution, will change when db is set
-    console.log("disconnection from game : ", id);
+    // --> put score of other player to 11 in bd
+    console.log("disconnection from game : ", socket.id);
   }
 
   @SubscribeMessage('connection')
@@ -112,13 +112,12 @@ export class GameGateway implements OnGatewayConnection {
       return ;
     this.gameService.updatePlayer(0, tmp.y, board);
   }
+
   async sendUpdateBoard(socket: Socket) {
     var timer = 0;
     var board = boards.get(socket.id);
-    if (!board)
-        return ;
     this.gameService.reset(true, board);
-    while (board && !board.end)
+    while (!board.end)
     {
       await sleep(interval);
       if (board.new_game)
@@ -128,11 +127,11 @@ export class GameGateway implements OnGatewayConnection {
       }
       this.server.to(socket.id).emit('board', this.gameService.updateBall(board));
       if (!(timer % 200))
-      {
         board.bot_offset = (Math.floor(Math.random() * 2) ? -1 : 1) * Math.random()
-          * board.player[1].half_height * 1.1 * board.ball.dx;
-      }
+          * board.player[1].half_height * 1.2 * board.ball.dx;
       timer++;
     }
+    // update game in bdd --> end of match
+    boards.delete(socket.id);
   }
 }

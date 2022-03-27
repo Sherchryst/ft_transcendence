@@ -138,6 +138,8 @@ export class GameService
     board.ball.half_width = 2;
 		board.player[0].half_height = 6;
 		board.player[1].half_height = 6;
+		board.bot_offset = (Math.floor(Math.random() * 2) ? -1 : 1) * Math.random()
+          * board.player[1].half_height * 1.2 * board.ball.dx;
 		board.pass_count = 0;
     board.update_needed = true;
     }
