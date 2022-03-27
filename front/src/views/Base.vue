@@ -19,7 +19,7 @@
 				<nav-button text="Channels" route="channel">
 					<GroupIcon />
 				</nav-button>
-				<nav-button text="Chat" route="chat" class="chat-link">
+				<nav-button text="Chat" route="chat" class="chat-link" :notification="1">
 					<ChatIcon />
 				</nav-button>
 			</div>

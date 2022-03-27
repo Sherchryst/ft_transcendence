@@ -1,7 +1,7 @@
 <template>
 	<div class="grid grid-cols-12 lg:gap-x-32">
 	<!-- <div class="flex flex-col lg:flex-row justify-between sm:flex-wrap"> -->
-		<div class="col-span-12 md:col-span-4">
+		<div class="col-span-12 md:col-span-4 flex flex-col max-w-sm">
 			<div class="flex place-content-center mb-10">
 				<ProfilePicture></ProfilePicture>
 			</div>
@@ -84,7 +84,7 @@
 							<LargerCard></LargerCard>
 						</div>
 						<div>
-							<LargerCard></LargerCard>
+							<LargerCard class="lg-card-inactive"></LargerCard>
 						</div>
 					</div>
 				</template>
