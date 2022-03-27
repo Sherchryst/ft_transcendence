@@ -62,8 +62,9 @@ const routes: Array<RouteRecordRaw> = [
       component: Profile
     },
     {
-      path: "game",
+      path: "game/:match_id",
       name: "game",
+      props: true,
       component: Game
     }
     ]

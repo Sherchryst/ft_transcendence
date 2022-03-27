@@ -43,8 +43,17 @@ export class MatchService
     });
   }
 
+  async findMatch(matchId: number): Promise<Match> {
+    return getRepository(Match).findOne({
+      relations: ['player1', 'player2'],
+      where: {
+        id: matchId
+      }
+    })
+  }
+
   async findMatchInvitations(userId: number, fromId: number): Promise<MatchInvitation> {
-    return await getRepository(MatchInvitation).findOne({
+    return getRepository(MatchInvitation).findOne({
       relations: ['to', 'map'],
       where: {
         from: { id: fromId },

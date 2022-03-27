@@ -4,7 +4,7 @@
 			<h4 class="text-3xl font-bold">{{title}}</h4>
 			<slot></slot>
 		</div>
-		<button-link :text="action_name" :href="link"/>
+		<button-link @click="action" :text="action_name"/>
 	</div>
 </template>
 
@@ -20,7 +20,12 @@ export default defineComponent({
 	props: {
 		title: { type: String, default: 'title' },
 		action_name: { type: String, default: 'action_name'},
-		link: { type: String, default: 'link'}
+		// link: { type: String, default: 'link'}
+	},
+	methods: {
+			action() {
+				this.$emit('action')
+			}
 	}
 })
 </script>

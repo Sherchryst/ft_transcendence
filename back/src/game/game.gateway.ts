@@ -8,6 +8,9 @@ import { CustomJwtService, getJwtFromSocket } from 'src/auth/jwt/jwt.service';
 import { UsersService } from 'src/users/users.service';
 import { WsJwt2faGuard } from 'src/auth/jwt/jwt.guard';
 import { Req, UseGuards } from '@nestjs/common';
+import { match } from 'assert';
+import { MatchType } from './entities/match.entity';
+import { MatchInvitation } from './entities/match-invitation.entity';
 
 const interval = 20;
 var calc = false;
@@ -40,7 +43,8 @@ const basic_board : Board = {
 	end : false,
   pass_count : 0,
   new_game : true,
-  update_needed : true
+  update_needed : true,
+  match_id : 0
 }
 
 function sleep(ms: number) {
@@ -50,6 +54,12 @@ function sleep(ms: number) {
 @UseGuards(WsJwt2faGuard)
 @WebSocketGateway(3001, { namespace : "game" })
 export class GameGateway implements OnGatewayConnection {
+  static startGame(id: any) {
+    throw new Error('Method not implemented.');
+  }
+
+  WsClients = new Map<number, Socket>();
+
   @WebSocketServer()
   server : Server;
   constructor(private readonly gameService : GameService,
@@ -68,9 +78,11 @@ export class GameGateway implements OnGatewayConnection {
       const user = await this.usersService.findOne(payload.sub);
       if (user.twofa && !payload.isSecondFactorAuth)
         throw new WsException("");
+      console.log("allo", user.id, socket.id, this.WsClients)
+      this.WsClients.set(user.id, socket);
     }
-    catch {
-      console.log("Game: Unauthorized connection");
+    catch(reason) {
+      console.log("Game: Unauthorized connection", reason);
       socket.disconnect(false);
       return;
     }
@@ -82,23 +94,55 @@ export class GameGateway implements OnGatewayConnection {
     console.log("disconnection from game : ", socket.id);
   }
 
+  @SubscribeMessage('invite')
+  async handleInvite(
+  @Req() req,
+  @MessageBody() data: {login: string, mapId: number}) {
+    const to_user = await this.usersService.findByLogin(data.login);
+    var map = await this.matchService.findMap(data.mapId)
+    const invitation = await this.matchService.createMatchInvitation(req.user.id, to_user.id, map);
+    console.log("invitation", invitation)
+    this.WsClients.get(to_user.id).emit("invited", invitation);
+  }
+  
+  @SubscribeMessage('bot')
+  async handleBot(
+    @Req() req,
+    @ConnectedSocket() socket: Socket) {
+    const match = await this.matchService.createMatch(await this.matchService.findMap(1), req.user.id, null, MatchType.CASUAL);
+    boards.set(socket.id, JSON.parse(JSON.stringify(basic_board)));
+    boards.get(socket.id).player[0].user_id = this.WsClients.get(match.player1.id).id;
+    boards.get(socket.id).player[1].user_id = "";
+    boards.get(socket.id).match_id = match.id;
+    socket.emit("gameStart", match.id);
+  }
+
+  @SubscribeMessage('acceptInvit')
+  async handleAcceptInvit(
+  @Req() req,
+  @MessageBody() data: any,
+  @ConnectedSocket() socket: Socket) {
+    console.log("data", data);
+    const match = await this.matchService.createMatch(await this.matchService.findMap(1), data.to.id, data.from.id, MatchType.CASUAL); // make a randomization
+    boards.set(socket.id, JSON.parse(JSON.stringify(basic_board)));
+    boards.get(socket.id).player[0].user_id = this.WsClients.get(match.player1.id).id;
+    const player2_socket =  this.WsClients.get(match.player2.id);
+    boards.get(socket.id).player[1].user_id = player2_socket.id;
+    boards.get(socket.id).match_id = match.id;
+    socket.join("game:" + match.id);
+    player2_socket.join("game:" + match.id);
+    this.server.to("game:" + match.id).emit("gameStart", match.id);
+  }
+
   @SubscribeMessage('connection')
   async handleMessage(
     @Req() req,
-    @MessageBody() id: string,
+    @MessageBody() id: number,
     @ConnectedSocket() socket: Socket) {
-    boards.set(socket.id, JSON.parse(JSON.stringify(basic_board)));
-    var map = await this.matchService.findMap(1);
-    if (!map)
-      map = {
-        id: 1,
-        ballColor: 16562691,
-        backgroundColor: 344663,
-        starsColor: 12566194,
-        racketColor: 16777215
-      };
-    this.server.to(socket.id).emit("id" , { id: 0, map: map });
-    this.server.to(socket.id).emit("login" , { id: 0, login: req.user.login });
+    const match =  await this.matchService.findMatch(id);
+    this.server.to("game:" + id).emit("gameMap", { map : match.map, login : [match.player1, match.player2]});
+    // socket.emit("gameMap", { map : match.map, login : [req.user.login, "Bot"]});
+    this.server.to(socket.id).emit("id" , 0);
     //       var match = await this.matchService.createMatch(map, user, null, MatchType.CASUAL);
     this.sendUpdateBoard(socket);
   }

@@ -40,6 +40,7 @@
   export default defineComponent({
     name: 'mycanvas',
     props: {
+      match_id: Number,
       msg: String
     },
     $refs!: {
@@ -48,7 +49,6 @@
     data() {
       return {
         login : ["player1", "player2"],
-        socket : new WebSocket('ws://localhost:3001/game'),
         ctx : null as any,
         id : 123,
         map: {
@@ -72,8 +72,11 @@
       }
     },
     mounted() {
-      gameSocket.on("connect", () => {
-      gameSocket.emit('connection');
+      gameSocket.emit('connection', this.match_id);
+      gameSocket.on("gameMap", (data : any) => {
+      this.map = data.map;
+      this.login = data.login;
+      this.drawBackground();
       console.log('socket connected');
       });
       gameSocket.on("board", (data : any) => {
@@ -81,13 +84,11 @@
         this.clear();
         this.addObjects();
       });
-      gameSocket.on("login", (data : any) => {
-        this.login[data.id] = data.login;
-      });
+      // gameSocket.on("login", (data : any) => {
+      //   this.login[data.id] = data.login;
+      // });
       gameSocket.on("id", (data : any) => {
-        this.id = data.id;
-        this.map = data.map;
-        this.drawBackground();
+        this.id = data;
       });
       this.ctx = (this.$refs.mycanvas as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
       this.dimX = this.ctx.canvas.width / 100;

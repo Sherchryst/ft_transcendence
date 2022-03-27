@@ -13,4 +13,5 @@ export interface Board
 	bot_offset : number;
 	pass_count : number;
 	new_game : boolean;
+	match_id : number;
 }

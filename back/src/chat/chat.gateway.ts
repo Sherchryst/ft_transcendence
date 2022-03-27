@@ -40,7 +40,7 @@ export class ChatGateway implements OnGatewayConnection{
             socket.disconnect(false)
             return
         }
-        console.log("conected to chat...")
+        console.log("connected to chat...")
     }
 
     @SubscribeMessage('join')
