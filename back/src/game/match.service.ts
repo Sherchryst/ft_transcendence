@@ -65,7 +65,7 @@ export class MatchService
   async setWinner(matchId: number, winnerId: number) {
     await getRepository(Match).update(matchId, {
       endAt: new Date(),
-      winner: { id: winnerId }
+      winner: winnerId >= 0 ? { id: winnerId } : null
     });
   }
 
