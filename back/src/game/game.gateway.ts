@@ -14,6 +14,7 @@ import { MatchInvitation } from './entities/match-invitation.entity';
 
 const interval = 20;
 var calc = false;
+var pending_player = -1;
 const speed = 1;
 var boards = new Map<string, Board>();
 const basic_board : Board = {
@@ -117,6 +118,29 @@ export class GameGateway implements OnGatewayConnection {
       board.new_game = true;
     socket.join(`game:${match.id}`);
     socket.emit("gameStart", match.id);
+    // console.log("match_id (bot): ", match.id);
+  }
+
+  @SubscribeMessage('matchmaking')
+  async handleMatchmaking(
+    @Req() req,
+    @ConnectedSocket() socket: Socket) {
+      if (pending_player >= 0)
+      {
+        const map = await this.matchService.findMap(1); // TODO: get map from match invitation
+        const match = await this.matchService.createMatch(map, req.user.id, pending_player, MatchType.RANKED); // make a randomization
+        boards.set("" + match.id, JSON.parse(JSON.stringify(basic_board)));
+        var board = boards.get("" + match.id);
+        board.player[0].user_id = this.WsClients.get(match.player1.id).id;
+        const player2_socket =  this.WsClients.get(match.player2.id);
+        board.player[1].user_id = player2_socket.id;
+        socket.join(`game:${match.id}`);
+        player2_socket.join(`game:${match.id}`);
+        this.server.to(`game:${match.id}`).emit("gameStart", match.id);
+        pending_player = -1;
+      }
+      else
+        pending_player = req.user.id;
     // console.log("match_id (bot): ", match.id);
   }
 
