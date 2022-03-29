@@ -181,22 +181,16 @@
 - racket_color: INT NOT NULL
 	- The color of the racket.
 
-### - match_invitation(<ins>*match_id*, *to_id*, *from_id*</ins>, *map_id*, sent_at, is_accepted)
+### - match_invitation(<ins>*from_id*, *to_id*</ins>, *map_id*, sent_at)
 
-- match_id: INT
-	- The id of the match.
-- to_id: INT NOT NULL
-	- The id of the user who was invited to the match.
 - from_id: INT NOT NULL
 	- The id of the user who sent the invitation.
+- to_id: INT NOT NULL
+	- The id of the user who was invited to the match.
 - map_id: INT NOT NULL
 	- The id of the map used in the match.
 - sent_at: TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 	- The date at which the invitation was sent.
-- is_accepted: BOOLEAN NOT NULL DEFAULT FALSE
-	- The invitation was accepted.
-
-### - match_request(<ins>*match_id*</ins>, )
 
 ### - match(<ins>id</ins>, *map_id*, *player1_id*, *player2_id*, mode, begin_at, end_at, *winner_id*, score1, score2)
 
