@@ -1,8 +1,8 @@
 <template>
 	<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-		<game-panel title="Battleground" @action="matchmaking" action_name="Recherche">
+		<game-panel title="Battleground" @action="(evt) => matchmaking()" action_name="Recherche">
 		</game-panel>
-		<game-panel @action="sendInvite" title="Challenge" action_name="Défier">
+		<game-panel @action="sendInvite()" title="Challenge" action_name="Défier">
 			<form action="" class="flex flex-col">
 				<div class="flex flex-col-reverse mt-4">
 					<input class="px-3 py-2" type="text" name="username" id="username">

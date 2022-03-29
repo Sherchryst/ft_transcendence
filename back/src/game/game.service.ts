@@ -70,7 +70,7 @@ export class GameService
 				|| tmpx  >= width + ball.half_width) //ball out of map
 			{
 				board.player[player? 0 : 1].score++;
-				this.reset(false, board);
+				this.reset(board);
 			}
     // else if ((tmpx > dim.racket.x[0] - dim.racket.width - (ball.half_width * 2)
       // || tmpx <= dim.racket.x[1] + dim.racket.width + (ball.half_width * 2))
@@ -116,18 +116,12 @@ export class GameService
           - board.player[1].y;
 			this.updatePlayer(1, board.player[1].y + (Math.abs(dy) > Math.abs(board.bot_speed) ? board.bot_speed * Math.sign(dy) : dy), board); //limit speed of bot
 		}
-		// this.updatePlayer(1, ball.y);
-		// this.updatePlayer(0, ball.y);
+		// this.updatePlayer(1, ball.y, board);
+		// this.updatePlayer(0, ball.y, board);
 	}
-    reset(all : boolean, board : Board)
-    {
-		if (all) // for testing only
-		{
-			board.player[0].score = 0;
-			board.player[1].score = 0;
-			board.end = false;
-		}
-		else if (board.player[0].score >= 11 || board.player[1].score >= 11)
+	reset(board : Board)
+	{
+		if (board.player[0].score >= 11 || board.player[1].score >= 11)
 			board.end = true;
 		board.new_game = true;
 		board.dead = false;
@@ -141,6 +135,5 @@ export class GameService
 		board.bot_offset = (Math.floor(Math.random() * 2) ? -1 : 1) * Math.random()
           * board.player[1].half_height * 1.2 * board.ball.dx;
 		board.pass_count = 0;
-    board.update_needed = true;
-    }
+	}
 }

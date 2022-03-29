@@ -74,10 +74,14 @@
     mounted() {
       gameSocket.emit('connection', this.match_id);
       gameSocket.on("gameMap", (data : any) => {
-      this.map = data.map;
-      this.login = data.login;
-      this.drawBackground();
-      console.log('socket connected');
+        this.map = { ...this.map, ...data.map };
+        console.log(" my map :", this.map);
+        this.login = { ...this.login, ...data.login };
+        console.log(" logins :", this.login);
+        this.id = data.id;
+        console.log(" id :", this.id);
+        this.drawBackground();
+        console.log('socket connected');
       });
       gameSocket.on("board", (data : any) => {
         this.board = {...this.board, ...data}
@@ -87,9 +91,6 @@
       // gameSocket.on("login", (data : any) => {
       //   this.login[data.id] = data.login;
       // });
-      gameSocket.on("id", (data : any) => {
-        this.id = data;
-      });
       this.ctx = (this.$refs.mycanvas as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
       this.dimX = this.ctx.canvas.width / 100;
       this.dimY = this.ctx.canvas.height / 100;
@@ -220,7 +221,8 @@
         if (this.id > 1)
           return ;
         let rect : DOMRect = this.ctx.canvas.getBoundingClientRect();
-        gameSocket.emit('player', {"id" : this.id, "y" : (evt.clientY - rect.top) / this.dimY})
+        console.log("id :", this.id);
+        gameSocket.emit('player', {"match_id" : this.match_id, "id" : this.id, "y" : (evt.clientY - rect.top) / this.dimY})
       }
     }
   })

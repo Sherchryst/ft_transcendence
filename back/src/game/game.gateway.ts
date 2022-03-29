@@ -37,14 +37,12 @@ const basic_board : Board = {
     score : 0,
     half_height : 6 }],
 	dead : false,
-  bot : true,
+  bot : false,
   bot_speed : 3,
   bot_offset : 0,
 	end : false,
   pass_count : 0,
-  new_game : true,
-  update_needed : true,
-  match_id : 0
+  new_game : false,
 }
 
 function sleep(ms: number) {
@@ -78,7 +76,7 @@ export class GameGateway implements OnGatewayConnection {
       const user = await this.usersService.findOne(payload.sub);
       if (user.twofa && !payload.isSecondFactorAuth)
         throw new WsException("");
-      console.log("allo", user.id, socket.id, this.WsClients)
+      // console.log("allo", user.id, socket.id, this.WsClients)
       this.WsClients.set(user.id, socket);
     }
     catch(reason) {
@@ -101,7 +99,7 @@ export class GameGateway implements OnGatewayConnection {
     const to_user = await this.usersService.findByLogin(data.login);
     var map = await this.matchService.findMap(data.mapId)
     const invitation = await this.matchService.createMatchInvitation(req.user.id, to_user.id, map);
-    console.log("invitation", invitation)
+    // console.log("invitation", invitation)
     this.WsClients.get(to_user.id).emit("invited", invitation);
   }
   
@@ -109,12 +107,17 @@ export class GameGateway implements OnGatewayConnection {
   async handleBot(
     @Req() req,
     @ConnectedSocket() socket: Socket) {
-    const match = await this.matchService.createMatch(await this.matchService.findMap(1), req.user.id, null, MatchType.CASUAL);
-    boards.set(socket.id, JSON.parse(JSON.stringify(basic_board)));
-    boards.get(socket.id).player[0].user_id = this.WsClients.get(match.player1.id).id;
-    boards.get(socket.id).player[1].user_id = "";
-    boards.get(socket.id).match_id = match.id;
+      const map = await this.matchService.findMap(1);
+      const match = await this.matchService.createMatch(map, req.user.id, null, MatchType.CASUAL);
+      boards.set("" + match.id, JSON.parse(JSON.stringify(basic_board)));
+      var board = boards.get("" + match.id);
+      board.player[0].user_id = this.WsClients.get( match.player1.id).id;
+      board.player[1].user_id = "";
+      board.bot = true;
+      board.new_game = true;
+    socket.join(`game:${match.id}`);
     socket.emit("gameStart", match.id);
+    // console.log("match_id (bot): ", match.id);
   }
 
   @SubscribeMessage('acceptInvit')
@@ -122,16 +125,18 @@ export class GameGateway implements OnGatewayConnection {
   @Req() req,
   @MessageBody() data: any,
   @ConnectedSocket() socket: Socket) {
-    console.log("data", data);
-    const match = await this.matchService.createMatch(await this.matchService.findMap(1), data.to.id, data.from.id, MatchType.CASUAL); // make a randomization
-    boards.set(socket.id, JSON.parse(JSON.stringify(basic_board)));
-    boards.get(socket.id).player[0].user_id = this.WsClients.get(match.player1.id).id;
+    // console.log("data", data);
+    const map = await this.matchService.findMap(1); // TODO: get map from match invitation
+    const match = await this.matchService.createMatch(map, data.to.id, data.from.id, MatchType.CASUAL); // make a randomization
+    boards.set("" + match.id, JSON.parse(JSON.stringify(basic_board)));
+    var board = boards.get("" + match.id);
+    board.player[0].user_id = this.WsClients.get(match.player1.id).id;
     const player2_socket =  this.WsClients.get(match.player2.id);
-    boards.get(socket.id).player[1].user_id = player2_socket.id;
-    boards.get(socket.id).match_id = match.id;
-    socket.join("game:" + match.id);
-    player2_socket.join("game:" + match.id);
-    this.server.to("game:" + match.id).emit("gameStart", match.id);
+    board.player[1].user_id = player2_socket.id;
+    socket.join(`game:${match.id}`);
+    player2_socket.join(`game:${match.id}`);
+    this.server.to(`game:${match.id}`).emit("gameStart", match.id);
+    // console.log("match_id (acceptInvit): ", boards);
   }
 
   @SubscribeMessage('connection')
@@ -139,28 +144,46 @@ export class GameGateway implements OnGatewayConnection {
     @Req() req,
     @MessageBody() id: number,
     @ConnectedSocket() socket: Socket) {
+    // console.log("match_id (connection): ", id);
     const match =  await this.matchService.findMatch(id);
-    this.server.to("game:" + id).emit("gameMap", { map : match.map, login : [match.player1, match.player2]});
+    var player_id;
+    var board = boards.get("" + id);
+    if (board.player[0].user_id == socket.id)
+      player_id = 0;
+    else if (board.player[1].user_id == socket.id)
+      player_id = 1;
+    else
+      player_id = 2;
+    // await sleep(1000); // wait for other player to join
+    this.server.to(socket.id).emit("gameMap", { id : player_id, map : await this.matchService.findMap(1), login : [match.player1.login, match.player2 ? match.player2.login : "BOT"] });
     // socket.emit("gameMap", { map : match.map, login : [req.user.login, "Bot"]});
-    this.server.to(socket.id).emit("id" , 0);
     //       var match = await this.matchService.createMatch(map, user, null, MatchType.CASUAL);
-    this.sendUpdateBoard(socket);
+    if (player_id == 0)
+    {
+      while (board.new_game == false)
+        await sleep(500);
+      this.sendUpdateBoard(id);
+    }
+    else if (player_id == 1)
+      board.new_game = true;
   }
 
   @SubscribeMessage('player')
   handlePlayer(
-  @MessageBody() tmp: Player,
-  @ConnectedSocket() socket: Socket) {
-    var board = boards.get(socket.id);
+  @MessageBody() tmp: {match_id: number, id: number, y: number}) {
+    // console.log("match_id (player): ", tmp.match_id);
+    var board = boards.get("" + tmp.match_id); //match id
     if (!board)
       return ;
-    this.gameService.updatePlayer(0, tmp.y, board);
+      //check player id
+    this.gameService.updatePlayer(tmp.id, tmp.y, board);
   }
 
-  async sendUpdateBoard(socket: Socket) {
+  async sendUpdateBoard(id: number) {
     var timer = 0;
-    var board = boards.get(socket.id);
-    this.gameService.reset(true, board);
+
+    var board = boards.get("" + id);
+    // console.log("id : \n", id, "boards :\n", boards, "board:", board);
     while (!board.end)
     {
       await sleep(interval);
@@ -169,13 +192,13 @@ export class GameGateway implements OnGatewayConnection {
         await sleep(1000);
         board.new_game = false;
       }
-      this.server.to(socket.id).emit('board', this.gameService.updateBall(board));
+      this.server.to(`game:${id}`).emit('board', this.gameService.updateBall(board));
       if (!(timer % 200))
         board.bot_offset = (Math.floor(Math.random() * 2) ? -1 : 1) * Math.random()
           * board.player[1].half_height * 1.2 * board.ball.dx;
       timer++;
     }
     // update game in bdd --> end of match
-    boards.delete(socket.id);
+    boards.delete("" + id);
   }
 }
