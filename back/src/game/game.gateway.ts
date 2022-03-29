@@ -125,7 +125,7 @@ export class GameGateway implements OnGatewayConnection {
   async handleMatchmaking(
     @Req() req,
     @ConnectedSocket() socket: Socket) {
-      if (pending_player >= 0)
+      if (pending_player >= 0 && pending_player != req.user.id)
       {
         const map = await this.matchService.findMap(1); // TODO: get map from match invitation
         const match = await this.matchService.createMatch(map, req.user.id, pending_player, MatchType.RANKED); // make a randomization
