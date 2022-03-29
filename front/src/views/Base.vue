@@ -51,7 +51,7 @@
 					</div>
 				</div>
 			</div>
-			<router-view/>
+			<router-view @read-message="removeMessageFrom"/>
 		</div>
 	</div>
 </template>
@@ -72,7 +72,6 @@ import { useStore } from 'vuex'
 import { key } from '@/store/index.ts'
 import { API } from '@/scripts/auth.ts';
 import router from '@/router';
-import { Profile, User } from '@/interfaces/Profile';
 import { SocketMessage } from '@/interfaces/Message';
 import { chatSocket } from '@/socket.ts'
 
@@ -92,15 +91,14 @@ export default defineComponent({
 	data() {
 		return {
 			socket : chatSocket,
-			history: [] as SocketMessage[]
+			channelMessage: [] as SocketMessage[]
 		}
 	},
 	mounted() {
 		this.socket
 			.on('message', (data: {channelMessage: SocketMessage}) => {
-				// console.log("NEW MESSAGE")
-				// if (data.channelMessage.message.user.)
-				// this.history.push(data.channelMessage)
+				if (data.channelMessage.message.from.login != this.$store.getters.getLogin)
+					this.channelMessage.push(data.channelMessage)
 			})
 	},
 	methods: {
@@ -116,6 +114,16 @@ export default defineComponent({
 			localStorage.removeItem('user')
 			router.push({name: "login"})
 		},
+		removeMessageFrom(id: number)
+		{
+			console.log("remove message from ", id);
+			for( let i = 0; i < this.channelMessage.length; i++){ 
+				if ( this.channelMessage[i].channel.id == id) { 
+					this.channelMessage.splice(i, 1); 
+					i--; 
+				}
+			}
+		}
 	},
 	computed: {
 		whoiam() : string {
@@ -123,7 +131,7 @@ export default defineComponent({
 			return store.getters.getLogin || 'unknown'
 		},
 		newMessage() : number {
-			return this.history.length
+			return this.channelMessage.length
 		}
 	}
 })
