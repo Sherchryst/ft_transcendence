@@ -63,8 +63,7 @@ export class MatchService
   }
 
   async setWinner(matchId: number, winnerId: number) {
-    await getRepository(Match).save({
-      id: matchId,
+    await getRepository(Match).update(matchId, {
       endAt: new Date(),
       winner: { id: winnerId }
     });
@@ -75,8 +74,7 @@ export class MatchService
   }
 
   async updateScore(matchId : number, score1: number, score2: number) {
-    await getRepository(Match).save({
-      id: matchId,
+    await getRepository(Match).update(matchId, {
       score1: score1,
       score2: score2
     });

@@ -190,6 +190,7 @@ export class GameGateway implements OnGatewayConnection {
       if (board.new_game)
       {
         await sleep(1000);
+        this.matchService.updateScore(id, board.player[0].score, board.player[1].score);
         board.new_game = false;
       }
       this.server.to(`game:${id}`).emit('board', this.gameService.updateBall(board));
@@ -198,7 +199,9 @@ export class GameGateway implements OnGatewayConnection {
           * board.player[1].half_height * 1.2 * board.ball.dx;
       timer++;
     }
-    // update game in bdd --> end of match
+    const match =  await this.matchService.findMatch(id);
+    this.matchService.setWinner(id, board.player[0].score > board.player[1].score ? match.player1.id : match.player2.id);
+    this.matchService.updateScore(id, board.player[0].score, board.player[1].score);
     boards.delete("" + id);
   }
 }
