@@ -31,8 +31,6 @@
 <script lang="ts">
 import GamePanel from '@/components/GamePanel.vue';
 import BigRadioButton from '@/components/BigRadioButton.vue';
-import SwitchButton from '@/components/SwitchButton.vue';
-// import ButtonLink from '@/components/ButtonLink.vue';
 import { defineComponent } from 'vue';
 import { gameSocket } from '../socket';
 import router from '@/router';
@@ -41,8 +39,6 @@ export default defineComponent({
 	components: {
 		GamePanel,
 		BigRadioButton,
-		SwitchButton
-		// ButtonLink
 	},
 	mounted() {
 		gameSocket.on("invited", (data : any) => {
