@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory, RouteRecordRaw, useRoute } from 'vue-router'
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import Base from '@/views/Base.vue'
 import Home from '@/views/Home.vue'
 import Login from '@/views/Login.vue'
@@ -9,7 +9,6 @@ import ListChat from '@/views/ListChat.vue'
 import Profile from '@/views/Profile.vue'
 import Register from '@/views/Register.vue'
 import GameChoice from '@/views/GameChoice.vue'
-import Redirection from '@/components/Redirection.vue'
 import Game from '@/views/Game.vue'
 import { useCookies } from "vue3-cookies";
 
@@ -75,7 +74,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
 	path: '/register',
-	name: 'Register',
+	name: 'register',
 	component: Register
   },
 ]
@@ -86,10 +85,19 @@ const router = createRouter({
 })
 
 router.beforeEach((to, form, next) => {
+  // console.log("STORE", store.getters)
   if (to.name != 'login' && !cookies.isKey('jwt'))
-    next({ name: 'login' });
-  else
-    next()
+    next({ name: 'login' })
+  else if (to.name != 'register' && cookies.isKey('jwt') && localStorage.getItem('user')) {
+    const profile = JSON.parse(localStorage.getItem('user') || '' )
+    if (profile?.user?.newUser)
+      next({ name: 'register'})
+    else
+      next()
+  }
+  else {
+      next()
+  }
 })
 
 export default router
