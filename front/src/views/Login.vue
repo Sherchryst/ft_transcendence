@@ -37,6 +37,8 @@ export default defineComponent({
 		if (route.query.is2fa !== undefined)
 		{
 			store.dispatch('connection').then(r => {
+				if (this.$store.getters.isNewUser)
+					router.push({name: "register"})
 				router.push({name: "home"})
 			});
 		}

@@ -11,13 +11,4 @@ createApp(App)
 	.use(router)
 	.use(createMetaManager())
 	.use(VueCookies)
-	// .use(new VueSocketIO({
-	// 	debug: true,
-	// 	connection: socket,
-	// 	vuex: {
-	// 		store,
-	// 		actionPrefix: "SOCKET_",
-	// 		mutationPrefix: "SOCKET_"
-	// 	}
-	// }))
 	.mount('#app')

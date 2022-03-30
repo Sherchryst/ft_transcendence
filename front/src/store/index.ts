@@ -1,8 +1,6 @@
-import { InjectionKey }
- from 'vue'
+import { InjectionKey } from 'vue'
 import { createStore, Store } from 'vuex';
 import { Profile, User } from '@/interfaces/Profile';
-import { io, Socket } from "socket.io-client";
 import { API } from '@/scripts/auth';
 // define your typings for the store state
 export interface State {
@@ -22,16 +20,27 @@ export const store = createStore<State>({
     displayMessages(state) {
       return state.chatMessages
     },
-    getLogin(state) : string{
-      return state.profile.user.login
+    getLogin() : string{
+      const profile : Profile = JSON.parse(localStorage.getItem('user') || '')
+      return profile?.user?.login
     },
-    getNickname(state) : string{
-      return state.profile.user.nickname
+    getNickname() : string{
+      const profile : Profile = JSON.parse(localStorage.getItem('user') || '')
+      return profile?.user?.nickname
+    },
+    getId() : number{
+      const profile : Profile = JSON.parse(localStorage.getItem('user') || '')
+      return profile?.user?.id
+    },
+    isNewUser(): boolean {
+      const profile : Profile = JSON.parse(localStorage.getItem('user') || '')
+      return profile?.user?.newUser
     }
   },
   mutations: {
     setProfile(state, _profile) {
-      state.profile = _profile
+      localStorage.setItem('user', JSON.stringify(_profile))
+      // state.profile = _profile
     },
     SOCKET_ADD_MESSAGE(state, message) {
       state.chatMessages.push(message);
@@ -40,7 +49,7 @@ export const store = createStore<State>({
   actions: {
     async connection({commit}){
       const response = await API.get('users/profile');
-       commit("setProfile", response.data);
+        commit("setProfile", response.data);
     },
     SOCKET_addMessage({ commit }, message) {
       commit('ADD_MESSAGE', message);

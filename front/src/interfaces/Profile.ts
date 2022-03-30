@@ -11,5 +11,6 @@ export interface User {
 	nickname: string,
 	role: string,
 	twofa?: boolean,
-	twofaSecret?: string
+	twofaSecret?: string,
+	newUser: boolean
 }
