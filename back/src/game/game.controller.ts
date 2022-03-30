@@ -8,14 +8,4 @@ export class GameController
 {
 	constructor(private readonly gameService : GameService)
 	{}
-	// @Get('board')
-	// findBoard()
-	// {
-	// 	return this.gameService.findBoard();
-	// }
-	// @Patch(':id')
-	// updatePlayer(@Param('id') id : number, @Body() y : number)
-	// {
-	// 	return this.gameService.updatePlayer(id, y);
-	// }
 }

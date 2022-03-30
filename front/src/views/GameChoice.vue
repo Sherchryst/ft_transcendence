@@ -1,11 +1,12 @@
 <template>
 	<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-		<GamePanel title="Battleground" action_name="Recherche" />
-		<game-panel title="Challenge" action_name="Défier">
+		<game-panel title="Battleground" @action="(evt) => matchmaking()" action_name="Recherche">
+		</game-panel>
+		<game-panel @action="sendInvite()" title="Challenge" action_name="Défier">
 			<form action="" class="flex flex-col">
 				<div class="flex flex-col-reverse mt-4">
 					<input class="px-3 py-2" type="text" name="username" id="username">
-					<label class="text-left" for="username">Useranme</label>
+					<label class="text-left" for="username">Username</label>
 				</div>
 				<div class="flex flex-col items-start mt-10">
 					<span>Maps</span>
@@ -21,7 +22,7 @@
 				</div>
 			</form>
 		</game-panel>
-		<game-panel title="Entrainement" action_name="Lancer" link="http://localhost:8080/#/game">
+		<game-panel title="Entrainement" @action="requestGame" action_name="Lancer">
 			<!-- <ButtonLink text="Bot game" href= /> -->
 		</game-panel>
 	</div>
@@ -33,6 +34,8 @@ import BigRadioButton from '@/components/BigRadioButton.vue';
 import SwitchButton from '@/components/SwitchButton.vue';
 // import ButtonLink from '@/components/ButtonLink.vue';
 import { defineComponent } from 'vue';
+import { gameSocket } from '../socket';
+import router from '@/router';
 
 export default defineComponent({
 	components: {
@@ -41,6 +44,28 @@ export default defineComponent({
 		SwitchButton
 		// ButtonLink
 	},
+	mounted() {
+		gameSocket.on("invited", (data : any) => {
+        gameSocket.emit("acceptInvit", data);
+				console.log("accepted invite : ", data);
+		});
+		gameSocket.on("gameStart", (data: any) => {
+				router.push({ name: "game", params: { match_id: data }})
+		})
+	},
+	methods: {
+		sendInvite() {
+			gameSocket.emit("invite", { login : "mchardin", map : 1});
+		},
+		requestGame() {
+			gameSocket.emit("bot");
+			console.log("BOT");
+		},
+		matchmaking() {
+			gameSocket.emit("matchmaking");
+			console.log("matchmaking")
+		}
+	}
 })
 </script>
 
