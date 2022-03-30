@@ -17,13 +17,31 @@
             </template>
       </LargePanel>
       <SquarePanel>
-          <LastGamePanel login="login" username="User" :first="1" :second="3" :result="false"></LastGamePanel>
+          <LastGamePanel login="login" username="User" :first="2" :second="3" :result="false"></LastGamePanel>
       </SquarePanel>
       <SquarePanel>
-        <MainTitle>Winrate</MainTitle>
-        <div class="text-3xl font-bold">89%</div>
+        <div class="h-full flex flex-col justify-between">
+            <MainTitle>Winrate</MainTitle>
+            <div class="text-8xl font-bold pb-12">89%</div>
+        </div>
       </SquarePanel>
-      <SquarePanel></SquarePanel>
+      <SquarePanel>
+        <div class="h-full flex flex-col justify-between gap-3">
+            <MainTitle>Top 10</MainTitle>
+            <div class="flex flex-col overflow-auto gap-6">
+                <TopPlayerPanel login="login" username="Username" :rank="1"></TopPlayerPanel>
+                <TopPlayerPanel login="login" username="Username" :rank="2"></TopPlayerPanel>
+                <TopPlayerPanel login="login" username="Username" :rank="3"></TopPlayerPanel>
+                <TopPlayerPanel login="login" username="Username" :rank="4"></TopPlayerPanel>
+                <TopPlayerPanel login="login" username="Username" :rank="5"></TopPlayerPanel>
+                <TopPlayerPanel login="login" username="Username" :rank="6"></TopPlayerPanel>
+                <TopPlayerPanel login="login" username="Username" :rank="7"></TopPlayerPanel>
+                <TopPlayerPanel login="login" username="Username" :rank="8"></TopPlayerPanel>
+                <TopPlayerPanel login="login" username="Username" :rank="9"></TopPlayerPanel>
+                <TopPlayerPanel login="login" username="Username" :rank="10"></TopPlayerPanel>
+            </div>
+        </div>
+      </SquarePanel>
   </div>
 </template>
 
@@ -35,6 +53,7 @@ import LargePanel from '@/components/home/LargePanel.vue';
 import MainTitle from '@/components/MainTitle.vue';
 import ButtonLink from '@/components/ButtonLink.vue';
 import LastGamePanel from '@/components/home/LastGamePanel.vue';
+import TopPlayerPanel from '@/components/home/TopPlayerPanel.vue';
 
 export default defineComponent({
     components: {
@@ -42,7 +61,8 @@ export default defineComponent({
     LargePanel,
     MainTitle,
     ButtonLink,
-    LastGamePanel
+    LastGamePanel,
+    TopPlayerPanel
 },
   setup () {
     useMeta({ title: 'Home' })

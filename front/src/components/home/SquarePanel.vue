@@ -1,5 +1,5 @@
 <template>
-    <div class="col-span-3 panel pb-8 p-8">
+    <div class="col-span-3 panel pb-8 p-8 h-full">
         <slot></slot>
     </div>
 </template>
