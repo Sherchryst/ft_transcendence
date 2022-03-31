@@ -19,7 +19,7 @@
 				<nav-button text="Channels" route="channel">
 					<GroupIcon />
 				</nav-button>
-				<nav-button text="Chat" route="chat" class="chat-link">
+				<nav-button text="Chat" route="chat" class="chat-link" :notification="this.newMessage">
 					<ChatIcon />
 				</nav-button>
 			</div>
@@ -37,7 +37,7 @@
 				<div class="hidden sm:flex flex-row justify-between justify-items-center h-16">
 					<div class="self-center">
 						<!-- If connected -->
-						<ButtonLink @click="logout()" text="Deconnection" route="login" />
+						<ButtonLink @click="logout()" class="btn-neutral" text="Deconnection" />
 					</div>
 					<div class="flex flex-row justify-between justify-items-center">
 						<div class="self-center">
@@ -51,7 +51,7 @@
 					</div>
 				</div>
 			</div>
-			<router-view/>
+			<router-view @read-message="removeMessageFrom"/>
 		</div>
 	</div>
 </template>
@@ -72,7 +72,8 @@ import { useStore } from 'vuex'
 import { key } from '@/store/index'
 import { API } from '@/scripts/auth';
 import router from '@/router';
-import { Profile, User } from '@/interfaces/Profile';
+import { SocketMessage } from '@/interfaces/Message';
+import { chatSocket } from '@/socket.ts'
 
 export default defineComponent({
 	components: {
@@ -87,6 +88,19 @@ export default defineComponent({
 		MenuIcon,
 		Logo,
 	},
+	data() {
+		return {
+			socket : chatSocket,
+			channelMessage: [] as SocketMessage[]
+		}
+	},
+	mounted() {
+		this.socket
+			.on('message', (data: {channelMessage: SocketMessage}) => {
+				if (data.channelMessage.message.from.login != this.$store.getters.getLogin)
+					this.channelMessage.push(data.channelMessage)
+			})
+	},
 	methods: {
 		toggle_nav(): void {
 			let navElement = document.getElementById("nav");
@@ -97,13 +111,27 @@ export default defineComponent({
 		logout(): void {
 			API.post('auth/logout')
 			sessionStorage.clear()
+			localStorage.removeItem('user')
 			router.push({name: "login"})
 		},
+		removeMessageFrom(id: number)
+		{
+			console.log("remove message from ", id);
+			for( let i = 0; i < this.channelMessage.length; i++){ 
+				if ( this.channelMessage[i].channel.id == id) { 
+					this.channelMessage.splice(i, 1); 
+					i--; 
+				}
+			}
+		}
 	},
 	computed: {
 		whoiam() : string {
 			const store = useStore(key)
-			return store.state.profile.user.login || 'unknown'
+			return store.getters.getLogin || 'unknown'
+		},
+		newMessage() : number {
+			return this.channelMessage.length
 		}
 	}
 })

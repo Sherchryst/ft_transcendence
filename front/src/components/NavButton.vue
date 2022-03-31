@@ -4,6 +4,11 @@
 			<slot></slot>
 		</div>
 		<div class="md:hidden pl-7 pt-1">{{text}}</div>
+		<div v-if="notification" class="felx lg:relative">
+			<div class="notification px-2 text-sm ml-3 lg:absolute bottom-0 right-0">
+				{{ notification }}
+			</div>
+		</div>
 	</router-link>
 </template>
 
@@ -13,14 +18,11 @@ import { defineComponent } from 'vue';
 export default defineComponent({
 	name: "NavButton",
 	props: {
-		text: {
-			type: String,
-			default: "link"
-		},
+		text: {type: String, default: "link"},
+		notification: {type: Number, default: 0},
 		route: String,
 	},
 	methods: {
-		// Need better solution
 		toggle_nav(): void {
 			let navElement = document.getElementById("nav");
 
@@ -57,6 +59,11 @@ export default defineComponent({
 		svg {
 			fill: $dark-font;
 		}
+	}
+	.notification{
+		background: $defeat-color;
+		color: white;
+		border-radius: 20px;
 	}
 }
 </style>

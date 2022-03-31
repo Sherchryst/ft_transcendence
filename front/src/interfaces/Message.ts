@@ -1,3 +1,4 @@
+import { Channel } from "./Channel"
 import { User } from "./Profile"
 
 export interface Message_t {
@@ -9,4 +10,9 @@ export interface Message_t {
 export interface ServerMessage {
 	from: User,
 	content: String
+}
+
+export interface SocketMessage {
+	message: ServerMessage
+	channel: Channel
 }

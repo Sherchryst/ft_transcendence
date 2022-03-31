@@ -1,5 +1,5 @@
 <template>
-	<div class="level p-4">
+	<div class="level py-4">
 		<div class="level-bar relative shadow-xl">
 			<div class="progress" v-bind:style = "{'width':percent+'%'}"></div>
 			<div class="level-number left absolute left-4">{{level}}</div>
