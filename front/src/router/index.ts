@@ -9,7 +9,7 @@ import ListChat from '@/views/ListChat.vue'
 import Profile from '@/views/Profile.vue'
 import Register from '@/views/Register.vue'
 import GameChoice from '@/views/GameChoice.vue'
-import Redirection from '@/components/Redirection.vue'
+import EditProfile from '@/views/EditProfile.vue'
 import Game from '@/views/Game.vue'
 import { useCookies } from "vue3-cookies";
 
@@ -56,10 +56,15 @@ const routes: Array<RouteRecordRaw> = [
       component: ListChat
     },
     {
-      path: 'profile/:username',
+      path: 'profile/view/:username',
       name: 'profile',
       props: true,
       component: Profile
+    },
+    {
+        path: 'profile/edit',
+        name: 'profile-edit',
+        component: EditProfile,
     },
     {
       path: "game/:match_id",
