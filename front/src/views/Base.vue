@@ -69,8 +69,8 @@ import SearchIcon from '@/assets/icon/search.svg';
 import MenuIcon from '@/assets/icon/menu.svg'
 import Logo from '@/assets/ApongUs.svg';
 import { useStore } from 'vuex'
-import { key } from '@/store/index.ts'
-import { API } from '@/scripts/auth.ts';
+import { key } from '@/store/index'
+import { API } from '@/scripts/auth';
 import router from '@/router';
 import { Profile, User } from '@/interfaces/Profile';
 
