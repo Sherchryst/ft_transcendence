@@ -39,6 +39,5 @@ export default defineComponent({
 .result {
     background-color: $panel-color;
     border-radius: 25px;
-    height: 35vh;
 }
 </style>

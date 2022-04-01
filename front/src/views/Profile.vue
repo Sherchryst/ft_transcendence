@@ -106,10 +106,10 @@ import MainTitle from '@/components/MainTitle.vue';
 import Scrool from '@/assets/icon/list-game.svg';
 import Trophy from '@/assets/icon/achievement.svg';
 import {defineComponent, watch, computed} from 'vue';
-import { API } from '@/scripts/auth.ts';
+import { API } from '@/scripts/auth';
 import { Profile } from '@/interfaces/Profile';
 import { useStore } from 'vuex'
-import { key } from '@/store/index.ts'
+import { key } from '@/store/index'
 
 
 export default defineComponent({
@@ -136,9 +136,9 @@ export default defineComponent({
 		useMeta({ title: 'Profile - ' + props.username})
 		const store = useStore(key)
 
-        return {
-            selfLogin: computed( () => store.getters.getLogin)
-        }
+		return {
+			selfLogin: computed( () => store.getters.getLogin)
+		}
 	},
 	data() {
 		return {

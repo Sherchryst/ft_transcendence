@@ -16,10 +16,6 @@
 						<big-radio-button id="map-3" />
 					</div>
 				</div>
-				<div class="flex flex-col items-start mt-10">
-					<span class="mb-1">Bonus</span>
-					<switch-button />
-				</div>
 			</form>
 		</game-panel>
 		<game-panel title="Entrainement" @action="requestGame" action_name="Lancer">
