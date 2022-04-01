@@ -42,4 +42,7 @@ export class User {
 
   @Column({ default: true, nullable: false })
   newUser: boolean;
+
+  @Column({ default: '/public/avatars/default.jpg', nullable: false })
+  avatarPath: string;
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { access } from 'fs';
+import { createWriteStream } from 'fs';
 import { ChannelMember } from 'src/chat/entities/channel-member.entity';
 import { Channel } from 'src/chat/entities/channel.entity';
 import { getRepository, Not } from 'typeorm';
@@ -63,14 +63,6 @@ export class UsersService {
 
   async findOne(userId: number): Promise<User> {
     return await getRepository(User).findOne(userId);
-  }
-
-  async getAvatarPath(userId: number): Promise<string> {
-    const user = await this.findOne(userId);
-    if (!user) {
-      return null;
-    }
-    return '';
   }
 
   async getBlockedUsers(userId: number): Promise<User[]> {
@@ -149,8 +141,13 @@ export class UsersService {
     });
   }
 
-  async updateAvatar(avatarId: number, data: Buffer) {
-
+  async updateAvatar(userId: number, data: Buffer) {
+    const ws = createWriteStream(`${__dirname}/../../public/avatars/${userId}.jpg`);
+    ws.write(data);
+    ws.end();
+    await getRepository(User).update({id: userId}, {
+      avatarPath: `avatars/${userId}.jpg`
+    });
   }
 
   async updateNickname(userId: number, nickname: string) {
