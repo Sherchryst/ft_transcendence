@@ -15,7 +15,7 @@
 				<ButtonLink v-if="this.username == this.selfLogin" class="flex justify-center w-full" text="Edit Profile"></ButtonLink>
 				<div v-else>
 					<ButtonLink class="flex justify-center w-full mb-4" text="Ask a friend"></ButtonLink>
-					<ButtonLink @click="openModal" class="flex justify-center w-full btn-neutral" text="Block User"></ButtonLink>
+					<ButtonLink @click="showModal = true" class="flex justify-center w-full btn-neutral" text="Block User"></ButtonLink>
 				</div>
 			</div>
 			<div class="flex flex-rows justify-around md:flex-wrap">
@@ -87,22 +87,24 @@
 				</template>
 			</ProfilePanel>
 		</div>
-		<Modal id="modal-block-user">
-			<template v-slot:title>
-				Block User
-			</template>
-			You will block the user <span class="font-bold">{{ this.username }}</span>. No more of his messages will appear. You could always unblock it later on this page.
-			<template v-slot:footer>
-				<div class="flex flex-col lg:flex-row gap-4 lg:justify-center">
-					<ButtonLink class="btn-neutral" data-micromodal-close>
-						Cancel
-					</ButtonLink>
-					<ButtonLink class="btn-danger" data-micromodal-close>
-						Block
-					</ButtonLink>
-				</div>
-			</template>
-		</Modal>
+		<transition name="modal">
+			<Modal v-if="showModal" ref="modal_block" id="modal-block-user" @close="showModal = false">
+				<template v-slot:title>
+					Block User
+				</template>
+				You will block the user <span class="font-bold">{{ this.username }}</span>. No more of his messages will appear. You could always unblock it later on this page.
+				<template v-slot:footer>
+					<div class="flex flex-col lg:flex-row gap-4 lg:justify-center">
+						<ButtonLink class="btn-neutral" data-micromodal-close>
+							Cancel
+						</ButtonLink>
+						<ButtonLink class="btn-danger" data-micromodal-close>
+							Block
+						</ButtonLink>
+					</div>
+				</template>
+			</Modal>
+		</transition>
 	</div>
 </template>
 
@@ -125,7 +127,7 @@ import { API } from '@/scripts/auth.ts';
 import { Profile } from '@/interfaces/Profile';
 import { useStore } from 'vuex'
 import { key } from '@/store/index.ts'
-import MicroModal from 'micromodal';
+// import MicroModal from 'micromodal';
 
 
 export default defineComponent({
@@ -159,6 +161,7 @@ export default defineComponent({
 	data() {
 		return {
 			profile: {} as Profile,
+			showModal: false,
 			modal: {}
 		}
 	},
@@ -177,7 +180,9 @@ export default defineComponent({
 			})
 		},
 		openModal() : void {
-			MicroModal.show('modal-block-user');
+			// this.$refs.modal_block.open()
+			console.log("Modal")
+			// MicroModal.show('modal-block-user');
 		}
 	},
 	created(): void {
