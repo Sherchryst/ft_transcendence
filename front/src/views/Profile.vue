@@ -1,22 +1,21 @@
 <template>
 	<div class="grid grid-cols-12 lg:gap-x-16 2xl:gap-x-32">
 		<div class="col-span-12 md:col-span-4 flex flex-col max-w-sm">
-			<div class="flex place-content-center mb-10">
+			<div class="flex place-content-center mb-4">
 				<ProfilePicture></ProfilePicture>
 			</div>
-			<div class="mb-16">
+			<div class="mb-6">
 				<MainTitle class="title-username">{{ profile.user?.nickname }}</MainTitle>
 				<p>{{ profile.user?.login }}</p>
 			</div>
 			<div class="mb-8">
-				<Level text="lvl.8"></Level>
 				<LevelBar :percent="68" :level="8" :nextLevel="9"></LevelBar>
 			</div>
 			<div class="mb-12">
 				<ButtonLink v-if="this.username == this.selfLogin" class="flex justify-center w-full" text="Edit Profile"></ButtonLink>
 				<div v-else>
 					<ButtonLink class="flex justify-center w-full mb-4" text="Ask a friend"></ButtonLink>
-					<ButtonLink class="flex justify-center w-full btn-neutral" text="Block User"></ButtonLink>
+					<ButtonLink @click="openModal" class="flex justify-center w-full btn-neutral" text="Block User"></ButtonLink>
 				</div>
 			</div>
 			<div class="flex flex-rows justify-around md:flex-wrap">
@@ -88,6 +87,22 @@
 				</template>
 			</ProfilePanel>
 		</div>
+		<Modal id="modal-block-user">
+			<template v-slot:title>
+				Block User
+			</template>
+			You will block the user <span class="font-bold">{{ this.username }}</span>. No more of his messages will appear. You could always unblock it later on this page.
+			<template v-slot:footer>
+				<div class="flex flex-col lg:flex-row gap-4 lg:justify-center">
+					<ButtonLink class="btn-neutral" data-micromodal-close>
+						Cancel
+					</ButtonLink>
+					<ButtonLink class="btn-danger" data-micromodal-close>
+						Block
+					</ButtonLink>
+				</div>
+			</template>
+		</Modal>
 	</div>
 </template>
 
@@ -95,7 +110,6 @@
 import { useMeta } from 'vue-meta'
 import ProfilePanel from '@/components/profile/ProfilePanel.vue';
 import ProfilePicture from '@/components/profile/ProfilePicture.vue';
-import Level from '@/components/profile/Level.vue';
 import LevelBar from '@/components/profile/LevelBar.vue';
 import MatchesHistory from '@/components/profile/MatchesHistory.vue';
 import LittleCard from '@/components/profile/LittleCard.vue';
@@ -103,6 +117,7 @@ import LargerCard from '@/components/profile/LargerCard.vue';
 import TitlePanel from '@/components/profile/TitlePanel.vue';
 import ButtonLink from '@/components/ButtonLink.vue';
 import MainTitle from '@/components/MainTitle.vue';
+import Modal from '@/components/Modal.vue';
 import Scrool from '@/assets/icon/list-game.svg';
 import Trophy from '@/assets/icon/achievement.svg';
 import {defineComponent, watch, computed} from 'vue';
@@ -110,6 +125,7 @@ import { API } from '@/scripts/auth.ts';
 import { Profile } from '@/interfaces/Profile';
 import { useStore } from 'vuex'
 import { key } from '@/store/index.ts'
+import MicroModal from 'micromodal';
 
 
 export default defineComponent({
@@ -117,7 +133,6 @@ export default defineComponent({
 	components: {
 		ProfilePicture,
 		MainTitle,
-		Level,
 		LevelBar,
 		ButtonLink,
 		LittleCard,
@@ -126,7 +141,8 @@ export default defineComponent({
 		Scrool,
 		Trophy,
 		ProfilePanel,
-		LargerCard
+		LargerCard,
+		Modal
 	},
 	props:
 	{
@@ -136,13 +152,14 @@ export default defineComponent({
 		useMeta({ title: 'Profile - ' + props.username})
 		const store = useStore(key)
 
-        return {
-            selfLogin: computed( () => store.getters.getLogin)
-        }
+		return {
+			selfLogin: computed( () => store.getters.getLogin)
+		}
 	},
 	data() {
 		return {
 			profile: {} as Profile,
+			modal: {}
 		}
 	},
 	methods: {
@@ -155,9 +172,12 @@ export default defineComponent({
 			})
 			.then((res) => {
 				this.profile = res.data;
-			}).catch((response) => {
+			}).catch(() => {
 				console.error("FAIL GET USER");
 			})
+		},
+		openModal() : void {
+			MicroModal.show('modal-block-user');
 		}
 	},
 	created(): void {

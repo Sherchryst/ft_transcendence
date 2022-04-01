@@ -1,6 +1,9 @@
 <template>
 	<router-link v-if="route" :to="{name: route}" class="btn px-7 py-3 pb-2">{{ text }}</router-link>
-	<a v-else :href="href" class="btn px-7 py-3 pb-2">{{ text }}</a>
+	<a v-else-if="text" :href="href" class="btn px-7 py-3 pb-2">{{ text }}</a>
+	<button v-else class="btn px-7 py-3 pb-2">
+		<slot></slot>
+	</button>
 </template>
 
 <script lang="ts">
@@ -9,7 +12,7 @@ import { defineComponent } from 'vue';
 export default defineComponent({
 	name: "ButtonLink",
 	props: {
-		text: { type: String, default: "action" },
+		text: { type: String },
 		route: { type: String },
 		href: { type: String }
 	}
@@ -43,7 +46,11 @@ button, a, .btn{
 		background: $dark-font;
 	}
 	&-danger{
-		
+		color:white;
+		background: $defeat-color;
+		&:hover{
+			background: darken($color: $defeat-color, $amount: 15%);
+		}
 	}
 }
 
