@@ -123,7 +123,7 @@ export class GameService
 	{
 		if (board.player[0].score >= 11 || board.player[1].score >= 11)
 			board.end = true;
-		board.new_game = true;
+		board.new_round = true;
 		board.dead = false;
     board.ball.dx = speed * (board.ball.x < this.dimensions.canvas.width / 2? -1:1);
     board.ball.dy = Math.random() * speed * 1.5 * (Math.floor(Math.random() * 2)? -1:1);

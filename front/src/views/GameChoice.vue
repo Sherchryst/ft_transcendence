@@ -55,7 +55,7 @@ export default defineComponent({
 	},
 	methods: {
 		sendInvite() {
-			gameSocket.emit("invite", { login : "mchardin", map : 1});
+			gameSocket.emit("invite", { login : "cheat_user", map : 1});
 		},
 		requestGame() {
 			gameSocket.emit("bot");

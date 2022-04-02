@@ -11,5 +11,5 @@ export interface Board
 	bot_speed : number;
 	bot_offset : number;
 	pass_count : number;
-	new_game : boolean;
+	new_round : boolean;
 }

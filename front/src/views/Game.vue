@@ -26,9 +26,8 @@
 <template>
 <div class="game">
   <div id="canvas-div" class="game-container w-full relative">
-    <canvas ref="background" id="background" class="game-bg" height="600" width="800">
-    </canvas>
-    <canvas ref="mycanvas" id="mycanvas" class="game-fg" height="600" width="800"></canvas>
+    <canvas ref="background" id="background" class="game-bg" height="600" width="800"></canvas>
+    <canvas ref="gamecanvas" id="gamecanvas" class="game-fg" height="600" width="800"></canvas>
   </div>
 </div>
 </template>
@@ -36,15 +35,21 @@
 <script lang="ts">
   import {defineComponent, ssrContextKey} from 'vue'
   import { gameSocket } from '../socket';
+  // import gamecanvas from '@/components/game/gamecanvas.vue';
+  // import background from '@/components/game/background.vue';
 
   export default defineComponent({
-    name: 'mycanvas',
+    name: 'gamecanvas',
     props: {
-      match_id: Number,
+      match_id: String,
       msg: String
     },
+    // components: {
+    //   gamecanvas,
+    //   background
+    // },
     $refs!: {
-    input: HTMLInputElement
+      input: HTMLInputElement
     },
     data() {
       return {
@@ -72,6 +77,7 @@
       }
     },
     mounted() {
+      console.log("mounted");
       gameSocket.emit('connection', this.match_id);
       gameSocket.on("gameMap", (data : any) => {
         this.map = { ...this.map, ...data.map };
@@ -88,13 +94,16 @@
         this.clear();
         this.addObjects();
       });
-      // gameSocket.on("login", (data : any) => {
-      //   this.login[data.id] = data.login;
-      // });
-      this.ctx = (this.$refs.mycanvas as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
+      this.ctx = (this.$refs.gamecanvas as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
       this.dimX = this.ctx.canvas.width / 100;
       this.dimY = this.ctx.canvas.height / 100;
       document.addEventListener("mousemove", this.moveRackets);
+    },
+    beforeRouteLeave(to, from, next) {
+      console.log("before leave");
+      if (this.id == 0 || this.id == 1)
+        gameSocket.emit('leave', { match_id : this.match_id, id : this.id });
+      next();
     },
     methods:
     {
@@ -136,7 +145,13 @@
       },
       drawBackground()
       {
-        var ctx = (this.$refs.background as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
+        var canvas = this.$refs.background as HTMLCanvasElement;
+        if (!canvas)
+        {
+          console.log("canvas not found");
+          return ;
+        }
+        var ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
         const interval = ctx.canvas.height / 10;
         const start = ctx.canvas.height / 60;
         const line_width = ctx.canvas.width / 80;
@@ -210,7 +225,7 @@
       addObjects()
       {
         if (this.board.end)
-          this.drawWinner(this.board.player[0].score >= 11 ? 0 : 1)
+          this.drawWinner(this.board.player[0].score > this.board.player[1].score ? 0 : 1);
         else
           this.drawBall(this.board.ball.x, this.board.ball.y);
         this.drawRackets(this.board.player[0].y, this.board.player[1].y);
@@ -222,7 +237,7 @@
           return ;
         let rect : DOMRect = this.ctx.canvas.getBoundingClientRect();
         console.log("id :", this.id);
-        gameSocket.emit('player', {"match_id" : this.match_id, "id" : this.id, "y" : (evt.clientY - rect.top) / this.dimY})
+        gameSocket.emit('player', {match_id : this.match_id, id : this.id, y : (evt.clientY - rect.top) / this.dimY})
       }
     }
   })
