@@ -87,10 +87,17 @@ export default defineComponent({
             .on('message', (data) => {
                 if (data.channelMessage.channel.id == this.id)
                     this.recv(data.channelMessage.message)
+                this.readMessage()
             })
         ;
 	},
+    updated() {
+        console.log('update')
+    },
 	methods: {
+        readMessage(){
+            this.$emit('read-message', this.id);
+        },
         send(message: string): void {
             console.log("message : ", message)
 			this.socket.emit('message', {
@@ -104,6 +111,7 @@ export default defineComponent({
                 channelId: parseInt(this.id),
                 password: ""
             });
+            this.readMessage()
 		},
 
 		leave_channel(): void {
