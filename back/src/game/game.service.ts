@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Board } from './interfaces/board.interface';
 import { Racket } from './interfaces/racket.interface';
 
-const speed = 0.5;
+const speed = 1;
 const max_x = 1 / Math.sqrt(10.0);
 const max_y = 3 * max_x;
 const width = 100;

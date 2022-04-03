@@ -188,7 +188,7 @@ export class GameGateway implements OnGatewayConnection {
     if (player_id == 0) {
       while (board.new_round == false) // wait for other player to join
         await sleep(500);
-      console.log("new match ", id, ": ", login1, " vs ", login2);
+      console.log("new match ", id, ": ", match.player1.login, " vs ", match.player2.login);
       this.sendUpdateBoard(id);
     }
     else if (player_id == 1) // player 2 is ready

@@ -135,7 +135,7 @@
       else
       {
         console.log("bot");
-        this.reset(true);
+        // this.reset(true);
         this.drawBackground();
         document.addEventListener("mousemove", this.moveRackets);
         this.game_loop();
@@ -275,8 +275,12 @@
         console.log("end : ", this.board.end);
         if (this.board.end)
           this.drawWinner(this.board.player[0].score > this.board.player[1].score ? 0 : 1);
-        else
-          this.drawBall(this.board.ball.x, this.board.ball.y);
+        else {
+            if (this.board.dead)
+              this.ctx.globalAlpha = 0.2;
+            this.drawBall(this.board.ball.x, this.board.ball.y);
+            this.ctx.globalAlpha = 1;
+          }
         this.drawRackets(this.board.player[0].y, this.board.player[1].y);
         this.drawScore();
       },
