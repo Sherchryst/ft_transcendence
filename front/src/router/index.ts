@@ -100,7 +100,7 @@ router.beforeEach((to, form, next) => {
   if (to.name != 'login' && !cookies.isKey('jwt'))
     next({ name: 'login' })
   else if (to.name != 'register' && cookies.isKey('jwt') && localStorage.getItem('user')) {
-    const profile = JSON.parse(localStorage.getItem('user') || '' )
+    const profile = JSON.parse(localStorage.getItem('user') || '{}' )
     if (profile?.user?.newUser)
       next({ name: 'register'})
     else
