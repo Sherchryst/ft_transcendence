@@ -5,7 +5,6 @@ import { Map } from './entities/map.entity';
 import { Injectable } from '@nestjs/common';
 import { MatchInvitation } from './entities/match-invitation.entity';
 
-
 @Injectable()
 export class MatchService
 {
@@ -37,9 +36,10 @@ export class MatchService
     await getRepository(Match).delete({ id: matchId });
   }
 
-  async deleteMatchInvitation(fromId: number) {
+  async deleteMatchInvitation(fromId: number, toId: number) {
     await getRepository(MatchInvitation).delete({
-      from: { id: fromId }
+      from: { id: fromId },
+      to: { id: toId }
     });
   }
 
@@ -65,7 +65,7 @@ export class MatchService
   async setWinner(matchId: number, winnerId: number) {
     await getRepository(Match).update(matchId, {
       endAt: new Date(),
-      winner: { id: winnerId }
+      winner: winnerId >= 0 ? { id: winnerId } : null
     });
   }
 
