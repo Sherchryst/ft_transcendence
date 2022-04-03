@@ -13,9 +13,16 @@
 			</div>
 			<div class="mb-12">
 				<ButtonLink v-if="this.username == this.selfLogin" class="flex justify-center w-full" text="Edit Profile"></ButtonLink>
-				<div v-else>
-					<ButtonLink class="flex justify-center w-full mb-4" text="Ask a friend"></ButtonLink>
-					<ButtonLink @click="showModal = true" class="flex justify-center w-full btn-neutral" text="Block User"></ButtonLink>
+				<div v-else class="flex flex-col gap-y-4">
+					<Transition mode="out-in" name="btn">
+						<button-link v-if="statut == 'NONE'" class="flex justify-center w-full" text="Ask a friend" @click="friendRequest"></button-link>
+						<button-link v-else-if="statut == 'WAIT'" class="btn-used flex justify-center w-full" text="Friend request send"></button-link>
+						<ButtonLink v-else-if="statut == 'BLOCK'" class="flex justify-center w-full" text="Unblock User" @click="unblock"></ButtonLink>
+					</Transition>
+					<Transition mode="out-in" name="btn">
+						<ButtonLink v-if="statut == 'NONE'" class="flex justify-center w-full btn-neutral" text="Block User" @click="openModal"></ButtonLink>
+						<ButtonLink v-else-if="statut == 'BLOCK'" class="flex justify-center w-full btn-inactive" text="This User is block"></ButtonLink>
+					</Transition>
 				</div>
 			</div>
 			<div class="flex flex-rows justify-around md:flex-wrap">
@@ -70,7 +77,7 @@
 					<TitlePanel title="Achievements"> <Trophy /> </TitlePanel>
 				</template>
 				<template v-slot:body>
-					<div class="grid md:grid-cols-2 max-h-10 gap-x-10 gap-y-5">
+					<div class="grid md:grid-cols-2 gap-x-10 gap-y-5">
 						<div>
 							<LargerCard></LargerCard>
 						</div>
@@ -87,24 +94,22 @@
 				</template>
 			</ProfilePanel>
 		</div>
-		<transition name="modal">
-			<Modal v-if="showModal" ref="modal_block" id="modal-block-user" @close="showModal = false">
-				<template v-slot:title>
-					Block User
-				</template>
-				You will block the user <span class="font-bold">{{ this.username }}</span>. No more of his messages will appear. You could always unblock it later on this page.
-				<template v-slot:footer>
-					<div class="flex flex-col lg:flex-row gap-4 lg:justify-center">
-						<ButtonLink class="btn-neutral" data-micromodal-close>
-							Cancel
-						</ButtonLink>
-						<ButtonLink class="btn-danger" data-micromodal-close>
-							Block
-						</ButtonLink>
-					</div>
-				</template>
-			</Modal>
-		</transition>
+		<Modal ref="modal_block" id="modal-block-user" @close="showModal = false">
+			<template v-slot:title>
+				Block User
+			</template>
+			You will block the user <span class="font-bold">{{ this.username }}</span>. No more of his messages will appear. You could always unblock it later on this page.
+			<template v-slot:footer>
+				<div class="flex flex-col lg:flex-row gap-4 lg:justify-end">
+					<ButtonLink @click="block" class="btn-danger">
+						Block
+					</ButtonLink>
+					<ButtonLink class="btn-neutral" @click="closeModal">
+						Cancel
+					</ButtonLink>
+				</div>
+			</template>
+		</Modal>
 	</div>
 </template>
 
@@ -162,7 +167,7 @@ export default defineComponent({
 		return {
 			profile: {} as Profile,
 			showModal: false,
-			modal: {}
+			statut: "NONE"
 		}
 	},
 	methods: {
@@ -175,15 +180,48 @@ export default defineComponent({
 			})
 			.then((res) => {
 				this.profile = res.data;
+				// Change statut
 			}).catch(() => {
 				console.error("FAIL GET USER");
 			})
 		},
 		openModal() : void {
-			// this.$refs.modal_block.open()
-			console.log("Modal")
-			// MicroModal.show('modal-block-user');
-		}
+			(this.$refs['modal_block'] as typeof Modal).open()
+		},
+		closeModal() : void {
+			(this.$refs['modal_block'] as typeof Modal).close()
+		},
+		friendRequest() : void {
+			API.post('users/send-friend-request', {
+				fromId: this.$store.getters.getId,
+				toId: this.profile.user?.id
+			}).then( () => {
+				this.statut = 'WAIT'
+			}).catch( (error) => {
+				console.log(error);
+			})
+		},
+		block() : void {
+			API.post('users/block-user', {
+				fromId: this.$store.getters.getId,
+				toId: this.profile.user?.id
+			}).then( () => {
+				this.statut = 'BLOCK'
+				this.closeModal()
+			}).catch( (error) => {
+				console.log(error);
+			})
+		},
+		unblock() : void {
+			API.post('users/unblock-user', {
+				fromId: this.$store.getters.getId,
+				toId: this.profile.user?.id
+			}).then( () => {
+				this.statut = 'NONE'
+			}).catch( (error) => {
+				console.log(error);
+			})
+		},
 	},
 	created(): void {
 		watch(
@@ -210,4 +248,21 @@ export default defineComponent({
 	-webkit-background-clip: text;
 	-webkit-text-fill-color: transparent;
 }
+
+// .btn-enter-active,
+// .btn-leave-active {
+//   transition: opacity 2s ease;
+// }
+
+// .btn-enter-from,
+// .btn-leave-to {
+// //   color: white;
+//   opacity: 0;
+// }
+
+// .btn-enter-to,
+// .btn-leave-from {
+//   color: black;
+// }
+
 </style>

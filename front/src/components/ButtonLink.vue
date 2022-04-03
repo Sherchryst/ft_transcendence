@@ -52,6 +52,15 @@ button, a, .btn{
 			background: darken($color: $defeat-color, $amount: 15%);
 		}
 	}
+	&-inactive{
+		cursor: unset;
+		background: #dfdfdf;
+		color: lighten($color: $dark-font, $amount: 60%);
+		&:hover{
+			background: #dfdfdf;
+			color: lighten($color: $dark-font, $amount: 60%);
+		}
+	}
 }
 
 </style>

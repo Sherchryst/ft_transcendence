@@ -51,7 +51,9 @@
 					</div>
 				</div>
 			</div>
-			<router-view @read-message="removeMessageFrom"/>
+			<div class="pb-6">
+				<router-view @read-message="removeMessageFrom"/>
+			</div>
 		</div>
 	</div>
 </template>
