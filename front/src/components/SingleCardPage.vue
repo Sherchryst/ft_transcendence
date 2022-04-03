@@ -1,6 +1,6 @@
 <template>
 	<div class="grid grid-cols-12 place-content-center h-screen">
-		<div class="col-start-2 col-span-4 flex flex-col justify-between r-panel px-28 py-36">
+		<div class="col-span-12 mx-3 lg:mx-0 lg:col-span-4 lg:col-start-2 flex flex-col justify-between r-panel px-6 lg:px-28 py-10 lg:py-36">
 			<slot></slot>
 		</div>
 	</div>
@@ -16,6 +16,7 @@ export default defineComponent({
 
 <style lang="scss">
 .r-panel{
+	box-shadow: 0px 4px 4px rgba(142, 172, 171, 0.31);
 	background: $bg--lg-color;
 	border-radius: 25px;
 }
