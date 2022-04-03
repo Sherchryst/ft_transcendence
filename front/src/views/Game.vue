@@ -123,6 +123,7 @@
           this.id = data.id;
           console.log(" id :", this.id);
           this.drawBackground();
+          document.addEventListener("mousemove", this.moveRackets);
           console.log('socket connected');
         });
         gameSocket.on("board", (data : any) => {
@@ -130,7 +131,6 @@
           this.clear();
           this.addObjects();
         });
-        document.addEventListener("mousemove", this.moveRackets);
       }
       else
       {
@@ -170,7 +170,7 @@
         if (ctx == null)
           ctx = this.ctx;
         ctx.fillStyle = color;
-        console.log('color', color);
+        // console.log('color', color);
         ctx.beginPath();
         // ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
         ctx.arc(x - radius, y - radius, radius, 0, Math.PI / 2, false);
@@ -204,7 +204,7 @@
         // ctx.fillStyle = "white";
         for (let count = 0; count < 300; count++) //stars
           this.roundStar(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height, Math.random() * 5, '#' + this.map.starsColor.toString(16), ctx);
-          console.log('stars color', this.map.starsColor);
+          // console.log('stars color', this.map.starsColor);
         for (let i = line_width; i < ctx.canvas.width; i+= interval) {
           this.roundRect((ctx.canvas.width- line_width) / 2, i, line_width, interval * 0.65, "white", ctx);
         }
@@ -272,7 +272,7 @@
       },
       addObjects()
       {
-        console.log("end : ", this.board.end);
+        // console.log("end : ", this.board.end);
         if (this.board.end)
           this.drawWinner(this.board.player[0].score > this.board.player[1].score ? 0 : 1);
         else {
