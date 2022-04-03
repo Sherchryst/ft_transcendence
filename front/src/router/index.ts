@@ -10,6 +10,7 @@ import Profile from '@/views/Profile.vue'
 import Register from '@/views/Register.vue'
 import GameChoice from '@/views/GameChoice.vue'
 import Game from '@/views/Game.vue'
+import NotFound from '@/views/NotFound.vue'
 import { useCookies } from "vue3-cookies";
 
 const { cookies } = useCookies();
@@ -78,6 +79,15 @@ const routes: Array<RouteRecordRaw> = [
 	name: 'register',
 	component: Register
   },
+  {
+    path: '/404',
+    name: 'not-found',
+    component: NotFound
+  },
+  { 
+    path: '/:pathMatch(.*)*', 
+    redirect: '/404'
+  }, 
 ]
 
 const router = createRouter({

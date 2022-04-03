@@ -132,7 +132,7 @@ import { API } from '@/scripts/auth.ts';
 import { Profile } from '@/interfaces/Profile';
 import { useStore } from 'vuex'
 import { key } from '@/store/index.ts'
-// import MicroModal from 'micromodal';
+import router from '@/router';
 
 
 export default defineComponent({
@@ -181,6 +181,8 @@ export default defineComponent({
 			.then((res) => {
 				this.profile = res.data;
 				// Change statut
+			}).catch(() => {
+				router.push({name: 'not-found'})
 			})
 		},
 		openModal() : void {
@@ -219,7 +221,8 @@ export default defineComponent({
 		watch(
 			() => this.$route.params,
 			(toParams) => {
-				this.getUser(toParams.username)
+				if(toParams.username)
+					this.getUser(toParams.username)
 			}
 		)
 	},
