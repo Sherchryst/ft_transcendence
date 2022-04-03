@@ -181,8 +181,6 @@ export default defineComponent({
 			.then((res) => {
 				this.profile = res.data;
 				// Change statut
-			}).catch(() => {
-				console.error("FAIL GET USER");
 			})
 		},
 		openModal() : void {
@@ -197,8 +195,6 @@ export default defineComponent({
 				toId: this.profile.user?.id
 			}).then( () => {
 				this.statut = 'WAIT'
-			}).catch( (error) => {
-				console.log(error);
 			})
 		},
 		block() : void {
@@ -208,8 +204,6 @@ export default defineComponent({
 			}).then( () => {
 				this.statut = 'BLOCK'
 				this.closeModal()
-			}).catch( (error) => {
-				console.log(error);
 			})
 		},
 		unblock() : void {
@@ -218,8 +212,6 @@ export default defineComponent({
 				toId: this.profile.user?.id
 			}).then( () => {
 				this.statut = 'NONE'
-			}).catch( (error) => {
-				console.log(error);
 			})
 		},
 	},
