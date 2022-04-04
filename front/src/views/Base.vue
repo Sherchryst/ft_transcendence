@@ -45,7 +45,7 @@
 							</one-row-form>
 						</div>
 						<div class="self-center mx-7">
-							<NotifIcon class="h-12" />
+							<Dropdown class="h-12" menuTitle="TEST" />
 						</div>
 						<div class="">
 							<Logo />
@@ -79,6 +79,7 @@ import { API } from '@/scripts/auth.ts';
 import router from '@/router';
 import { SocketMessage } from '@/interfaces/Message';
 import { chatSocket } from '@/socket.ts'
+import Dropdown from '@/components/Dropdown.vue'
 
 export default defineComponent({
 	components: {
@@ -92,7 +93,8 @@ export default defineComponent({
 		SearchIcon,
 		MenuIcon,
 		Logo,
-		NotifIcon
+		// NotifIcon,
+		Dropdown
 	},
 	data() {
 		return {
