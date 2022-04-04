@@ -1,15 +1,20 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
-import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { ChatModule } from './chat/chat.module';
-import { UsersModule } from './users/users.module';
 import { GameModule } from './game/game.module';
+import { join } from 'path';
+import { Module } from '@nestjs/common';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersModule } from './users/users.module';
 
 @Module({
   controllers: [AppController],
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'db',
