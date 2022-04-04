@@ -1,11 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import { access } from 'fs';
-import { ChannelMember } from 'src/chat/entities/channel-member.entity';
+import { Avatar } from './entities/avatar.entity';
 import { Channel } from 'src/chat/entities/channel.entity';
+import { ChannelMember } from 'src/chat/entities/channel-member.entity';
+import { createReadStream, readFileSync } from 'fs';
 import { getRepository, Not } from 'typeorm';
+import { Injectable } from '@nestjs/common';
+import { User } from './entities/user.entity';
 import { UserAchievement } from './entities/user-achievement.entity';
 import { UserRelationship, UserRelationshipType } from './entities/user-relationship.entity';
-import { User } from './entities/user.entity';
+import * as PostgresError from '@fiveem/postgres-error-codes'
 
 @Injectable()
 export class UsersService {
@@ -43,12 +45,26 @@ export class UsersService {
   }
 
   async create(login: string): Promise<User> {
-    const repo = getRepository(User);
-    const user = repo.create({
-      login: login,
-      nickname: login
+    const genRanHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+    const defaultAvatar = readFileSync('./blank-avatar.jpg');
+    const avatar = await getRepository(Avatar).save({
+      user: { login: login },
+      data: defaultAvatar
     });
-    return await repo.save(user);
+    const repo = getRepository(User);
+    do
+      try {
+        const user = repo.create({
+          login: login,
+          nickname: genRanHex(32),
+          avatar: avatar
+        });
+        return await repo.save(user);
+      } catch (e) {
+        if (e.code !== PostgresError.PG_UNIQUE_VIOLATION)
+          throw e;
+      }
+    while (true);
   }
 
   async findAll(): Promise<User[]> {

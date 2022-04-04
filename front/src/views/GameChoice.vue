@@ -3,7 +3,7 @@
 		<game-panel title="Battleground" @action="(evt) => matchmaking()" action_name="Recherche">
 		</game-panel>
 		<game-panel @action="sendInvite()" title="Challenge" action_name="Défier">
-			<form action="" class="flex flex-col">
+			<!-- <form action="" class="flex flex-col">
 				<div class="flex flex-col-reverse mt-4">
 					<input class="px-3 py-2" type="text" name="username" id="username">
 					<label class="text-left" for="username">Username</label>
@@ -16,7 +16,11 @@
 						<big-radio-button id="map-3" />
 					</div>
 				</div>
-			</form>
+				<div class="flex flex-col items-start mt-10">
+					<span class="mb-1">Bonus</span>
+					<switch-button />
+				</div>
+			</form> -->
 		</game-panel>
 		<game-panel title="Entrainement" @action="requestGame" action_name="Lancer">
 			<!-- <ButtonLink text="Bot game" href= /> -->
@@ -28,13 +32,13 @@
 import GamePanel from '@/components/GamePanel.vue';
 import BigRadioButton from '@/components/BigRadioButton.vue';
 import { defineComponent } from 'vue';
-import { gameSocket } from '../socket';
+import { gameSocket } from '@/socket';
 import router from '@/router';
 
 export default defineComponent({
 	components: {
 		GamePanel,
-		BigRadioButton,
+		// BigRadioButton,
 	},
 	mounted() {
 		gameSocket.on("invited", (data : any) => {
@@ -47,10 +51,10 @@ export default defineComponent({
 	},
 	methods: {
 		sendInvite() {
-			gameSocket.emit("invite", { login : "mchardin", map : 1});
+			gameSocket.emit("invite", { login : "cheat_user", map : 1});
 		},
 		requestGame() {
-			gameSocket.emit("bot");
+			router.push({ name: "game", params: { match_id: `bot` }})
 			console.log("BOT");
 		},
 		matchmaking() {

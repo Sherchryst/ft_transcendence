@@ -7,6 +7,10 @@ export interface Board
 	player : Player[];
 	dead : boolean;
 	end : boolean;
+	bot : boolean;
+	bot_speed : number;
+	bot_offset : number;
+	bot_id : number;
 	pass_count : number;
 	new_round : boolean;
 }

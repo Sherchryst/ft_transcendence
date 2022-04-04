@@ -18,7 +18,7 @@ export class Match {
   @ManyToOne(() => User, u => u.id, { nullable: false })
   player1: User;
 
-  @ManyToOne(() => User, u => u.id)
+  @ManyToOne(() => User, u => u.id, { nullable: false })
   player2: User;
 
   @Column({ nullable: false })
