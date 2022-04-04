@@ -37,7 +37,7 @@
   import { gameSocket } from '@/socket';
   import { Bot } from '@/interfaces/game/bot.interface'; // change to @
   import { Board } from '@/interfaces/game/board.interface';
-  import { Map } from '@/interfaces/game/map.interface';
+  import { GameMap } from '@/interfaces/game/gameMap.interface';
   import { Dimensions } from '@/interfaces/game/dimensions.interface';
   // import gamecanvas from '@/components/game/gamecanvas.vue';
   // import background from '@/components/game/background.vue';
@@ -64,8 +64,8 @@
           ballColor : 16562691,
           backgroundColor : 344663,
           starsColor: 12566194,
-          racketColor : 16777215 
-        } as Map,
+          racketColor : 16777215
+        } as GameMap,
         dimX : 1,
         dimY : 1,
         dim : {
@@ -200,15 +200,16 @@
         const interval = ctx.canvas.height / 10;
         const start = ctx.canvas.height / 60;
         const line_width = ctx.canvas.width / 80;
-        ctx.fillStyle = "rgb(6, 40, 56)";
+        const starColor = `#${this.map.starsColor.toString(16).padStart(6, '0')}`;
+        const lineColor = `#${this.map.racketColor.toString(16).padStart(6, '0')}`;
+        ctx.fillStyle = `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`;
+        console.log("background color", `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`);
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         // ctx.fillStyle = "white";
         for (let count = 0; count < 300; count++) //stars
-          this.roundStar(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height, Math.random() * 5, '#' + this.map.starsColor.toString(16), ctx);
-          // console.log('stars color', this.map.starsColor);
-        for (let i = line_width; i < ctx.canvas.width; i+= interval) {
-          this.roundRect((ctx.canvas.width- line_width) / 2, i, line_width, interval * 0.65, "white", ctx);
-        }
+          this.roundStar(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height, Math.random() * ctx.canvas.height / 80, starColor, ctx);
+        for (let i = line_width; i < ctx.canvas.width; i+= interval)
+          this.roundRect((ctx.canvas.width- line_width) / 2, i, line_width, interval * 0.65, lineColor, ctx);
       },
       clear()
       {
@@ -217,8 +218,7 @@
       drawBall(x : number, y : number)
       {
         var h_width = this.board.ball.half_width;
-        var bColor = '#' + this.map.ballColor.toString(16);
-        // console.log('ball color', this.colorballColor);
+        var bColor = `#${this.map.ballColor.toString(16).padStart(6, '0')}`;
         if (this.board.ball.dx > 0)
         {
           this.roundRect((x - h_width / 2) * this.dimX, (y - h_width) * this.dimY, h_width * (3/2)  * this.dimX, h_width * (5 / 3) * this.dimX, bColor);
@@ -245,29 +245,30 @@
       {
         if (!this.dim)
           return ;
+        var rColor = `#${this.map.racketColor.toString(16).padStart(6, '0')}`;
         this.roundRect((this.dim.racket.x[0] - this.dim.racket.width) * this.dimX, (y1 - this.board.player[0].half_height) * this.dimY,
-          this.dim.racket.width * this.dimX, this.board.player[0].half_height * 2 * this.dimY);
+          this.dim.racket.width * this.dimX, this.board.player[0].half_height * 2 * this.dimY, rColor);
         this.roundRect(this.dim.racket.x[1] * this.dimX, (y2 - this.board.player[1].half_height) * this.dimY,
-          this.dim.racket.width * this.dimX, this.board.player[1].half_height * 2 * this.dimY);
+          this.dim.racket.width * this.dimX, this.board.player[1].half_height * 2 * this.dimY, rColor);
       },
       drawScore()
       {
         this.ctx.fillStyle = "white";
-        this.ctx.font = "70px courier new" // absolute size /!\
+        this.ctx.font = `${this.ctx.canvas.height / 10}px courier new`; // absolute size /!\
         this.ctx.textAlign = "right";
         this.ctx.fillText((this.board.player[0].score).toString(), this.ctx.canvas.width / 2 - this.ctx.canvas.width / 20, this.ctx.canvas.height / 10);
         this.ctx.textAlign = "left";
         this.ctx.fillText((this.board.player[1].score).toString(), this.ctx.canvas.width / 2 + this.ctx.canvas.width / 20, this.ctx.canvas.height / 10);
-        this.ctx.font = "30px courier new" // absolute size /!\
+        this.ctx.font = `${this.ctx.canvas.height / 15}px courier new`; // absolute size /!\
         this.ctx.textAlign = "right";
-        this.ctx.fillText(this.login[1], this.ctx.canvas.width - this.ctx.canvas.width / 10, this.ctx.canvas.height / 10);
+        this.ctx.fillText(this.login[1], this.ctx.canvas.width - this.ctx.canvas.width / 22, this.ctx.canvas.height / 10);
         this.ctx.textAlign = "left";
-        this.ctx.fillText(this.login[0], this.ctx.canvas.width / 10, this.ctx.canvas.height / 10);
+        this.ctx.fillText(this.login[0], this.ctx.canvas.width / 22, this.ctx.canvas.height / 10);
       },
       drawWinner(winner : number)
       {
         this.ctx.fillStyle = "white";
-        this.ctx.font = "70px courier new" // absolute size /!\
+        this.ctx.font = `${this.ctx.canvas.height / 10}px courier new`; // absolute size /!\
         this.ctx.textAlign = "center";
         this.ctx.fillText(this.login[winner] + " wins", this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
       },

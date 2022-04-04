@@ -1,4 +1,4 @@
-export interface Map
+export interface GameMap
 {
   ballColor : number,
   backgroundColor : number;

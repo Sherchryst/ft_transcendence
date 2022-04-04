@@ -12,6 +12,7 @@ import { match } from 'assert';
 import { Match, MatchType } from './entities/match.entity';
 import { MatchInvitation } from './entities/match-invitation.entity';
 import { switchMap } from 'rxjs';
+import { GameMap } from './entities/game-map.entity';
 
 const interval = 20;
 var pending_player = -1;
@@ -103,7 +104,7 @@ export class GameGateway implements OnGatewayConnection {
       console.log("You can't invite yourself");
     else
     {
-      var map = await this.matchService.findMap(data.mapId)
+      var map = await this.matchService.findGameMap(data.mapId)
       const invitation = await this.matchService.createMatchInvitation(req.user.id, to_user.id, map);
       // console.log("invitation", invitation)
       console.log("invitation sent to ", to_user.login);
@@ -121,9 +122,9 @@ export class GameGateway implements OnGatewayConnection {
     return board;
   }
 
-  async createMatch(mapId: number, player1: number, player2: number | null, matchType: MatchType,
+  async createMatch(map: GameMap, player1: number, player2: number | null, matchType: MatchType,
   @ConnectedSocket() socket: Socket) : Promise<Match> {
-    const map = await this.matchService.findMap(mapId);
+    console.log("Create match : map", map);
     if (Math.random() < 0.5)
     {
       const tmp = player1;
@@ -131,6 +132,7 @@ export class GameGateway implements OnGatewayConnection {
       player2 = tmp;
     }
     const match = await this.matchService.createMatch(map, player1, player2, matchType);
+    console.log("Match created : (in create match) ", match);
     const player1_socket =  this.WsClients.get(match.player1.id);
     const player2_socket =  this.WsClients.get(match.player2.id);
     this.createBoard(match.id, player1_socket.id, player2_socket.id);
@@ -146,7 +148,8 @@ export class GameGateway implements OnGatewayConnection {
   @ConnectedSocket() socket: Socket) {
     if (pending_player >= 0 && pending_player != req.user.id)
     {
-      await this.createMatch(1, pending_player, req.user.id, MatchType.RANKED, socket);
+      const map = await this.matchService.findGameMap(1); 
+      await this.createMatch(map, pending_player, req.user.id, MatchType.RANKED, socket);
       pending_player = -1;
     }
     else
@@ -159,8 +162,15 @@ export class GameGateway implements OnGatewayConnection {
   @MessageBody() data: any,
   @ConnectedSocket() socket: Socket) {
     // console.log("data", data);
-    await this.createMatch(data.mapId, data.to.id, data.from.id, MatchType.CASUAL, socket);
-    await this.matchService.deleteMatchInvitation(data.from.id, data.to.id);
+    const matchInvit = await this.matchService.findMatchInvitation(data.to.id, data.from.id);
+    if (matchInvit == null)
+      console.log("No invitation found");
+    else
+    {
+      console.log("Invitation accepted : ", matchInvit);
+      await this.createMatch(matchInvit.map, matchInvit.to.id, matchInvit.from.id, MatchType.CASUAL, socket);
+      await this.matchService.deleteMatchInvitation(data.from.id, data.to.id);
+    }
     // console.log("match_id (acceptInvit): ", boards);
   }
 
@@ -173,9 +183,6 @@ export class GameGateway implements OnGatewayConnection {
 
     var board = boards.get("" + id);
     var player_id;
-    var map_id;
-    var login1;
-    var login2;
 
     if (board.player[0].user_id == socket.id)
     player_id = 0;
@@ -184,8 +191,8 @@ export class GameGateway implements OnGatewayConnection {
     else
     player_id = 2;
     const match = await this.matchService.findMatch(id);
-    // console.log("match", match, "map", match.map);
-    socket.emit("gameMap", { id : player_id, map : await this.matchService.findMap(1), login : [match.player1.login, match.player2.login] }); //change to specific map
+    console.log("match", match, "map", match.map);
+    socket.emit("gameMap", { id : player_id, map : match.map, login : [match.player1.login, match.player2.login] }); //change to specific map
     if (player_id == 0) {
       while (board.ready == false) // wait for other player to join
         await sleep(500);
