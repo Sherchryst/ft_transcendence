@@ -108,13 +108,13 @@ export class GameService
 	{
 		if (board.player[0].score >= 11 || board.player[1].score >= 11)
 			board.end = true;
-		board.new_round = true;
+		board.pause_counter = 50;
 		board.dead = false;
-    board.ball.dx = speed * (board.ball.x < width / 2? -1:1);
-    board.ball.dy = Math.random() * speed * 1.5 * (Math.floor(Math.random() * 2)? -1:1);
+		board.ball.dx = speed * (board.ball.x < width / 2? -1:1);
+		board.ball.dy = Math.random() * speed * 1.5 * (Math.floor(Math.random() * 2)? -1:1);
         board.ball.x = 50;
         board.ball.y = Math.random() * height / 2 + height / 4;
-    board.ball.half_width = 2;
+    	board.ball.half_width = 2;
 		board.player[0].half_height = 6;
 		board.player[1].half_height = 6;
 		board.pass_count = 0;

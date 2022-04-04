@@ -99,7 +99,8 @@
           dead : false,
           end : false,
           pass_count : 0,
-          new_round : true } as Board,
+          ready : true,
+          pause_counter : 50 } as Board,
         bot : {
           bot_speed : 2,
           bot_offset : 0,
@@ -404,7 +405,7 @@
         }
         if (this.board.player[0].score >= 11 || this.board.player[1].score >= 11)
           this.board.end = true;
-        this.board.new_round = true;
+        this.board.pause_counter = 50;
         this.board.dead = false;
         this.board.ball.dx = this.board.ball.x < this.dim.width / 2? -1:1;
         this.board.ball.dy = Math.random() * 1.5 * (Math.floor(Math.random() * 2)? -1:1);
@@ -421,15 +422,13 @@
       {
         while (!this.board.end)
         {
-          if (this.board.new_round)
-            {
-              await this.sleep(1000);
-              this.board.new_round = false;
-            }
-            await this.sleep(20);
+          await this.sleep(20);
+          if (this.board.pause_counter > 0)
+            this.board.pause_counter--;
+          else
             this.updateBall();
-            this.clear();
-            this.addObjects();
+          this.clear();
+          this.addObjects();
         }
       },
       sleep(ms: number) {

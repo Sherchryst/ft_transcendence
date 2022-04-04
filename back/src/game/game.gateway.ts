@@ -40,7 +40,8 @@ const basic_board : Board = {
 	dead : false,
 	end : false,
   pass_count : 0,
-  new_round : false,
+  ready : false,
+  pause_counter : 50
 }
 
 function sleep(ms: number) {
@@ -186,13 +187,13 @@ export class GameGateway implements OnGatewayConnection {
     // console.log("match", match, "map", match.map);
     socket.emit("gameMap", { id : player_id, map : await this.matchService.findMap(1), login : [match.player1.login, match.player2.login] }); //change to specific map
     if (player_id == 0) {
-      while (board.new_round == false) // wait for other player to join
+      while (board.ready == false) // wait for other player to join
         await sleep(500);
       console.log("new match ", id, ": ", match.player1.login, " vs ", match.player2.login);
       this.sendUpdateBoard(id);
     }
     else if (player_id == 1) // player 2 is ready
-      board.new_round = true;
+      board.ready = true;
   }
 
   @SubscribeMessage('leave')
@@ -235,13 +236,15 @@ export class GameGateway implements OnGatewayConnection {
     while (!board.end)
     {
       await sleep(interval);
-      if (board.new_round)
+      if (board.pause_counter > 0)
       {
-        await sleep(1000);
-        this.matchService.updateScore(id, board.player[0].score, board.player[1].score);
-        board.new_round = false;
+        if (board.pause_counter == 1)
+          this.matchService.updateScore(id, board.player[0].score, board.player[1].score);
+        board.pause_counter--;
       }
-      this.server.to(`game:${id}`).emit('board', this.gameService.updateBall(board));
+      else
+        this.gameService.updateBall(board);
+      this.server.to(`game:${id}`).emit('board', board);
     }
     const match = await this.matchService.findMatch(id);
     this.matchService.setWinner(id, board.player[0].score > board.player[1].score ?
