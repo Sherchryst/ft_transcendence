@@ -6,7 +6,7 @@
 
 ## Users
 
-### - user(<ins>id</ins>, login, nickname, role, mmr, twofa, avatar_path)
+### - user(<ins>id</ins>, login, nickname, role, mmr, twofa, new_user, avatar_path)
 
 - id: INT
 	- An unique identifier for the user which is independant from 42.
