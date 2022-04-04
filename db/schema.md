@@ -6,7 +6,7 @@
 
 ## Users
 
-### - user(<ins>id</ins>, login, nickname, role, mmr, twofa, new_user, avatar_path)
+### - user(<ins>id</ins>, login, nickname, mmr, twofa, new_user, avatar_path)
 
 - id: INT
 	- An unique identifier for the user which is independant from 42.
@@ -14,10 +14,6 @@
 	- The login of the user retrieved from the 42 intranet.
 - nickname: VARCHAR(32) UNIQUE
 	- The user should be able to choose a unique name that will be displayed on the website.
-- role: ENUM NOT NULL DEFAULT `user`
-	- `admin`: The user is an administrator of the website.
-	- `banned`: The user is banned from the website.
-	- `user`: The user is a regular user of the website.
 - mmr: INT NOT NULL DEFAULT 0
 	- The matchmaking rating of the user.
 - twofa: VARCHAR(32) DEFAULT NULL
