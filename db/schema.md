@@ -6,14 +6,7 @@
 
 ## Users
 
-### - avatar(<ins>id</ins>, data)
-
-- avatar_id: INT
-	- The id of the avatar.
-- data: BYTEA NOT NULL
-	- The data of the avatar.
-
-### - user(<ins>id</ins>, login, nickname, role, mmr, twofa, *avatar_id*)
+### - user(<ins>id</ins>, login, nickname, role, mmr, twofa, new_user, avatar_path)
 
 - id: INT
 	- An unique identifier for the user which is independant from 42.
@@ -30,10 +23,10 @@
 - twofa: VARCHAR(32) DEFAULT NULL
 	- A secret used to generate a 2FA code.
 	- If NULL then the user does not use 2FA.
-- avatar_id: INT NOT NULL
-	- The id of the avatar of the user.
 - new_user: BOOL NOT UNKNOWN
-	- True if the user has not set a nickname yet False otherwise.
+	- True if the user has not set a nickname yet false otherwise.
+- avatar_path: VARCHAR(64) NOT NULL DEFAULT `avatars/default.jpg`
+	- The path to the avatar of the user.
 
 ### - user_relationship(<ins>*from_id*, *to_id*</ins>, type)
 

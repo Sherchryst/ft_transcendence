@@ -81,12 +81,11 @@ export class UsersService {
     return await getRepository(User).findOne(userId);
   }
 
-  async getAvatarPath(userId: number): Promise<string> {
-    const user = await this.findOne(userId);
-    if (!user) {
-      return null;
-    }
-    return '';
+  async getAvatar(userId: number): Promise<Avatar> {
+    const user = await getRepository(User).findOne(userId, {
+      relations: ['avatar']
+    });
+    return user ? user.avatar : null;
   }
 
   async getBlockedUsers(userId: number): Promise<User[]> {
@@ -166,7 +165,9 @@ export class UsersService {
   }
 
   async updateAvatar(avatarId: number, data: Buffer) {
-
+    await getRepository(Avatar).update(avatarId, {
+      data: data
+    });
   }
 
   async updateNickname(userId: number, nickname: string) {
@@ -176,4 +177,3 @@ export class UsersService {
     });
   }
 }
-

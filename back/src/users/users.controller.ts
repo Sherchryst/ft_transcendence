@@ -119,32 +119,16 @@ export class UsersController {
     }
   }
 
-  @Get('get-avatar')
-  async getAvatar(@Query('id') id: number, @Response({ passthrough: true }) res) {
-    if (!id)
-      throw new BadRequestException('No id provided');
-    const avatarPath = await this.usersService.getAvatarPath(id);
-    if (!avatarPath)
-      throw new HttpException('Avatar not found', 404);
-    const stream = Readable.from(avatar.data);
-    res.set({
-      'Content-Disposition': 'inline',
-      'Content-Type': 'image'
-    });
-    return new StreamableFile(stream);
-  }
-
   @Post('update-avatar')
   @UseInterceptors(FileInterceptor('file', { fileFilter: imageFilter }))
   async updateAvatar(@UploadedFile() file: Express.Multer.File, @Body() body: { id : number }) {
     if (!file)
       throw new BadRequestException('No file uploaded');
-    const avatarPath = await this.usersService.getAvatarPath(body.id);
-    if (!avatarPath)
+    const user = await this.usersService.findOne(body.id);
+    if (!user)
       throw new NotFoundException('User not found');
-    console.log("Avatar: ", avatarPath);
-    var buffer = await sharp(file.buffer)
+    let buffer = await sharp(file.buffer)
     .resize(400).toFormat('jpeg').jpeg({ quality: 90 }).toBuffer();
-    await this.usersService.updateAvatar(avatarPath.id, buffer);
+    await this.usersService.updateAvatar(user.id, buffer);
   }
 }
