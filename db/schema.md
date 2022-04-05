@@ -14,8 +14,8 @@
 	- The login of the user retrieved from the 42 intranet.
 - nickname: VARCHAR(32) UNIQUE
 	- The user should be able to choose a unique name that will be displayed on the website.
-- mmr: INT NOT NULL DEFAULT 0
-	- The matchmaking rating of the user.
+- xp: INT NOT NULL DEFAULT 0
+	- The experience points of the user.
 - twofa: VARCHAR(32) DEFAULT NULL
 	- A secret used to generate a 2FA code.
 	- If NULL then the user does not use 2FA.

@@ -15,7 +15,7 @@ export class User {
   nickname: string;
 
   @Column({ default: 0 })
-  mmr: number;
+  xp: number;
 
   @Column({ length: 32, default: '' })
   @Exclude()
