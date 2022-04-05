@@ -126,14 +126,13 @@ export class GameGateway implements OnGatewayConnection {
 
   async createMatch(map: GameMap, player1: number, player2: number | null, matchType: MatchType,
   @ConnectedSocket() socket: Socket) : Promise<Match> {
-    console.log("NEW MATCHHH Create match : map", map, player1, player2);
     if (Math.random() < 0.5) {
       const tmp = player1;
       player1 = player2;
       player2 = tmp;
     }
     const match = await this.matchService.createMatch(map, player1, player2, matchType);
-    // console.log("Match created : (in create match) ", match);
+    console.log("Match created : (in create match) ", match.id);
     const player1_socket =  this.WsClients.get(match.player1.id);
     const player2_socket =  this.WsClients.get(match.player2.id);
     this.createBoard(match.id, player1_socket.id, player2_socket.id);
@@ -192,7 +191,6 @@ export class GameGateway implements OnGatewayConnection {
     player_id = 2;
     const match = await this.matchService.findMatch(id);
     // console.log("match", match, "map", match.map);
-    console.log("1 MB : ", 1 << 20);
     socket.emit("gameMap", { id : player_id, map : match.map, login : [match.player1.login, match.player2.login] }); //change to specific map
     if (player_id == 0) {
       board.isReady.then(() => {

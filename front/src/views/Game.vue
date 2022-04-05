@@ -302,11 +302,11 @@
       },
       moveRackets(evt : MouseEvent)
       {
-        console.log("Evt: ", evt);
+        // console.log("Evt: ", evt);
         if (this.id > 1)
           return ;
         let rect : DOMRect = this.ctx.canvas.getBoundingClientRect();
-        console.log("id :", this.id, this.match_id);
+        // console.log("id :", this.id, this.match_id);
         if (this.$props.match_id != "bot")
           gameSocket.emit('player', {match_id : this.match_id, id : this.id, y : (evt.clientY - rect.top) / this.dimY})
         else
