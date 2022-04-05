@@ -8,6 +8,7 @@ import VueCookies from 'vue3-cookies'
 import Toast, { PluginOptions, POSITION } from "vue-toastification";
 import VueAxios from 'vue-axios';
 import { API } from '@/scripts/auth';
+import SDropdown from "@storinka/dropdown";
 
 import 'vue-toastification/dist/index.css';
 
@@ -22,4 +23,5 @@ createApp(App)
 	.use(VueCookies)
 	.use(VueAxios, API)
 	.use(Toast, optionsToast)
+	.use(SDropdown)
 	.mount('#app')

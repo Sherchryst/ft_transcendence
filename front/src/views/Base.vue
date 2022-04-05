@@ -45,7 +45,12 @@
 							</one-row-form>
 						</div>
 						<div class="self-center mx-7">
-							<Dropdown class="h-12" menuTitle="TEST" />
+							<button v-s-dropdown-toggle:some-dropdown>
+								<NotifIcon class="h-12 w-12" />
+							</button>
+							<s-dropdown name="some-dropdown" align="left">
+								<NotifPanel/>
+							</s-dropdown>
 						</div>
 						<div class="">
 							<Logo />
@@ -79,7 +84,7 @@ import { API } from '@/scripts/auth.ts';
 import router from '@/router';
 import { SocketMessage } from '@/interfaces/Message';
 import { chatSocket } from '@/socket.ts'
-import Dropdown from '@/components/Dropdown.vue'
+import NotifPanel from '@/components/Notification/NotifPanel.vue';
 
 export default defineComponent({
 	components: {
@@ -93,8 +98,8 @@ export default defineComponent({
 		SearchIcon,
 		MenuIcon,
 		Logo,
-		// NotifIcon,
-		Dropdown
+		NotifIcon,
+		NotifPanel,
 	},
 	data() {
 		return {
