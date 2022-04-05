@@ -42,8 +42,8 @@ export default defineComponent({
 	},
 	mounted() {
 		gameSocket.on("invited", (data : any) => {
-        gameSocket.emit("acceptInvit", data);
-				console.log("accepted invite : ", data);
+			gameSocket.emit("acceptInvit", data);
+			console.log("accepted invite : ", data);
 		});
 		gameSocket.on("gameStart", (data: any) => {
 				router.push({ name: "game", params: { match_id: data }})
@@ -51,7 +51,7 @@ export default defineComponent({
 	},
 	methods: {
 		sendInvite() {
-			gameSocket.emit("invite", { login : "cheat_user", mapId : 2});
+			gameSocket.emit("invite", { login : "cheat_user", mapId : 2, level : 1});
 		},
 		requestGame() {
 			router.push({ name: "game", params: { match_id: `bot` }})

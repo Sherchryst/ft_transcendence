@@ -98,7 +98,6 @@
             half_height : 6 }],
           dead : false,
           end : false,
-          pass_count : 0,
           ready : true,
           pause_counter : 50 } as Board,
         bot : {
@@ -203,7 +202,7 @@
         const starColor = `#${this.map.starsColor.toString(16).padStart(6, '0')}`;
         const lineColor = `#${this.map.racketColor.toString(16).padStart(6, '0')}`;
         ctx.fillStyle = `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`;
-        console.log("background color", `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`);
+        // console.log("background color", `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`);
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         // ctx.fillStyle = "white";
         for (let count = 0; count < 300; count++) //stars
@@ -254,12 +253,12 @@
       drawScore()
       {
         this.ctx.fillStyle = "white";
-        this.ctx.font = `${this.ctx.canvas.height / 10}px courier new`; // absolute size /!\
+        this.ctx.font = `${this.ctx.canvas.height / 10}px courier new`;
         this.ctx.textAlign = "right";
         this.ctx.fillText((this.board.player[0].score).toString(), this.ctx.canvas.width / 2 - this.ctx.canvas.width / 20, this.ctx.canvas.height / 10);
         this.ctx.textAlign = "left";
         this.ctx.fillText((this.board.player[1].score).toString(), this.ctx.canvas.width / 2 + this.ctx.canvas.width / 20, this.ctx.canvas.height / 10);
-        this.ctx.font = `${this.ctx.canvas.height / 15}px courier new`; // absolute size /!\
+        this.ctx.font = `${this.ctx.canvas.height / 15}px courier new`;
         this.ctx.textAlign = "right";
         this.ctx.fillText(this.login[1], this.ctx.canvas.width - this.ctx.canvas.width / 22, this.ctx.canvas.height / 10);
         this.ctx.textAlign = "left";
@@ -309,17 +308,10 @@
       },
       racketCollision(dist : number, idx : number, racket_dy : number)
       {
-        this.board.pass_count++;
         var ball = this.board.ball;
-        if (!(this.board.pass_count % 10))
-        {
-          this.board.player[0].half_height *= .9;
-          this.board.player[1].half_height *= .9;
-        }
-        else if (!(this.board.pass_count % 5))
-          ball.half_width *= 0.9
-        ball.dx *= -1.05;
-        ball.dy = 1.05 * ball.dy + racket_dy
+        const speed_factor = ball.dx > 3 ? 1 : 1.05;
+        ball.dx *= -speed_factor;
+        ball.dy = speed_factor * ball.dy + racket_dy
             + dist * Math.abs(ball.dx) / this.board.player[idx].half_height;
         if (Math.abs(ball.dx) * 2 < Math.abs(ball.dy))
           ball.dy = 2 * Math.sign(ball.dy) * Math.abs(ball.dx);
@@ -417,7 +409,6 @@
         this.board.player[1].half_height = 6;
         this.bot.bot_offset = (Math.floor(Math.random() * 2) ? -1 : 1) * Math.random()
               * this.board.player[this.bot.bot_id].half_height * 1.2 * this.board.ball.dx;
-        this.board.pass_count = 0;
       },
       async game_loop()
       {
