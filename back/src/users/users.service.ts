@@ -1,7 +1,6 @@
-import { Avatar } from './entities/avatar.entity';
 import { Channel } from 'src/chat/entities/channel.entity';
 import { ChannelMember } from 'src/chat/entities/channel-member.entity';
-import { createReadStream, readFileSync } from 'fs';
+import { createWriteStream } from 'fs';
 import { getRepository, Not } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { User } from './entities/user.entity';
@@ -46,18 +45,12 @@ export class UsersService {
 
   async create(login: string): Promise<User> {
     const genRanHex = size => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
-    const defaultAvatar = readFileSync('./blank-avatar.jpg');
-    const avatar = await getRepository(Avatar).save({
-      user: { login: login },
-      data: defaultAvatar
-    });
     const repo = getRepository(User);
     do
       try {
         const user = repo.create({
           login: login,
-          nickname: genRanHex(32),
-          avatar: avatar
+          nickname: genRanHex(32)
         });
         return await repo.save(user);
       } catch (e) {
@@ -79,13 +72,6 @@ export class UsersService {
 
   async findOne(userId: number): Promise<User> {
     return await getRepository(User).findOne(userId);
-  }
-
-  async getAvatar(userId: number): Promise<Avatar> {
-    const user = await getRepository(User).findOne(userId, {
-      relations: ['avatar']
-    });
-    return user ? user.avatar : null;
   }
 
   async getBlockedUsers(userId: number): Promise<User[]> {
@@ -164,9 +150,12 @@ export class UsersService {
     });
   }
 
-  async updateAvatar(avatarId: number, data: Buffer) {
-    await getRepository(Avatar).update(avatarId, {
-      data: data
+  async updateAvatar(userId: number, data: Buffer) {
+    const ws = createWriteStream(`${__dirname}/../../public/avatars/${userId}.jpg`);
+    ws.write(data);
+    ws.end();
+    await getRepository(User).update({id: userId}, {
+      avatarPath: `avatars/${userId}.jpg`
     });
   }
 

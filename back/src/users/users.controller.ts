@@ -1,6 +1,5 @@
-import { BadRequestException, Body, ClassSerializerInterceptor, ConflictException, Controller, forwardRef, Get, HttpException, Inject, NotFoundException, Param, Post, Query, Req, Response, ServiceUnavailableException, StreamableFile, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Get, NotFoundException, Post, Query, Req, ServiceUnavailableException, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Readable } from 'typeorm/platform/PlatformTools';
 import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
 import { UsersService } from './users.service';
 import * as PostgresError from '@fiveem/postgres-error-codes'
@@ -119,32 +118,16 @@ export class UsersController {
     }
   }
 
-  @Get('get-avatar')
-  async getAvatar(@Query('id') id: number, @Response({ passthrough: true }) res) {
-    if (!id)
-      throw new BadRequestException('No id provided');
-    const avatar = await this.usersService.getAvatar(id);
-    if (!avatar)
-      throw new HttpException('Avatar not found', 404);
-    const stream = Readable.from(avatar.data);
-    res.set({
-      'Content-Disposition': 'inline',
-      'Content-Type': 'image'
-    });
-    return new StreamableFile(stream);
-  }
-
   @Post('update-avatar')
   @UseInterceptors(FileInterceptor('file', { fileFilter: imageFilter }))
   async updateAvatar(@UploadedFile() file: Express.Multer.File, @Body() body: { id : number }) {
     if (!file)
       throw new BadRequestException('No file uploaded');
-    const avatar = await this.usersService.getAvatar(body.id);
-    if (!avatar)
+    const user = await this.usersService.findOne(body.id);
+    if (!user)
       throw new NotFoundException('User not found');
-    console.log("Avatar: ", avatar);
-    var buffer = await sharp(file.buffer)
-    .resize(400).toFormat('jpeg').jpeg({ quality: 90 }).toBuffer();
-    await this.usersService.updateAvatar(avatar.id, buffer);
+    let buffer = await sharp(file.buffer)
+    .resize(400, 400).toFormat('jpeg').jpeg({ quality: 90 }).toBuffer();
+    await this.usersService.updateAvatar(user.id, buffer);
   }
 }
