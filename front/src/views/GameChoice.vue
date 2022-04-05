@@ -49,6 +49,12 @@ export default defineComponent({
 				router.push({ name: "game", params: { match_id: data }})
 		})
 	},
+	beforeUnmount() {
+      gameSocket.off("invited");
+      gameSocket.off("gameStart");
+      // const removed = document.removeEventListener("mousemove", this.moveRackets);
+      console.log("before destroy in gamechoice");
+    },
 	methods: {
 		sendInvite() {
 			gameSocket.emit("invite", { login : "cheat_user", mapId : 2, level : 1});

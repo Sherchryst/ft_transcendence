@@ -113,13 +113,20 @@ export class GameGateway implements OnGatewayConnection {
     var board = JSON.parse(JSON.stringify(basic_board));
     board.player[0].user_id = player1;
     board.player[1].user_id = player2;
+    board.setReady = () => console.log("Omg not working samer");
+    board.isReady = new Promise<boolean>((resolve, reject) => {
+      board.setReady = () => {
+        console.log("Setting resolve")
+        resolve(true);
+      }
+    });
     boards.set(`${id}`, board);
     return board;
   }
 
   async createMatch(map: GameMap, player1: number, player2: number | null, matchType: MatchType,
   @ConnectedSocket() socket: Socket) : Promise<Match> {
-    // console.log("Create match : map", map);
+    console.log("NEW MATCHHH Create match : map", map, player1, player2);
     if (Math.random() < 0.5) {
       const tmp = player1;
       player1 = player2;
@@ -171,9 +178,10 @@ export class GameGateway implements OnGatewayConnection {
   async handleMessage(
   @MessageBody() id: number,
   @ConnectedSocket() socket: Socket) {
-    // console.log("match_id (connection): ", id);
+    console.log("match_id (connection): ", id);
 
     var board : Board = boards.get(`${id}`);
+    if (!board) return ;
     var player_id : number;
 
     if (board.player[0].user_id == socket.id)
@@ -184,16 +192,19 @@ export class GameGateway implements OnGatewayConnection {
     player_id = 2;
     const match = await this.matchService.findMatch(id);
     // console.log("match", match, "map", match.map);
+    console.log("1 MB : ", 1 << 20);
     socket.emit("gameMap", { id : player_id, map : match.map, login : [match.player1.login, match.player2.login] }); //change to specific map
     if (player_id == 0) {
-      while (board.ready == false) // wait for other player to join
-        await sleep(500);
-      console.log("new match ", id, ": ", match.player1.login, " vs ", match.player2.login);
-      board.level = 3; // tmp --> should be in match invitation
-      this.sendUpdateBoard(id);
+      board.isReady.then(() => {
+        console.log("new match ", id, ": ", match.player1.login, " vs ", match.player2.login);
+        board.level = 3; // tmp --> should be in match invitation
+        this.sendUpdateBoard(id);
+      });
     }
-    else if (player_id == 1) // player 2 is ready
-      board.ready = true;
+    else if (player_id == 1) {
+      board.ready = true
+      board.setReady();
+    }
   }
 
   @SubscribeMessage('leave')
@@ -207,9 +218,9 @@ export class GameGateway implements OnGatewayConnection {
         board.player[data.id == 0? 1 : 0].score = 11;
         board.end = true;
         this.server.to(`game:${data.match_id}`).emit('board', this.gameService.updateBall(board));
-        console.log("Player left game ", data.match_id);
       }
       this.server.socketsLeave(`game:${data.match_id}`);
+      console.log("Player left game ", data.match_id);
     }
     catch (e) {
       console.log("Player left game");
@@ -222,11 +233,13 @@ export class GameGateway implements OnGatewayConnection {
     // console.log("match_id (player): ", data.match_id);
     if (data.id != 0 && data.id != 1)
       return;
-    var board = boards.get(`${data.match_id}`); //match id
-    if (!board )
-      return ;
-      //check player id
-    this.gameService.updatePlayer(data.id, data.y, board);
+    try {
+      // console.log ("BOARDS :", boards.keys());
+      var board = boards.get(`${data.match_id}`); //match id
+        //check player id
+      this.gameService.updatePlayer(data.id, data.y, board);
+    }
+    catch (e){}
   }
 
   async sendUpdateBoard(id: number) {
@@ -253,10 +266,11 @@ export class GameGateway implements OnGatewayConnection {
       this.server.to(`game:${id}`).emit('board', board);
     }
     const match = await this.matchService.findMatch(id);
-    this.matchService.setWinner(id, board.player[0].score > board.player[1].score ?
-    match.player1.id : (match.player2? match.player2.id : -1));
-    this.matchService.updateScore(id, board.player[0].score, board.player[1].score);
+    await this.matchService.setWinner(id, board.player[0].score > board.player[1].score ?
+      match.player1.id : (match.player2? match.player2.id : -1));
+    await this.matchService.updateScore(id, board.player[0].score, board.player[1].score);
     console.log("match ", id, "ended, score: ", board.player[0].score, " - ", board.player[1].score);
     boards.delete(`${id}`);
+    console.log("boards : (after delete)", boards.keys());
   }
 }

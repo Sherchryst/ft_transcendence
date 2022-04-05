@@ -2,14 +2,14 @@ import { Channel } from "./Channel"
 import { User } from "./Profile"
 
 export interface Message_t {
-	from: String,
-	content: String
+	from: string,
+	content: string
 	self?: boolean
 }
 
 export interface ServerMessage {
 	from: User,
-	content: String
+	content: string
 }
 
 export interface SocketMessage {

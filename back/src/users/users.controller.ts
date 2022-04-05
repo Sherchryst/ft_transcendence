@@ -11,7 +11,7 @@ export const imageFilter: any = (req: any, file: { mimetype: string, size: numbe
   const validExtension: Array<string> = ['image/png', 'image/jpg', 'image/jpeg', 'image/gif'];
   if (!validExtension.includes(file.mimetype))
     return callback(new BadRequestException('Only image files are allowed'), false);
-  if (file.size > 1000000)
+  if (file.size > (1 << 20))
     return callback(new BadRequestException('Image must be less than 1MB'), false);
   return callback(null, true);
 };

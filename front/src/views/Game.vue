@@ -24,7 +24,7 @@
 </style>
 
 <template>
-<div class="game">
+<div class="game" @mousemove="moveRackets">
   <div id="canvas-div" class="game-container w-full relative">
     <canvas ref="background" id="background" class="game-bg" height="600" width="800"></canvas>
     <canvas ref="gamecanvas" id="gamecanvas" class="game-fg" height="600" width="800"></canvas>
@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts">
-  import {defineComponent, ssrContextKey} from 'vue'
+  import { defineComponent } from 'vue'
   import { gameSocket } from '@/socket';
   import { Bot } from '@/interfaces/game/bot.interface'; // change to @
   import { Board } from '@/interfaces/game/board.interface';
@@ -57,6 +57,7 @@
     },
     data() {
       return {
+        evts: [],
         login : ["you", "bot"],
         ctx : null as any,
         id : 0,
@@ -108,9 +109,9 @@
       }
     },
     mounted() {
-      console.log("mounted");
       this.ctx = (this.$refs.gamecanvas as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
       this.dimX = this.ctx.canvas.width / 100;
+      console.log("mounted", this.ctx, this.$props);
       this.dimY = this.ctx.canvas.height / 100;
       if (this.$props.match_id != "bot")
       {
@@ -123,8 +124,8 @@
           this.id = data.id;
           console.log(" id :", this.id);
           this.drawBackground();
-          document.addEventListener("mousemove", this.moveRackets);
-          console.log('socket connected');
+          // const setuped = document.addEventListener("mousemove", this.moveRackets);
+          // console.log(setuped, 'socket connected');
         });
         gameSocket.on("board", (data : any) => {
           this.board = { ...this.board, ...data }
@@ -137,17 +138,31 @@
         console.log("bot");
         // this.reset(true);
         this.drawBackground();
-        document.addEventListener("mousemove", this.moveRackets);
+        //const setuped = document.addEventListener("mousemove", this.moveRackets);
+        // console.log(setuped, 'evts', this.evts);
         this.game_loop();
       }
     },
     beforeRouteLeave(to, from, next) {
-      console.log("before leave");
-      if (this.$props.match_id != "bot" && (this.id == 0 || this.id == 1))
-      {
-        gameSocket.emit('leave', { match_id : this.match_id, id : this.id });
+      const res = window.confirm("Are you sure you want to leave this page? You will lose your progress.")
+      if (res) {
+        console.log("leaving");
+        if (this.$props.match_id != "bot" && (this.id == 0 || this.id == 1))
+        {
+          gameSocket.emit('leave', { match_id : this.match_id, id : this.id });
+        }
+        next();
       }
-      next();
+      else
+        next(false);
+      console.log("before leave");
+
+    },
+    beforeUnmount() {
+      gameSocket.off("board");
+      gameSocket.off("gameMap");
+      // const removed = document.removeEventListener("mousemove", this.moveRackets);
+      console.log("before destroy");
     },
     methods:
     {
@@ -287,10 +302,11 @@
       },
       moveRackets(evt : MouseEvent)
       {
+        console.log("Evt: ", evt);
         if (this.id > 1)
           return ;
         let rect : DOMRect = this.ctx.canvas.getBoundingClientRect();
-        // console.log("id :", this.id);
+        console.log("id :", this.id, this.match_id);
         if (this.$props.match_id != "bot")
           gameSocket.emit('player', {match_id : this.match_id, id : this.id, y : (evt.clientY - rect.top) / this.dimY})
         else
