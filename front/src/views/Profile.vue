@@ -2,7 +2,7 @@
 	<div class="grid grid-cols-12 lg:gap-x-16 2xl:gap-x-32">
 		<div class="col-span-12 md:col-span-4 flex flex-col max-w-sm">
 			<div class="flex place-content-center mb-10">
-				<ProfilePicture></ProfilePicture>
+				<ProfilePicture :avatar="profile.user?.avatarPath"></ProfilePicture>
 			</div>
 			<div class="mb-16">
 				<MainTitle class="title-username">{{ profile.user?.nickname }}</MainTitle>
