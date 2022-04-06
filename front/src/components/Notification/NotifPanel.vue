@@ -1,7 +1,7 @@
 <template>
 	<div class="flex flex-col">
 		<div class="flex justify-between">
-			<div class="font-bold text-xl mb-5">Notification</div>
+			<div class="font-bold text-xl mb-5">Notifications</div>
 			<router-link to="home">view all</router-link>
 		</div>
 		<NotifCard>
