@@ -1,6 +1,6 @@
 <template>
 	<div class="flex flex-shrink-0 w-auto h-auto ">
-		<img class="frame h-64 w-64" :src="'http://localhost:3000/' + avatar" alt="profile">
+		<img class="frame h-64 w-64" :src="avatar" alt="profile">
 	</div>
 </template>
 

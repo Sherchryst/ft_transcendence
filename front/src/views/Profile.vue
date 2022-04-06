@@ -2,7 +2,7 @@
 	<div class="grid grid-cols-12 lg:gap-x-16 2xl:gap-x-32">
 		<div class="col-span-12 md:col-span-4 flex flex-col max-w-sm">
 			<div class="flex place-content-center mb-10">
-				<ProfilePicture :avatar="profile.user?.avatarPath"></ProfilePicture>
+				<ProfilePicture :avatar="'http://localhost:3000/' + profile.user?.avatarPath"></ProfilePicture>
 			</div>
 			<div class="mb-16">
 				<MainTitle class="title-username">{{ profile.user?.nickname }}</MainTitle>
@@ -13,7 +13,7 @@
 				<LevelBar :percent="68" :level="8" :nextLevel="9"></LevelBar>
 			</div>
 			<div class="mb-12">
-				<ButtonLink v-if="this.username == this.selfLogin" class="flex justify-center w-full" text="Edit Profile"></ButtonLink>
+				<ButtonLink v-if="username == selfLogin" route="edit-profile" class="flex justify-center w-full"  text="Edit Profile"></ButtonLink>
 				<div v-else>
 					<ButtonLink class="flex justify-center w-full mb-4" text="Ask a friend"></ButtonLink>
 					<ButtonLink class="flex justify-center w-full btn-neutral" text="Block User"></ButtonLink>
@@ -106,10 +106,10 @@ import MainTitle from '@/components/MainTitle.vue';
 import Scrool from '@/assets/icon/list-game.svg';
 import Trophy from '@/assets/icon/achievement.svg';
 import {defineComponent, watch, computed} from 'vue';
-import { API } from '@/scripts/auth.ts';
+import { API } from '@/scripts/auth';
 import { Profile } from '@/interfaces/Profile';
 import { useStore } from 'vuex'
-import { key } from '@/store/index.ts'
+import { key } from '@/store/index'
 
 
 export default defineComponent({
@@ -153,9 +153,9 @@ export default defineComponent({
 					login: username
 				}
 			})
-			.then((res) => {
+			.then((res: any) => {
 				this.profile = res.data;
-			}).catch((response) => {
+			}).catch((response: any) => {
 				console.error("FAIL GET USER");
 			})
 		}
