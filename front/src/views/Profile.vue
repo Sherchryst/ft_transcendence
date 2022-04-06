@@ -2,7 +2,7 @@
 	<div class="grid grid-cols-12 lg:gap-x-16 2xl:gap-x-32">
 		<div class="col-span-12 md:col-span-4 flex flex-col max-w-sm">
 			<div class="flex place-content-center mb-10">
-				<ProfilePicture :avatar="'http://localhost:3000/' + profile.user?.avatarPath"></ProfilePicture>
+				<ProfilePicture v-if="profile.user != undefined" :avatar="'http://localhost:3000/' + profile.user?.avatarPath"></ProfilePicture>
 			</div>
 			<div class="mb-16">
 				<MainTitle class="title-username">{{ profile.user?.nickname }}</MainTitle>
@@ -155,6 +155,7 @@ export default defineComponent({
 			})
 			.then((res: any) => {
 				this.profile = res.data;
+				console.log('This.Profile',this.profile);
 			}).catch((response: any) => {
 				console.error("FAIL GET USER");
 			})

@@ -3,14 +3,21 @@
 	<form @submit.prevent="send">
 		<div class="flex flex-col justify-evenly">
 			<div class="self-center mb-16">
-				<ChooseAvatar></ChooseAvatar>
+				<ChooseAvatar @onInputImage="inputImage($event)">
+					<template v-slot:activator>
+						<div v-if="inside" class="grey frame flex flex-col place-content-center w-64 h-64 mb-10">
+							<span class="title-username">Click to add avatar</span>
+						</div>
+						<div v-else class="flex place-content-center">
+							<ProfilePicture :avatar="imageURL"></ProfilePicture>
+						</div>
+					</template>
+				</ChooseAvatar>
 			</div>
-
 			<div class="self-center mb-12 space-y-4">
 				<label for="username">Enter username:</label>
 				<input type="text" class="input" id="username" name="username" v-model="nickname" placeholder="username" required>
 			</div>
-
 			<div class="self-center">
 				<button type="submit" class="button px-7 py-3 pb-2"> Register </button>
 			</div>
@@ -37,12 +44,22 @@ export default defineComponent({
 	},
 	data() {
 		return {
-			nickname: ""
+			avatar: {} as File,
+			imageURL: '',
+			nickname: '',
+			inside: true
 		}
 	},
 	methods: {
+		inputImage(image: File) {
+			this.avatar = image;
+			this.imageURL = URL.createObjectURL(image);
+			this.inside = false;
+		},
 		send() {
-			console.log("send")
+			var formData = new FormData();
+			formData.append('file', this.avatar);
+			formData.append('id', this.$store.getters.getId);
 			API.post('users/update-nickname', {
 				id: this.$store.getters.getId,
 				nickname: this.nickname
@@ -52,10 +69,16 @@ export default defineComponent({
 				})
 			}).catch(function(error) {
 				console.log(error);
-			})
+			});
+			API.post('users/update-avatar', formData, {
+				headers: {
+					'Content-Type': 'multipart/form-data'
+				}}).catch(function(error) {
+				console.log("update failed", error);
+			});
 		}
 	}
-})
+	})
 </script>
 
 <style lang="scss" scoped>

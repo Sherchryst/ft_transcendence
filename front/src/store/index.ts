@@ -24,6 +24,10 @@ export const store = createStore<State>({
       const profile : Profile = JSON.parse(localStorage.getItem('user') || '')
       return profile?.user?.login
     },
+    getAvatarPath() : string{
+      const profile : Profile = JSON.parse(localStorage.getItem('user') || '')
+      return profile?.user?.avatarPath
+    },
     getNickname() : string{
       const profile : Profile = JSON.parse(localStorage.getItem('user') || '')
       return profile?.user?.nickname

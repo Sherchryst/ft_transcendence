@@ -3,7 +3,7 @@
         <div @click="launchFilePicker()">
             <slot name="activator"></slot>
         </div>
-        <input type="file" accept="image/*" ref="file" :name="uploadFieldName" @change="onFileChange($event)" style="display:none">
+        <input type="file" accept=".png , .jpg" ref="file" :name="uploadFieldName" @change="onFileChange($event)" style="display:none">
     </div>
 </template>
 
