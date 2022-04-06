@@ -3,7 +3,7 @@
         <div @click="launchFilePicker()">
             <slot name="activator"></slot>
         </div>
-        <input type="file" ref="file" :name="uploadFieldName" @change="onFileChange($event.target.name, $event.target.files)" style="display:none">
+        <input type="file" accept="image/*" ref="file" :name="uploadFieldName" @change="onFileChange($event)" style="display:none">
     </div>
 </template>
 
@@ -21,10 +21,14 @@ export default defineComponent({
     },
     methods: {
         launchFilePicker() {
-            this.$refs.file.click();
+            (this.$refs['file'] as HTMLElement).click();
         },
-        onFileChange(name, files) {
-            this.$emit('input', files[0]);
+        onFileChange(event: any) {
+            const file = event.target.files[0];
+            console.log(file);
+            if (file && file instanceof File) {
+                this.$emit('onInputImage', file);
+            }
         }
     }
 });

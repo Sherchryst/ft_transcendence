@@ -2,9 +2,9 @@
     <div class="grid grid-cols-12 lg:gap-x-16 2xl:gap-x-32">
         <div class="col-span-12 md:col-span-4 flex flex-col max-w-sm">
             <div class="mb-10">
-                <ChooseAvatar @input="inputImage($event)">
+                <ChooseAvatar @onInputImage="inputImage($event)">
                     <template v-slot:activator>
-                        <div v-if="!avatar" class="grey frame flex flex-col place-content-center w-64 h-64 mb-10">
+                        <div v-if="inside" class="grey frame flex flex-col place-content-center w-64 h-64 mb-10">
                             <span class="title-username">Click to add avatar</span>
                         </div>
                         <div v-else class="flex place-content-center">
@@ -42,14 +42,17 @@ export default defineComponent({
     },
     data () {
         return {
-        avatar: null,
-        imageURL: ''
+        avatar: {} as File,
+        imageURL: '',
+        nickname: '',
+        inside: true
         }
     },
     methods: {
         inputImage(image: File) {
-            this.avatar = image
-            this.imageURL = URL.createObjectURL(image)
+            this.avatar = image;
+            this.imageURL = URL.createObjectURL(image);
+            this.inside = false;
         },
     }
 });
