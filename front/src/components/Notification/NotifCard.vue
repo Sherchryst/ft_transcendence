@@ -20,6 +20,9 @@ export default defineComponent({
 		dateTime: { type: Date },
 		from: {type: Object as PropType<User>},
 	},
+	// computed: {
+
+	// },
 	setup(props) {
 		props
 	}

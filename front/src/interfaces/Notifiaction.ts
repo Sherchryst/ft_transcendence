@@ -2,7 +2,7 @@ import { Channel } from "./Channel"
 import { User } from "./Profile"
 
 export interface FriendRequest {
-	from: User
+	from: string
 }
 
 export interface ChannelInvitation {
@@ -12,17 +12,10 @@ export interface ChannelInvitation {
 
 export interface GameInvitation {
 	from: User,
-	map: String
-
-}
-
-export enum NotificationType {
-	FRIEMD,
-	CHANNEL,
-	GAME
+	map: string
 }
 export interface Notification {
-	type: NotificationType,
+	container: string,
 	content: FriendRequest | ChannelInvitation | GameInvitation,
 	date: Date
 }
