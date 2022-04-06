@@ -5,7 +5,7 @@
 			<div class="notif-message">
 				<slot></slot>
 			</div>
-			<div>xx ago</div>
+			<div class="relative-time">{{ relativeTime }}</div>
 		</div>
 	</div>
 </template>
@@ -13,6 +13,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { User } from '@/interfaces/Profile'
+import moment from 'moment'
 
 export default defineComponent({
 	name: "NotifCard",
@@ -20,9 +21,11 @@ export default defineComponent({
 		dateTime: { type: Date },
 		from: {type: Object as PropType<User>},
 	},
-	// computed: {
-
-	// },
+	computed: {
+		relativeTime(): string {
+			return moment(this.dateTime).fromNow()
+		}
+	},
 	setup(props) {
 		props
 	}
@@ -42,5 +45,8 @@ export default defineComponent({
 }
 .font-accentuate{
 	color: $dark-font;
+}
+.relative-time{
+	color: $text-title;
 }
 </style>
