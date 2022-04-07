@@ -39,6 +39,10 @@ export const store = createStore<State>({
     isNewUser(): boolean {
       const profile : Profile = JSON.parse(localStorage.getItem('user') || '')
       return profile?.user?.newUser
+    },
+    is2FA(): boolean | undefined {
+      const profile : Profile = JSON.parse(localStorage.getItem('user') || '')
+      return profile?.user?.twofa;
     }
   },
   mutations: {
@@ -52,7 +56,7 @@ export const store = createStore<State>({
   },
   actions: {
     async connection({commit}){
-      const response = await API.get('users/profile');
+        const response = await API.get('users/profile');
         commit("setProfile", response.data);
     },
     SOCKET_addMessage({ commit }, message) {
