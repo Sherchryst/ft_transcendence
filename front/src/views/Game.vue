@@ -2,7 +2,7 @@
   .game{
     overflow: hidden;
     canvas{
-      transform: translateX(-50%) translateY(-50%);
+      transform: translateX(-50%);
       position: absolute;
       left: 0;
       top: 0;
@@ -35,7 +35,7 @@
 <script lang="ts">
   import { defineComponent } from 'vue'
   import { gameSocket } from '@/socket';
-  import { Bot } from '@/interfaces/game/bot.interface'; // change to @
+  import { Bot } from '@/interfaces/game/bot.interface';
   import { Board } from '@/interfaces/game/board.interface';
   import { GameMap } from '@/interfaces/game/gameMap.interface';
   import { Dimensions } from '@/interfaces/game/dimensions.interface';
