@@ -42,16 +42,22 @@ export default defineComponent({
 	},
 	mounted() {
 		gameSocket.on("invited", (data : any) => {
-        gameSocket.emit("acceptInvit", data);
-				console.log("accepted invite : ", data);
+			gameSocket.emit("acceptInvit", data);
+			console.log("accepted invite : ", data);
 		});
 		gameSocket.on("gameStart", (data: any) => {
 				router.push({ name: "game", params: { match_id: data }})
 		})
 	},
+	beforeUnmount() {
+      gameSocket.off("invited");
+      gameSocket.off("gameStart");
+      // const removed = document.removeEventListener("mousemove", this.moveRackets);
+      console.log("before destroy in gamechoice");
+    },
 	methods: {
 		sendInvite() {
-			gameSocket.emit("invite", { login : "cheat_user", map : 1});
+			gameSocket.emit("invite", { login : "cheat_user", mapId : 2, level : 1});
 		},
 		requestGame() {
 			router.push({ name: "game", params: { match_id: `bot` }})

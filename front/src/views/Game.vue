@@ -24,7 +24,7 @@
 </style>
 
 <template>
-<div class="game">
+<div class="game" @mousemove="moveRackets">
   <div id="canvas-div" class="game-container w-full relative">
     <canvas ref="background" id="background" class="game-bg" height="600" width="800"></canvas>
     <canvas ref="gamecanvas" id="gamecanvas" class="game-fg" height="600" width="800"></canvas>
@@ -33,11 +33,11 @@
 </template>
 
 <script lang="ts">
-  import {defineComponent, ssrContextKey} from 'vue'
+  import { defineComponent } from 'vue'
   import { gameSocket } from '@/socket';
   import { Bot } from '@/interfaces/game/bot.interface'; // change to @
   import { Board } from '@/interfaces/game/board.interface';
-  import { Map } from '@/interfaces/game/map.interface';
+  import { GameMap } from '@/interfaces/game/gameMap.interface';
   import { Dimensions } from '@/interfaces/game/dimensions.interface';
   // import gamecanvas from '@/components/game/gamecanvas.vue';
   // import background from '@/components/game/background.vue';
@@ -57,6 +57,7 @@
     },
     data() {
       return {
+        evts: [],
         login : ["you", "bot"],
         ctx : null as any,
         id : 0,
@@ -64,8 +65,8 @@
           ballColor : 16562691,
           backgroundColor : 344663,
           starsColor: 12566194,
-          racketColor : 16777215 
-        } as Map,
+          racketColor : 16777215
+        } as GameMap,
         dimX : 1,
         dimY : 1,
         dim : {
@@ -98,8 +99,8 @@
             half_height : 6 }],
           dead : false,
           end : false,
-          pass_count : 0,
-          new_round : true } as Board,
+          ready : true,
+          pause_counter : 50 } as Board,
         bot : {
           bot_speed : 2,
           bot_offset : 0,
@@ -108,9 +109,9 @@
       }
     },
     mounted() {
-      console.log("mounted");
       this.ctx = (this.$refs.gamecanvas as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
       this.dimX = this.ctx.canvas.width / 100;
+      console.log("mounted", this.ctx, this.$props);
       this.dimY = this.ctx.canvas.height / 100;
       if (this.$props.match_id != "bot")
       {
@@ -123,8 +124,8 @@
           this.id = data.id;
           console.log(" id :", this.id);
           this.drawBackground();
-          document.addEventListener("mousemove", this.moveRackets);
-          console.log('socket connected');
+          // const setuped = document.addEventListener("mousemove", this.moveRackets);
+          // console.log(setuped, 'socket connected');
         });
         gameSocket.on("board", (data : any) => {
           this.board = { ...this.board, ...data }
@@ -137,17 +138,31 @@
         console.log("bot");
         // this.reset(true);
         this.drawBackground();
-        document.addEventListener("mousemove", this.moveRackets);
+        //const setuped = document.addEventListener("mousemove", this.moveRackets);
+        // console.log(setuped, 'evts', this.evts);
         this.game_loop();
       }
     },
     beforeRouteLeave(to, from, next) {
-      console.log("before leave");
-      if (this.$props.match_id != "bot" && (this.id == 0 || this.id == 1))
-      {
-        gameSocket.emit('leave', { match_id : this.match_id, id : this.id });
+      const res = window.confirm("Are you sure you want to leave this page? You will lose your progress.")
+      if (res) {
+        console.log("leaving");
+        if (this.$props.match_id != "bot" && (this.id == 0 || this.id == 1))
+        {
+          gameSocket.emit('leave', { match_id : this.match_id, id : this.id });
+        }
+        next();
       }
-      next();
+      else
+        next(false);
+      console.log("before leave");
+
+    },
+    beforeUnmount() {
+      gameSocket.off("board");
+      gameSocket.off("gameMap");
+      // const removed = document.removeEventListener("mousemove", this.moveRackets);
+      console.log("before destroy");
     },
     methods:
     {
@@ -199,15 +214,16 @@
         const interval = ctx.canvas.height / 10;
         const start = ctx.canvas.height / 60;
         const line_width = ctx.canvas.width / 80;
-        ctx.fillStyle = "rgb(6, 40, 56)";
+        const starColor = `#${this.map.starsColor.toString(16).padStart(6, '0')}`;
+        const lineColor = `#${this.map.racketColor.toString(16).padStart(6, '0')}`;
+        ctx.fillStyle = `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`;
+        // console.log("background color", `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`);
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         // ctx.fillStyle = "white";
         for (let count = 0; count < 300; count++) //stars
-          this.roundStar(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height, Math.random() * 5, '#' + this.map.starsColor.toString(16), ctx);
-          // console.log('stars color', this.map.starsColor);
-        for (let i = line_width; i < ctx.canvas.width; i+= interval) {
-          this.roundRect((ctx.canvas.width- line_width) / 2, i, line_width, interval * 0.65, "white", ctx);
-        }
+          this.roundStar(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height, Math.random() * ctx.canvas.height / 80, starColor, ctx);
+        for (let i = line_width; i < ctx.canvas.width; i+= interval)
+          this.roundRect((ctx.canvas.width- line_width) / 2, i, line_width, interval * 0.65, lineColor, ctx);
       },
       clear()
       {
@@ -216,8 +232,7 @@
       drawBall(x : number, y : number)
       {
         var h_width = this.board.ball.half_width;
-        var bColor = '#' + this.map.ballColor.toString(16);
-        // console.log('ball color', this.colorballColor);
+        var bColor = `#${this.map.ballColor.toString(16).padStart(6, '0')}`;
         if (this.board.ball.dx > 0)
         {
           this.roundRect((x - h_width / 2) * this.dimX, (y - h_width) * this.dimY, h_width * (3/2)  * this.dimX, h_width * (5 / 3) * this.dimX, bColor);
@@ -244,29 +259,30 @@
       {
         if (!this.dim)
           return ;
+        var rColor = `#${this.map.racketColor.toString(16).padStart(6, '0')}`;
         this.roundRect((this.dim.racket.x[0] - this.dim.racket.width) * this.dimX, (y1 - this.board.player[0].half_height) * this.dimY,
-          this.dim.racket.width * this.dimX, this.board.player[0].half_height * 2 * this.dimY);
+          this.dim.racket.width * this.dimX, this.board.player[0].half_height * 2 * this.dimY, rColor);
         this.roundRect(this.dim.racket.x[1] * this.dimX, (y2 - this.board.player[1].half_height) * this.dimY,
-          this.dim.racket.width * this.dimX, this.board.player[1].half_height * 2 * this.dimY);
+          this.dim.racket.width * this.dimX, this.board.player[1].half_height * 2 * this.dimY, rColor);
       },
       drawScore()
       {
         this.ctx.fillStyle = "white";
-        this.ctx.font = "70px courier new" // absolute size /!\
+        this.ctx.font = `${this.ctx.canvas.height / 10}px courier new`;
         this.ctx.textAlign = "right";
         this.ctx.fillText((this.board.player[0].score).toString(), this.ctx.canvas.width / 2 - this.ctx.canvas.width / 20, this.ctx.canvas.height / 10);
         this.ctx.textAlign = "left";
         this.ctx.fillText((this.board.player[1].score).toString(), this.ctx.canvas.width / 2 + this.ctx.canvas.width / 20, this.ctx.canvas.height / 10);
-        this.ctx.font = "30px courier new" // absolute size /!\
+        this.ctx.font = `${this.ctx.canvas.height / 15}px courier new`;
         this.ctx.textAlign = "right";
-        this.ctx.fillText(this.login[1], this.ctx.canvas.width - this.ctx.canvas.width / 10, this.ctx.canvas.height / 10);
+        this.ctx.fillText(this.login[1], this.ctx.canvas.width - this.ctx.canvas.width / 22, this.ctx.canvas.height / 10);
         this.ctx.textAlign = "left";
-        this.ctx.fillText(this.login[0], this.ctx.canvas.width / 10, this.ctx.canvas.height / 10);
+        this.ctx.fillText(this.login[0], this.ctx.canvas.width / 22, this.ctx.canvas.height / 10);
       },
       drawWinner(winner : number)
       {
         this.ctx.fillStyle = "white";
-        this.ctx.font = "70px courier new" // absolute size /!\
+        this.ctx.font = `${this.ctx.canvas.height / 10}px courier new`; // absolute size /!\
         this.ctx.textAlign = "center";
         this.ctx.fillText(this.login[winner] + " wins", this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
       },
@@ -286,10 +302,11 @@
       },
       moveRackets(evt : MouseEvent)
       {
+        // console.log("Evt: ", evt);
         if (this.id > 1)
           return ;
         let rect : DOMRect = this.ctx.canvas.getBoundingClientRect();
-        // console.log("id :", this.id);
+        // console.log("id :", this.id, this.match_id);
         if (this.$props.match_id != "bot")
           gameSocket.emit('player', {match_id : this.match_id, id : this.id, y : (evt.clientY - rect.top) / this.dimY})
         else
@@ -307,17 +324,10 @@
       },
       racketCollision(dist : number, idx : number, racket_dy : number)
       {
-        this.board.pass_count++;
         var ball = this.board.ball;
-        if (!(this.board.pass_count % 10))
-        {
-          this.board.player[0].half_height *= .9;
-          this.board.player[1].half_height *= .9;
-        }
-        else if (!(this.board.pass_count % 5))
-          ball.half_width *= 0.9
-        ball.dx *= -1.05;
-        ball.dy = 1.05 * ball.dy + racket_dy
+        const speed_factor = ball.dx > 3 ? 1 : 1.05;
+        ball.dx *= -speed_factor;
+        ball.dy = speed_factor * ball.dy + racket_dy
             + dist * Math.abs(ball.dx) / this.board.player[idx].half_height;
         if (Math.abs(ball.dx) * 2 < Math.abs(ball.dy))
           ball.dy = 2 * Math.sign(ball.dy) * Math.abs(ball.dx);
@@ -404,7 +414,7 @@
         }
         if (this.board.player[0].score >= 11 || this.board.player[1].score >= 11)
           this.board.end = true;
-        this.board.new_round = true;
+        this.board.pause_counter = 50;
         this.board.dead = false;
         this.board.ball.dx = this.board.ball.x < this.dim.width / 2? -1:1;
         this.board.ball.dy = Math.random() * 1.5 * (Math.floor(Math.random() * 2)? -1:1);
@@ -415,21 +425,18 @@
         this.board.player[1].half_height = 6;
         this.bot.bot_offset = (Math.floor(Math.random() * 2) ? -1 : 1) * Math.random()
               * this.board.player[this.bot.bot_id].half_height * 1.2 * this.board.ball.dx;
-        this.board.pass_count = 0;
       },
       async game_loop()
       {
         while (!this.board.end)
         {
-          if (this.board.new_round)
-            {
-              await this.sleep(1000);
-              this.board.new_round = false;
-            }
-            await this.sleep(20);
+          await this.sleep(20);
+          if (this.board.pause_counter > 0)
+            this.board.pause_counter--;
+          else
             this.updateBall();
-            this.clear();
-            this.addObjects();
+          this.clear();
+          this.addObjects();
         }
       },
       sleep(ms: number) {
