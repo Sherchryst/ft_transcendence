@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { Map } from './map.entity';
+import { GameMap } from './game-map.entity';
 
 @Entity()
 export class MatchInvitation {
@@ -10,8 +10,8 @@ export class MatchInvitation {
   @ManyToOne(() => User, u => u.id, { primary: true })
   to: User;
 
-  @ManyToOne(() => Map, m => m.id, { nullable: false })
-  map: Map;
+  @ManyToOne(() => GameMap, m => m.id, { nullable: false })
+  map: GameMap;
 
   @Column()
   sentAt: Date;

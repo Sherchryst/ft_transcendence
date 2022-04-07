@@ -1,9 +1,9 @@
 <template>
-  <metainfo>
-    <template v-slot:title="{ content }">{{ content ? `${content} | ApongUs` : `ApongUs` }}</template>
-    <!-- <title>testlol</title> -->
-  </metainfo>
   <div id="container" class="min-h-screen">
+    <metainfo>
+      <template v-slot:title="{ content }">{{ content ? `${content} | ApongUs` : `ApongUs` }}</template>
+      <!-- <title>testlol</title> -->
+    </metainfo>
     <router-view/>
   </div>
 </template>

@@ -1,14 +1,14 @@
 import { User } from 'src/users/entities/user.entity';
 import { getRepository } from 'typeorm';
 import { Match, MatchType } from './entities/match.entity';
-import { Map } from './entities/map.entity';
+import { GameMap } from './entities/game-map.entity';
 import { Injectable } from '@nestjs/common';
 import { MatchInvitation } from './entities/match-invitation.entity';
 
 @Injectable()
 export class MatchService
 {
-  async createMatch(map: Map, player1: number, player2: number, mode: MatchType): Promise<Match> {
+  async createMatch(map: GameMap, player1: number, player2: number, mode: MatchType): Promise<Match> {
     const match = getRepository(Match).create({
       map: map,
       player1: { id: player1 },
@@ -21,7 +21,7 @@ export class MatchService
     return match;
   }
 
-  async createMatchInvitation(from: number, to: number, map: Map): Promise<MatchInvitation> {
+  async createMatchInvitation(from: number, to: number, map: GameMap): Promise<MatchInvitation> {
     const matchInvitation = getRepository(MatchInvitation).create({
       from: { id: from },
       to: { id: to },
@@ -45,16 +45,16 @@ export class MatchService
 
   async findMatch(matchId: number): Promise<Match> {
     return getRepository(Match).findOne({
-      relations: ['player1', 'player2'],
+      relations: ['player1', 'player2', 'map'],
       where: {
         id: matchId
       }
     })
   }
 
-  async findMatchInvitations(userId: number, fromId: number): Promise<MatchInvitation> {
+  async findMatchInvitation(userId: number, fromId: number): Promise<MatchInvitation> {
     return getRepository(MatchInvitation).findOne({
-      relations: ['to', 'map'],
+      relations: ['to', 'from', 'map'],
       where: {
         from: { id: fromId },
         to: { id: userId }
@@ -80,7 +80,7 @@ export class MatchService
     });
   }
 
-  async findMap(mapId: number): Promise<Map> {
-    return await getRepository(Map).findOne(mapId);
+  async findGameMap(mapId: number): Promise<GameMap> {
+    return await getRepository(GameMap).findOne(mapId);
   }
 }
