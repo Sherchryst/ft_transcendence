@@ -36,7 +36,6 @@
 				</div>
 				<div class="hidden sm:flex flex-row justify-between justify-items-center h-16">
 					<div class="self-center">
-						<!-- If connected -->
 						<ButtonLink @click="logout()" class="btn-neutral" text="Deconnection" />
 					</div>
 					<div class="flex flex-row justify-between justify-items-center">
@@ -45,13 +44,23 @@
 								<SearchIcon />
 							</one-row-form>
 						</div>
-						<div class="ml-10">
+						<div class="self-center mx-7">
+							<button v-s-dropdown-toggle:some-dropdown>
+								<NotifIcon class="h-12 w-12" />
+							</button>
+							<s-dropdown name="some-dropdown" align="left">
+								<NotifPanel/>
+							</s-dropdown>
+						</div>
+						<div class="">
 							<Logo />
 						</div>
 					</div>
 				</div>
 			</div>
-			<router-view @read-message="removeMessageFrom"/>
+			<div class="pb-6">
+				<router-view @read-message="removeMessageFrom"/>
+			</div>
 		</div>
 	</div>
 </template>
@@ -67,6 +76,7 @@ import GroupIcon from '@/assets/icon/group.svg';
 import GameIcon from '@/assets/icon/game.svg';
 import SearchIcon from '@/assets/icon/search.svg';
 import MenuIcon from '@/assets/icon/menu.svg'
+import NotifIcon from '@/assets/icon/notification.svg';
 import Logo from '@/assets/ApongUs.svg';
 import { useStore } from 'vuex'
 import { key } from '@/store/index.ts'
@@ -74,6 +84,7 @@ import { API } from '@/scripts/auth.ts';
 import router from '@/router';
 import { SocketMessage } from '@/interfaces/Message';
 import { chatSocket } from '@/socket.ts'
+import NotifPanel from '@/components/Notification/NotifPanel.vue';
 
 export default defineComponent({
 	components: {
@@ -87,6 +98,8 @@ export default defineComponent({
 		SearchIcon,
 		MenuIcon,
 		Logo,
+		NotifIcon,
+		NotifPanel,
 	},
 	data() {
 		return {
