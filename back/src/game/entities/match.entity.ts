@@ -38,4 +38,7 @@ export class Match {
 
   @Column({ default: 0 })
   score2: number;
+
+  @Column({ nullable: false })
+  level: number;
 }

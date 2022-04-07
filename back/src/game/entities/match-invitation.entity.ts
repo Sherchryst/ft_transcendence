@@ -15,4 +15,7 @@ export class MatchInvitation {
 
   @Column()
   sentAt: Date;
+
+  @Column({ nullable: false })
+  level: number;
 }

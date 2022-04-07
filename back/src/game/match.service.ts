@@ -10,7 +10,8 @@ export class MatchService {
     map: GameMap,
     player1: number,
     player2: number,
-    mode: MatchType
+    mode: MatchType,
+    level: number
   ): Promise<Match> {
     const match = getRepository(Match).create({
       map: map,
@@ -19,6 +20,7 @@ export class MatchService {
       mode: mode,
       beginAt: new Date(),
       winner: null,
+      level: level
     });
     await getRepository(Match).save(match);
     return match;
@@ -27,13 +29,15 @@ export class MatchService {
   async createMatchInvitation(
     from: number,
     to: number,
-    map: GameMap
+    map: GameMap,
+    level: number
   ): Promise<MatchInvitation> {
     const matchInvitation = getRepository(MatchInvitation).create({
       from: { id: from },
       to: { id: to },
       map: map,
       sentAt: new Date(),
+      level: level
     });
     await getRepository(MatchInvitation).save(matchInvitation);
     return matchInvitation;
