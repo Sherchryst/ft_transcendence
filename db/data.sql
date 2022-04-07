@@ -19,6 +19,9 @@ INSERT INTO "user_relationship" VALUES
 ('block', 1, 2);
 
 INSERT INTO "game_map" ("ball_color", "background_color", "stars_color", "racket_color") VALUES
+(CAST(x'fcba03' AS int), CAST(x'0' AS int), CAST(x'0' AS int), CAST(x'ffffff' AS int));
+
+INSERT INTO "game_map" ("ball_color", "background_color", "stars_color", "racket_color") VALUES
 (CAST(x'fcba03' AS int), CAST(x'054257' AS int), CAST(x'bfbeb2' AS int), CAST(x'ffffff' AS int));
 
 INSERT INTO "game_map" ("ball_color", "background_color", "stars_color", "racket_color") VALUES

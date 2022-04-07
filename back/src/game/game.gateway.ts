@@ -63,7 +63,7 @@ function sleep(ms: number) {
 @WebSocketGateway(3001, { namespace: "game" })
 export class GameGateway implements OnGatewayConnection {
   static startGame() {
-    throw new Error("Method not implemented.");
+    throw new Error("Game : Method not implemented.");
   }
 
   WsClients = new Map<number, Socket>();
@@ -94,13 +94,32 @@ export class GameGateway implements OnGatewayConnection {
       socket.disconnect(false);
       return;
     }
-    console.log("Game : connection to socket");
+    console.log("Game : new connection to socket");
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {
     // --> put score of other player to 11 in bd
     // this.WsClients.delete(req.user?.id);
-    console.log("disconnection from game : ", socket.id);
+    var player_id : number;
+    this.WsClients.forEach((value, key) => {
+      if (value == socket) {
+        boards.forEach((board, match_id) => {
+          if (board.player[0].user_id == value.id)
+            player_id = 0;
+          else if (board.player[1].user_id == value.id)
+            player_id = 1;
+          else return;
+          board.player[player_id == 0 ? 1 : 0].score = 11;
+          board.end = true;
+          this.server
+            .to(`game:${match_id}`)
+            .emit("board", this.gameService.updateBall(board));
+          this.server.socketsLeave(`game:${match_id}`);
+        });
+        this.WsClients.delete(key);
+      }
+    });
+    console.log("Game : disconnection from socket");
   }
 
   @SubscribeMessage("invite")
@@ -109,21 +128,27 @@ export class GameGateway implements OnGatewayConnection {
     @MessageBody() data: { login: string; mapId: number; level: number }
   ) {
     const to_user = await this.usersService.findByLogin(data.login);
-    if (to_user == null) console.log("User not found");
+    if (to_user == null) console.log("Game : User not found"); // error
     else if (data.login == req.user.login)
-      console.log("You can't invite yourself");
+      console.log("Game : You can't invite yourself"); // error
     else {
-      const map = await this.matchService.findGameMap(data.mapId);
-      const invitation = await this.matchService.createMatchInvitation(
-        req.user.id,
-        to_user.id,
-        map
-      );
+      try {
+        var map = await this.matchService.findGameMap(data.mapId);
+        const invitation = await this.matchService.createMatchInvitation(
+          req.user.id,
+          to_user.id,
+          map
+        );
+        this.WsClients.get(to_user.id).emit("invited", invitation);
+        console.log("Game : Invitation sent to", to_user.login);
+      }
+      catch(e)
+      {
+        console.log("Game : Error while sending invitation"); // error
+      }
       // console.log("invitation", invitation)
-      console.log("invitation sent to ", to_user.login);
       // while(!this.WsClients.has(to_user.id))
       //   await sleep(5000);
-      this.WsClients.get(to_user.id).emit("invited", invitation);
     }
   }
 
@@ -131,10 +156,9 @@ export class GameGateway implements OnGatewayConnection {
     const board = JSON.parse(JSON.stringify(basic_board));
     board.player[0].user_id = player1;
     board.player[1].user_id = player2;
-    board.setReady = () => console.log("Omg not working samer");
+    board.setReady = () => {}
     board.isReady = new Promise<boolean>((resolve) => {
       board.setReady = () => {
-        console.log("Setting resolve");
         resolve(true);
       };
     });
@@ -159,7 +183,7 @@ export class GameGateway implements OnGatewayConnection {
       player2,
       matchType
     );
-    console.log("Match created : (in create match) ", match.id);
+    // console.log("Match created : (in create match) ", match.id);
     const player1_socket = this.WsClients.get(match.player1.id);
     const player2_socket = this.WsClients.get(match.player2.id);
     this.createBoard(match.id, player1_socket.id, player2_socket.id);
@@ -172,7 +196,12 @@ export class GameGateway implements OnGatewayConnection {
   @SubscribeMessage("matchmaking")
   async handleMatchmaking(@Req() req: any) {
     if (pending_player >= 0 && pending_player != req.user.id) {
-      const map = await this.matchService.findGameMap(1);
+      var map = await this.matchService.findGameMap(1);
+      if (!map)
+      {
+        console.log("Game : Error while finding map"); // error
+        return;
+      }
       await this.createMatch(
         map,
         pending_player,
@@ -190,9 +219,8 @@ export class GameGateway implements OnGatewayConnection {
       data.to.id,
       data.from.id
     );
-    if (matchInvit == null) console.log("No invitation found");
+    if (matchInvit == null) console.log("Game : No invitation found"); // error
     else {
-      // console.log("Invitation accepted : ", matchInvit);
       await this.createMatch(
         matchInvit.map,
         matchInvit.to.id,
@@ -201,7 +229,6 @@ export class GameGateway implements OnGatewayConnection {
       );
       await this.matchService.deleteMatchInvitation(data.from.id, data.to.id);
     }
-    // console.log("match_id (acceptInvit): ", boards);
   }
 
   @SubscribeMessage("connection")
@@ -209,17 +236,18 @@ export class GameGateway implements OnGatewayConnection {
     @MessageBody() id: number,
     @ConnectedSocket() socket: Socket
   ) {
-    console.log("match_id (connection): ", id);
-
     const board: Board = boards.get(`${id}`);
-    if (!board) return;
+    const match = await this.matchService.findMatch(id);
+    if (!board || !match)
+    {
+      console.log("Game : No match found"); // error
+      return ;
+    }
     let player_id: number;
 
     if (board.player[0].user_id == socket.id) player_id = 0;
     else if (board.player[1].user_id == socket.id) player_id = 1;
     else player_id = 2;
-    const match = await this.matchService.findMatch(id);
-    // console.log("match", match, "map", match.map);
     socket.emit("gameMap", {
       id: player_id,
       map: match.map,
@@ -228,14 +256,15 @@ export class GameGateway implements OnGatewayConnection {
     if (player_id == 0) {
       board.isReady.then(() => {
         console.log(
-          "new match ",
+          "Game : New match",
           id,
-          ": ",
+          ":",
           match.player1.login,
-          " vs ",
+          "vs",
           match.player2.login
         );
-        board.level = 3; // tmp --> should be in match invitation
+        if (match.mode == MatchType.CASUAL)
+          board.level = 3; // tmp --> should be in match invitation
         this.sendUpdateBoard(id);
       });
     } else if (player_id == 1) {
@@ -262,10 +291,8 @@ export class GameGateway implements OnGatewayConnection {
           .emit("board", this.gameService.updateBall(board));
       }
       this.server.socketsLeave(`game:${data.match_id}`);
-      console.log("Player left game ", data.match_id);
-    } catch (e) {
-      console.log("Player left game");
-    }
+    } catch (e) {}
+    console.log("Game : Player left game");
   }
 
   @SubscribeMessage("player")
@@ -305,28 +332,27 @@ export class GameGateway implements OnGatewayConnection {
       this.server.to(`game:${id}`).emit("board", board);
     }
     const match = await this.matchService.findMatch(id);
-    await this.matchService.setWinner(
-      id,
-      board.player[0].score > board.player[1].score
-        ? match.player1.id
-        : match.player2
-        ? match.player2.id
-        : -1
-    );
     await this.matchService.updateScore(
       id,
       board.player[0].score,
       board.player[1].score
-    );
+      );
+      await this.matchService.setWinner(
+        id,
+        board.player[0].score > board.player[1].score
+          ? match.player1.id
+          : match.player2
+          ? match.player2.id
+          : -1
+      );
     console.log(
-      "match ",
+      "Game : Match",
       id,
-      "ended, score: ",
+      "ended, score:",
       board.player[0].score,
-      " - ",
+      "-",
       board.player[1].score
     );
     boards.delete(`${id}`);
-    console.log("boards : (after delete)", boards.keys());
   }
 }

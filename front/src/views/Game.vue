@@ -107,12 +107,17 @@
         } as Bot
       }
     },
+    computed :
+    {
+      game_canvas: function () { return this.$refs.gamecanvas as HTMLCanvasElement},
+      game_ctx: function () { return this.game_canvas.getContext('2d') as CanvasRenderingContext2D},
+      bg_canvas: function () { return this.$refs.background as HTMLCanvasElement},
+      bg_ctx: function () { return this.bg_canvas.getContext('2d') as CanvasRenderingContext2D}
+    },
     mounted() {
-      const game_ctx = (this.$refs.gamecanvas as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
-      const bg_ctx = (this.$refs.gamecanvas as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
-      this.dimX = game_ctx.canvas.width / 100;
-      console.log("mounted", game_ctx, this.$props);
-      this.dimY = game_ctx.canvas.height / 100;
+      this.dimX = this.game_ctx.canvas.width / 100;
+      console.log("mounted", this.game_ctx, this.$props);
+      this.dimY = this.game_ctx.canvas.height / 100;
       if (this.$props.match_id != "bot")
       {
         gameSocket.emit('connection', this.match_id);
@@ -127,23 +132,24 @@
           console.log(" logins :", this.login);
           this.id = data.id;
           console.log(" id :", this.id);
-          this.drawBackground(bg_ctx);
-          document.addEventListener("mousemove", this.moveRackets.bind(null, game_ctx));
+          this.drawBackground();
+          document.addEventListener("mousemove", this.moveRackets);
           // console.log(setuped, 'socket connected');
         });
         gameSocket.on("board", (data : Board) => {
           this.board = { ...this.board, ...data }
-          this.addObjects(game_ctx);
+          this.addObjects();
         });
       }
       else
       {
         console.log("bot");
         // this.reset(true);
-        this.drawBackground(bg_ctx);
-        document.addEventListener("mousemove", this.moveRackets.bind(null, game_ctx));
+        this.drawBackground();
+        console.log(this.game_ctx);
+        document.addEventListener("mousemove", this.moveRackets);
         // console.log(setuped, 'evts', this.evts);
-        this.game_loop(game_ctx);
+        this.game_loop();
       }
     },
     beforeRouteLeave(to, from, next) {
@@ -159,7 +165,6 @@
       else
         next(false);
       console.log("before leave");
-
     },
     beforeUnmount() {
       gameSocket.off("board");
@@ -181,8 +186,9 @@
         ctx.closePath();
         ctx.fill();
       },
-      roundStar(x : number, y : number, radius : number, color = "white", ctx : CanvasRenderingContext2D)
+      roundStar(x : number, y : number, radius : number, color = "white")
       {
+        var ctx = this.bg_ctx;
         ctx.fillStyle = color;
         // console.log('color', color);
         ctx.beginPath();
@@ -201,8 +207,9 @@
         ctx.closePath();
         ctx.stroke();
       },
-      drawBackground(ctx : CanvasRenderingContext2D)
+      drawBackground()
       {
+        var ctx = this.bg_ctx;
         const interval = ctx.canvas.height / 10;
         const line_width = ctx.canvas.width / 80;
         const starColor = `#${this.map.starsColor.toString(16).padStart(6, '0')}`;
@@ -212,12 +219,13 @@
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         // ctx.fillStyle = "white";
         for (let count = 0; count < 300; count++) //stars
-          this.roundStar(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height, Math.random() * ctx.canvas.height / 80, starColor, ctx);
+          this.roundStar(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height, Math.random() * ctx.canvas.height / 80, starColor);
         for (let i = line_width; i < ctx.canvas.width; i+= interval)
           this.roundRect((ctx.canvas.width- line_width) / 2, i, line_width, interval * 0.65, lineColor, ctx);
       },
-      drawBall(x : number, y : number, ctx : CanvasRenderingContext2D)
+      drawBall(x : number, y : number, )
       {
+        var ctx = this.game_ctx;
         var h_width = this.board.ball.half_width;
         var bColor = `#${this.map.ballColor.toString(16).padStart(6, '0')}`;
         if (this.board.ball.dx > 0)
@@ -242,8 +250,9 @@
         // ctx.fillRect(ctx.canvas.height, ctx.canvas.height, -100, -350);
         // this.roundRect(ctx.canvas.height, ctx.canvas.height, -100, -350, "white");
       },
-      drawRackets(y1 : number, y2 : number, ctx : CanvasRenderingContext2D)
+      drawRackets(y1 : number, y2 : number, )
       {
+        var ctx = this.game_ctx;
         if (!this.dim)
           return ;
         var rColor = `#${this.map.racketColor.toString(16).padStart(6, '0')}`;
@@ -252,8 +261,9 @@
         this.roundRect(this.dim.racket.x[1] * this.dimX, (y2 - this.board.player[1].half_height) * this.dimY,
           this.dim.racket.width * this.dimX, this.board.player[1].half_height * 2 * this.dimY, rColor, ctx);
       },
-      drawScore(ctx : CanvasRenderingContext2D)
+      drawScore()
       {
+        var ctx = this.game_ctx;
         ctx.fillStyle = "white";
         ctx.font = `${ctx.canvas.height / 10}px courier new`;
         ctx.textAlign = "right";
@@ -266,34 +276,36 @@
         ctx.textAlign = "left";
         ctx.fillText(this.login[0], ctx.canvas.width / 22, ctx.canvas.height / 10);
       },
-      drawWinner(winner : number, ctx : CanvasRenderingContext2D)
+      drawWinner(winner : number)
       {
+        var ctx = this.game_ctx;
         ctx.fillStyle = "white";
         ctx.font = `${ctx.canvas.height / 10}px courier new`; // absolute size /!\
         ctx.textAlign = "center";
         ctx.fillText(this.login[winner] + " wins", ctx.canvas.width / 2, ctx.canvas.height / 2);
       },
-      addObjects(ctx : CanvasRenderingContext2D)
+      addObjects()
       {
         // console.log("end : ", this.board.end);
+        var ctx = this.game_ctx;
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         if (this.board.end)
-          this.drawWinner(this.board.player[0].score > this.board.player[1].score ? 0 : 1, ctx);
+          this.drawWinner(this.board.player[0].score > this.board.player[1].score ? 0 : 1);
         else {
             if (this.board.dead)
               ctx.globalAlpha = 0.2;
-            this.drawBall(this.board.ball.x, this.board.ball.y, ctx);
+            this.drawBall(this.board.ball.x, this.board.ball.y);
             ctx.globalAlpha = 1;
           }
-        this.drawRackets(this.board.player[0].y, this.board.player[1].y, ctx);
-        this.drawScore(ctx);
+        this.drawRackets(this.board.player[0].y, this.board.player[1].y);
+        this.drawScore();
       },
-      moveRackets(ctx : CanvasRenderingContext2D, evt : MouseEvent)
+      moveRackets(evt : MouseEvent)
       {
         // console.log("Evt: ", evt);
         if (this.id > 1)
           return ;
-        let rect : DOMRect = ctx.canvas.getBoundingClientRect();
+        let rect : DOMRect = this.game_ctx.canvas.getBoundingClientRect();
         // console.log("id :", this.id, this.match_id);
         if (this.$props.match_id != "bot")
           gameSocket.emit('player', {match_id : this.match_id, id : this.id, y : (evt.clientY - rect.top) / this.dimY})
@@ -397,7 +409,7 @@
         this.bot.bot_offset = (Math.floor(Math.random() * 2) ? -1 : 1) * Math.random()
               * this.board.player[this.bot.bot_id].half_height * 1.2 * this.board.ball.dx;
       },
-      async game_loop(ctx : CanvasRenderingContext2D)
+      async game_loop()
       {
         while (!this.board.end)
         {
@@ -406,7 +418,7 @@
             this.board.pause_counter--;
           else
             this.updateBall();
-          this.addObjects(ctx);
+          this.addObjects();
         }
       },
       sleep(ms: number) {
