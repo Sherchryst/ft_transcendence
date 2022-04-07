@@ -59,7 +59,6 @@
       return {
         evts: [],
         login : ["you", "bot"],
-        ctx : null as any,
         id : 0,
         map: {
           ballColor : 16562691,
@@ -109,38 +108,42 @@
       }
     },
     mounted() {
-      this.ctx = (this.$refs.gamecanvas as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
-      this.dimX = this.ctx.canvas.width / 100;
-      console.log("mounted", this.ctx, this.$props);
-      this.dimY = this.ctx.canvas.height / 100;
+      const game_ctx = (this.$refs.gamecanvas as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
+      const bg_ctx = (this.$refs.gamecanvas as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
+      this.dimX = game_ctx.canvas.width / 100;
+      console.log("mounted", game_ctx, this.$props);
+      this.dimY = game_ctx.canvas.height / 100;
       if (this.$props.match_id != "bot")
       {
         gameSocket.emit('connection', this.match_id);
-        gameSocket.on("gameMap", (data : any) => {
+        gameSocket.on("gameMap", (data : {
+          map: GameMap,
+          login : string[],
+          id : number
+        }) => {
           this.map = { ...this.map, ...data.map };
           console.log(" my map :", this.map);
           this.login = { ...this.login, ...data.login };
           console.log(" logins :", this.login);
           this.id = data.id;
           console.log(" id :", this.id);
-          this.drawBackground();
-          // const setuped = document.addEventListener("mousemove", this.moveRackets);
+          this.drawBackground(bg_ctx);
+          document.addEventListener("mousemove", this.moveRackets.bind(null, game_ctx));
           // console.log(setuped, 'socket connected');
         });
-        gameSocket.on("board", (data : any) => {
+        gameSocket.on("board", (data : Board) => {
           this.board = { ...this.board, ...data }
-          this.clear();
-          this.addObjects();
+          this.addObjects(game_ctx);
         });
       }
       else
       {
         console.log("bot");
         // this.reset(true);
-        this.drawBackground();
-        //const setuped = document.addEventListener("mousemove", this.moveRackets);
+        this.drawBackground(bg_ctx);
+        document.addEventListener("mousemove", this.moveRackets.bind(null, game_ctx));
         // console.log(setuped, 'evts', this.evts);
-        this.game_loop();
+        this.game_loop(game_ctx);
       }
     },
     beforeRouteLeave(to, from, next) {
@@ -166,10 +169,8 @@
     },
     methods:
     {
-      roundRect(x : number, y : number, x2 : number, y2 : number, color = "white", ctx : any = null)
+      roundRect(x : number, y : number, x2 : number, y2 : number, color = "white", ctx : CanvasRenderingContext2D)
       {
-        if (ctx == null)
-          ctx = this.ctx;
         ctx.fillStyle = color;
         const dist_x = x2 > y2? y2 / 3 : x2 / 3;
         ctx.beginPath();
@@ -180,10 +181,8 @@
         ctx.closePath();
         ctx.fill();
       },
-      roundStar(x : number, y : number, radius : number, color = "white", ctx : any = null)
+      roundStar(x : number, y : number, radius : number, color = "white", ctx : CanvasRenderingContext2D)
       {
-        if (ctx == null)
-          ctx = this.ctx;
         ctx.fillStyle = color;
         // console.log('color', color);
         ctx.beginPath();
@@ -202,17 +201,9 @@
         ctx.closePath();
         ctx.stroke();
       },
-      drawBackground()
+      drawBackground(ctx : CanvasRenderingContext2D)
       {
-        var canvas = this.$refs.background as HTMLCanvasElement;
-        if (!canvas)
-        {
-          console.log("canvas not found");
-          return ;
-        }
-        var ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
         const interval = ctx.canvas.height / 10;
-        const start = ctx.canvas.height / 60;
         const line_width = ctx.canvas.width / 80;
         const starColor = `#${this.map.starsColor.toString(16).padStart(6, '0')}`;
         const lineColor = `#${this.map.racketColor.toString(16).padStart(6, '0')}`;
@@ -225,87 +216,84 @@
         for (let i = line_width; i < ctx.canvas.width; i+= interval)
           this.roundRect((ctx.canvas.width- line_width) / 2, i, line_width, interval * 0.65, lineColor, ctx);
       },
-      clear()
-      {
-          this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-      },
-      drawBall(x : number, y : number)
+      drawBall(x : number, y : number, ctx : CanvasRenderingContext2D)
       {
         var h_width = this.board.ball.half_width;
         var bColor = `#${this.map.ballColor.toString(16).padStart(6, '0')}`;
         if (this.board.ball.dx > 0)
         {
-          this.roundRect((x - h_width / 2) * this.dimX, (y - h_width) * this.dimY, h_width * (3/2)  * this.dimX, h_width * (5 / 3) * this.dimX, bColor);
-          this.roundRect((x - h_width) * this.dimX, (y + h_width / 3) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, bColor);
-          this.roundRect((x - h_width) * this.dimX, (y - h_width) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, bColor);
-          this.roundRect((x + h_width / 4) * this.dimX, (y - h_width * (3/4)) * this.dimY, (h_width / 2 * this.dimX), h_width * this.dimX, "#AEBBBC");
-          this.roundRect((x - h_width / 2) * this.dimX, (y + h_width * (2/3)) * this.dimY, h_width * this.dimX, h_width * (2 / 3) * this.dimX, bColor);
+          this.roundRect((x - h_width / 2) * this.dimX, (y - h_width) * this.dimY, h_width * (3/2)  * this.dimX, h_width * (5 / 3) * this.dimX, bColor, ctx);
+          this.roundRect((x - h_width) * this.dimX, (y + h_width / 3) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, bColor, ctx);
+          this.roundRect((x - h_width) * this.dimX, (y - h_width) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, bColor, ctx);
+          this.roundRect((x + h_width / 4) * this.dimX, (y - h_width * (3/4)) * this.dimY, (h_width / 2 * this.dimX), h_width * this.dimX, "#AEBBBC", ctx);
+          this.roundRect((x - h_width / 2) * this.dimX, (y + h_width * (2/3)) * this.dimY, h_width * this.dimX, h_width * (2 / 3) * this.dimX, bColor, ctx);
         }
         else
         {
-          this.roundRect((x - h_width) * this.dimX, (y - h_width) * this.dimY, h_width * (3 / 2)  * this.dimX, h_width * (5 / 3) * this.dimX, bColor);
-          this.roundRect((x - h_width / 2) * this.dimX, (y - h_width) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, bColor);
-          this.roundRect((x - h_width / 2) * this.dimX, (y + h_width / 3) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, bColor);
-          this.roundRect((x - h_width * (3/4)) * this.dimX, (y - h_width * (3/4)) * this.dimY, (h_width / 2 * this.dimX), h_width * this.dimX, "#AEBBBC");
-          this.roundRect((x - h_width / 2) * this.dimX, (y + h_width * (2/3)) * this.dimY, h_width * this.dimX, h_width * (2 / 3) * this.dimX, bColor);
+          this.roundRect((x - h_width) * this.dimX, (y - h_width) * this.dimY, h_width * (3 / 2)  * this.dimX, h_width * (5 / 3) * this.dimX, bColor, ctx);
+          this.roundRect((x - h_width / 2) * this.dimX, (y - h_width) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, bColor, ctx);
+          this.roundRect((x - h_width / 2) * this.dimX, (y + h_width / 3) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, bColor, ctx);
+          this.roundRect((x - h_width * (3/4)) * this.dimX, (y - h_width * (3/4)) * this.dimY, (h_width / 2 * this.dimX), h_width * this.dimX, "#AEBBBC", ctx);
+          this.roundRect((x - h_width / 2) * this.dimX, (y + h_width * (2/3)) * this.dimY, h_width * this.dimX, h_width * (2 / 3) * this.dimX, bColor, ctx);
         }
-        // this.ctx.fillStyle = "#b8a500";
-        // this.ctx.fillRect(0, 0, 400, 50);
+        // ctx.fillStyle = "#b8a500";
+        // ctx.fillRect(0, 0, 400, 50);
         // this.roundRect(0, 0, 400, 50, "white");
-        // this.ctx.fillRect(this.ctx.canvas.height, this.ctx.canvas.height, -100, -350);
-        // this.roundRect(this.ctx.canvas.height, this.ctx.canvas.height, -100, -350, "white");
+        // ctx.fillRect(ctx.canvas.height, ctx.canvas.height, -100, -350);
+        // this.roundRect(ctx.canvas.height, ctx.canvas.height, -100, -350, "white");
       },
-      drawRackets(y1 : number, y2 : number)
+      drawRackets(y1 : number, y2 : number, ctx : CanvasRenderingContext2D)
       {
         if (!this.dim)
           return ;
         var rColor = `#${this.map.racketColor.toString(16).padStart(6, '0')}`;
         this.roundRect((this.dim.racket.x[0] - this.dim.racket.width) * this.dimX, (y1 - this.board.player[0].half_height) * this.dimY,
-          this.dim.racket.width * this.dimX, this.board.player[0].half_height * 2 * this.dimY, rColor);
+          this.dim.racket.width * this.dimX, this.board.player[0].half_height * 2 * this.dimY, rColor, ctx);
         this.roundRect(this.dim.racket.x[1] * this.dimX, (y2 - this.board.player[1].half_height) * this.dimY,
-          this.dim.racket.width * this.dimX, this.board.player[1].half_height * 2 * this.dimY, rColor);
+          this.dim.racket.width * this.dimX, this.board.player[1].half_height * 2 * this.dimY, rColor, ctx);
       },
-      drawScore()
+      drawScore(ctx : CanvasRenderingContext2D)
       {
-        this.ctx.fillStyle = "white";
-        this.ctx.font = `${this.ctx.canvas.height / 10}px courier new`;
-        this.ctx.textAlign = "right";
-        this.ctx.fillText((this.board.player[0].score).toString(), this.ctx.canvas.width / 2 - this.ctx.canvas.width / 20, this.ctx.canvas.height / 10);
-        this.ctx.textAlign = "left";
-        this.ctx.fillText((this.board.player[1].score).toString(), this.ctx.canvas.width / 2 + this.ctx.canvas.width / 20, this.ctx.canvas.height / 10);
-        this.ctx.font = `${this.ctx.canvas.height / 15}px courier new`;
-        this.ctx.textAlign = "right";
-        this.ctx.fillText(this.login[1], this.ctx.canvas.width - this.ctx.canvas.width / 22, this.ctx.canvas.height / 10);
-        this.ctx.textAlign = "left";
-        this.ctx.fillText(this.login[0], this.ctx.canvas.width / 22, this.ctx.canvas.height / 10);
+        ctx.fillStyle = "white";
+        ctx.font = `${ctx.canvas.height / 10}px courier new`;
+        ctx.textAlign = "right";
+        ctx.fillText((this.board.player[0].score).toString(), ctx.canvas.width / 2 - ctx.canvas.width / 20, ctx.canvas.height / 10);
+        ctx.textAlign = "left";
+        ctx.fillText((this.board.player[1].score).toString(), ctx.canvas.width / 2 + ctx.canvas.width / 20, ctx.canvas.height / 10);
+        ctx.font = `${ctx.canvas.height / 15}px courier new`;
+        ctx.textAlign = "right";
+        ctx.fillText(this.login[1], ctx.canvas.width - ctx.canvas.width / 22, ctx.canvas.height / 10);
+        ctx.textAlign = "left";
+        ctx.fillText(this.login[0], ctx.canvas.width / 22, ctx.canvas.height / 10);
       },
-      drawWinner(winner : number)
+      drawWinner(winner : number, ctx : CanvasRenderingContext2D)
       {
-        this.ctx.fillStyle = "white";
-        this.ctx.font = `${this.ctx.canvas.height / 10}px courier new`; // absolute size /!\
-        this.ctx.textAlign = "center";
-        this.ctx.fillText(this.login[winner] + " wins", this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
+        ctx.fillStyle = "white";
+        ctx.font = `${ctx.canvas.height / 10}px courier new`; // absolute size /!\
+        ctx.textAlign = "center";
+        ctx.fillText(this.login[winner] + " wins", ctx.canvas.width / 2, ctx.canvas.height / 2);
       },
-      addObjects()
+      addObjects(ctx : CanvasRenderingContext2D)
       {
         // console.log("end : ", this.board.end);
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         if (this.board.end)
-          this.drawWinner(this.board.player[0].score > this.board.player[1].score ? 0 : 1);
+          this.drawWinner(this.board.player[0].score > this.board.player[1].score ? 0 : 1, ctx);
         else {
             if (this.board.dead)
-              this.ctx.globalAlpha = 0.2;
-            this.drawBall(this.board.ball.x, this.board.ball.y);
-            this.ctx.globalAlpha = 1;
+              ctx.globalAlpha = 0.2;
+            this.drawBall(this.board.ball.x, this.board.ball.y, ctx);
+            ctx.globalAlpha = 1;
           }
-        this.drawRackets(this.board.player[0].y, this.board.player[1].y);
-        this.drawScore();
+        this.drawRackets(this.board.player[0].y, this.board.player[1].y, ctx);
+        this.drawScore(ctx);
       },
-      moveRackets(evt : MouseEvent)
+      moveRackets(ctx : CanvasRenderingContext2D, evt : MouseEvent)
       {
         // console.log("Evt: ", evt);
         if (this.id > 1)
           return ;
-        let rect : DOMRect = this.ctx.canvas.getBoundingClientRect();
+        let rect : DOMRect = ctx.canvas.getBoundingClientRect();
         // console.log("id :", this.id, this.match_id);
         if (this.$props.match_id != "bot")
           gameSocket.emit('player', {match_id : this.match_id, id : this.id, y : (evt.clientY - rect.top) / this.dimY})
@@ -357,23 +345,6 @@
             this.board.player[player? 0 : 1].score++;
             this.reset(false);
           }
-        // else if ((tmpx > dim.racket.x[0] - dim.racket.width - (ball.half_width * 2)
-          // || tmpx <= dim.racket.x[1] + dim.racket.width + (ball.half_width * 2))
-          // && Math.abs(dist) <= this.this.board.player[player].half_height + ball.half_width
-          // && Math.sign(dist) == Math.sign(ball.dy)
-          // && (Math.sign(dist) == Math.sign(racket_dy) || racket_dy < 0.001)) //ball side of racket
-          // {
-          // 	ball.dy = Math.abs(ball.dy) * Math.sign(dist) + racket_dy;
-          // 	if (Math.abs(ball.dx) * 2 < Math.abs(ball.dy))
-          // 		ball.dy = 2 * Math.sign(ball.dy) * Math.abs(ball.dx);
-          // 	// ball.dy = -1 * Math.sign(dist) + ball.dy + (Math.sign(dist) != Math.sign(racket_dy)? racket_dy:0);
-          // 	ball.y = this.this.board.player[player].y + Math.sign(dist) * (ball.half_width + this.this.board.player[player].half_height);
-          // 	if (ball.y < ball.half_width)
-          // 		ball.y = ball.half_width;
-          // 	else if (ball.y > height - ball.half_width)
-          // 		ball.y = height - ball.half_width;
-          // 	this.this.board.dead = true;
-          // }
           else //ball behind racket
           {
             this.moveBall();
@@ -426,7 +397,7 @@
         this.bot.bot_offset = (Math.floor(Math.random() * 2) ? -1 : 1) * Math.random()
               * this.board.player[this.bot.bot_id].half_height * 1.2 * this.board.ball.dx;
       },
-      async game_loop()
+      async game_loop(ctx : CanvasRenderingContext2D)
       {
         while (!this.board.end)
         {
@@ -435,8 +406,7 @@
             this.board.pause_counter--;
           else
             this.updateBall();
-          this.clear();
-          this.addObjects();
+          this.addObjects(ctx);
         }
       },
       sleep(ms: number) {

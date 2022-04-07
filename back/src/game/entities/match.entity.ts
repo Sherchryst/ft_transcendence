@@ -1,10 +1,10 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
-import { GameMap } from './game-map.entity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "../../users/entities/user.entity";
+import { GameMap } from "./game-map.entity";
 
 export enum MatchType {
-  CASUAL = 'casual',
-  RANKED = 'ranked'
+  CASUAL = "casual",
+  RANKED = "ranked",
 }
 
 @Entity()
@@ -12,13 +12,13 @@ export class Match {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => GameMap, m => m.id)
+  @ManyToOne(() => GameMap, (m) => m.id)
   map: GameMap;
 
-  @ManyToOne(() => User, u => u.id, { nullable: false })
+  @ManyToOne(() => User, (u) => u.id, { nullable: false })
   player1: User;
 
-  @ManyToOne(() => User, u => u.id, { nullable: false })
+  @ManyToOne(() => User, (u) => u.id, { nullable: false })
   player2: User;
 
   @Column({ nullable: false })
@@ -30,7 +30,7 @@ export class Match {
   @Column({ nullable: true })
   endAt!: Date;
 
-  @ManyToOne(() => User, u => u.id, { nullable: true })
+  @ManyToOne(() => User, (u) => u.id, { nullable: true })
   winner!: User;
 
   @Column({ default: 0 })
