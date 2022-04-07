@@ -1,20 +1,30 @@
 <template>
-	<div class="flex flex-col">
+	<div class="notif-panel flex flex-col">
 		<div class="flex justify-between">
 			<div class="font-bold text-xl mb-5">Notifications</div>
 			<router-link to="home">view all</router-link>
 		</div>
-		<NotifCard v-for="notification in notifications" :key="notification.date.toString()" :dateTime="notification.date">
-			<component :is="notification.container" :data="notification.content"></component>
-		</NotifCard>
+		<div v-if="notifications.length != 0">
+			<NotifCard v-for="notification in notifications" :key="notification.date.toString()" :dateTime="notification.date">
+				<component :is="notification.container" :data="notification.content" @close="removeNotif"></component>
+			</NotifCard>
+		</div>
+		<div v-else class="w-64 notif-message">
+			No notification
+		</div>
 	</div>
 </template>
+
+<style lang="scss" scoped>
+
+</style>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import NotifCard from '@/components/Notification/NotifCard.vue';
-import { Notification, FriendRequest, GameInvitation, ChannelInvitation } from "@/interfaces/Notifiaction";
-import { User } from "@/interfaces/Profile";
+import { Notification, FriendRequest } from "@/interfaces/Notifiaction";
+// import { GameInvitation, ChannelInvitation } from "@/interfaces/Notifiaction";
+// import { User } from "@/interfaces/Profile";
 import { API } from "@/scripts/auth";
 import NotifFriend from "./NotifFriend.vue";
 import NotifGame from "./NotifGame.vue";
@@ -40,8 +50,9 @@ export default defineComponent({
 					id: this.$store.getters.getId
 				}
 			}).then( (response) => {
-				this.addFriendRequest(response.data[0])
-				console.log("RESPONSE :", response.data);
+				response.data.forEach( (element: FriendRequest) => {
+					this.addFriendRequest(element)
+				});
 			})
 
 			// TEST
@@ -75,8 +86,8 @@ export default defineComponent({
 			// } as Notification)
 
 		},
-		addFriendRequest(data: {id: number, nickname: string}): void {
-			let friendRequest =  { from: data.nickname, id: data.id} as FriendRequest
+		addFriendRequest(data: FriendRequest): void {
+			let friendRequest =  { nickname: data.nickname, id: data.id} as FriendRequest
 			let dateEvent = new Date()
 			this.notifications.push({
 				container: 'NotifFriend',
@@ -84,6 +95,13 @@ export default defineComponent({
 				date: dateEvent
 			} as Notification)
 		},
+		removeNotif(data: any): void {
+			let index = this.notifications.findIndex( (notif) => {
+				return (notif.content == data)
+			})
+			console.log("index", index)
+			this.notifications.splice(index)
+		}
 	},
 	mounted() {
 		this.getNotif()

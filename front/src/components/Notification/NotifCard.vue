@@ -1,8 +1,8 @@
 <template>
-	<div class="notif-card flex py-3">
+	<div v-if="display" class="notif-card flex py-3">
 		<img class="w-10 h-10" src="@/assets/blank-avatar.jpg" alt="test">
 		<div class="w-64 ml-3 flex flex-col">
-			<div class="notif-message">
+			<div class="notif-message" @close="hidden">
 				<slot></slot>
 			</div>
 			<div class="relative-time">{{ relativeTime }}</div>
@@ -21,13 +21,24 @@ export default defineComponent({
 		dateTime: { type: Date },
 		from: {type: Object as PropType<User>},
 	},
+	setup(props) {
+		props
+	},
+	data() {
+		return {
+			display: true
+		}
+	},
 	computed: {
 		relativeTime(): string {
 			return moment(this.dateTime).fromNow()
 		}
 	},
-	setup(props) {
-		props
+	methods: {
+		hidden() {
+			console.log("niques")
+			this.display = false
+		}
 	}
 })
 </script>

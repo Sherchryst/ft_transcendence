@@ -2,7 +2,7 @@ import { Channel } from "./Channel"
 import { User } from "./Profile"
 
 export interface FriendRequest {
-	from: string,
+	nickname: string,
 	id: number
 }
 
