@@ -1,16 +1,28 @@
 <template>
-	<label>
-		<input type="checkbox">
+<div class="flex flex-col">
+	<span class="mb-2 text-left label"><slot></slot></span>
+	<label :name="name" class="mod-switch">
+		<input :name="name" type="checkbox">
 		<span class="slider"></span>
 	</label>
+</div>
 </template>
 
 <script lang="ts">
+import { defineComponent } from "vue";
+import ModLabel from "./form/ModLabel.vue";
 
+export default defineComponent({
+	name: "SwitchButton",
+	props: {
+		name: { type: String, default: "check" }
+	},
+	// components: { ModLabel }
+})
 </script>
 
-<style lang="scss" scoped>
-label {
+<style lang="scss">
+.mod-switch {
 	position: relative;
 	display: inline-block;
 	width: 60px;

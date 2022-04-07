@@ -1,11 +1,15 @@
 <template>
-    <div>
-        <div class="grid-cols-1 md:grid grid-cols-3 span-4 mb-5">
-            <one-row-form placeholder="#-chan-name" @callback="create" >
-                <span class="px-2">Create</span>
-            </one-row-form>
+    <div class="grid-cols-1 md:grid grid-cols-3 gap-4 span-4">
+        <div class=" mb-5">
+            <form id="form-channel" class="flex flex-col gap-3" @submit.prevent="create">
+                <div class="text-xl text-left font-bold form-title">New channel</div>
+                <mod-input ref="name" name="name" type="text" placeholder="#-chan-name" v-model="formCreate.name">Name</mod-input>
+                <mod-input name="password" type="password" placeholder="Optional">Password</mod-input>
+                <switch-button @change="switchVisibility" name="visibility">Private</switch-button>
+                <button-link type="submit" >Create</button-link>
+            </form>
         </div>
-        <div class="grid-cols-1 md:grid grid-cols-3 gap-4 span-4" :key="listChannel">
+        <div class="col-span-2" :key="listChannel">
             <channel-view v-for="chan in listChannel" :id="chan.id" :title="chan.name" :key="chan.id"/>
         </div>
     </div>
@@ -16,15 +20,19 @@ import { defineComponent } from 'vue';
 import { API } from '@/scripts/auth.ts';
 import { useMeta } from 'vue-meta'
 import ChannelView from '@/components/chat/ChannelView.vue'
-import OneRowForm from '@/components/OneRowForm.vue'
 import { chatSocket } from '@/socket.ts'
 import { Channel } from '@/interfaces/Channel'
+import SwitchButton from '../components/SwitchButton.vue'
+import ModInput from '@/components/form/ModInput.vue';
+import ButtonLink from '@/components/ButtonLink.vue';
 
 export default defineComponent ({
     components: {
-        ChannelView,
-        OneRowForm,
-    },
+    ChannelView,
+    SwitchButton,
+    ModInput,
+    ButtonLink,
+},
     beforeRouteLeave(to, from, next) {
         next()
     },
@@ -35,8 +43,17 @@ export default defineComponent ({
         return {
             socket : chatSocket,
             listChannel: [] as Channel[],
+            formCreate: {
+                name: "",
+                visibility: "public"
+            }
         }
     },
+    // computed: {
+    //     // visibility(): string {
+    //     //     return ""
+    //     // }
+    // },
     mounted() {
         this.socket
             .on("connect", () => {
@@ -57,12 +74,15 @@ export default defineComponent ({
         })
     },
     methods: {
-        create(name_chan: string): void {
-            this.socket.emit("create", {
-                name : name_chan, 
-                visibility : "public"
-            })
+        create(): void {
+            this.socket.emit("create", this.formCreate)
 		},
+        switchVisibility(): void {
+            let visibility =  this.formCreate.visibility
+            console.log("SWITCH")
+            this.formCreate.visibility =  visibility == "public" ? "private" : "public"
+            console.log(this.formCreate.visibility)
+        }
     }
 })
 </script>
@@ -76,5 +96,8 @@ export default defineComponent ({
     &:hover{
         background: $panel-color;
     }
+}
+.form-title {
+    color: $dark-font
 }
 </style>
