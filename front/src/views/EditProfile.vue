@@ -5,7 +5,7 @@
                 <div class="mb-10">
                     <ChooseAvatar @onInputImage="inputImage($event)">
                         <template v-slot:activator>
-                            <div v-if="inside" class="grey frame flex flex-col place-content-center w-64 h-64 mb-10">
+                            <div v-if="inside" class="grey frame flex flex-col place-content-center w-64 h-64">
                                 <span class="title-username">Click to add avatar</span>
                             </div>
                             <div v-else class="flex place-content-center">
@@ -16,7 +16,7 @@
                 </div>
                 <div class="flex flex-col title-username self-center mb-16 space-y-4">
                     <label for="username">Enter username:</label>
-                    <input type="text" class="title-username input" id="username" name="username" v-model="nickname" placeholder="username" required>
+                    <input type="text" class="title-username input" id="username" name="username" v-model="nickname" placeholder="username">
                 </div>
                 <div class="mb-20 flex flex-row place-content-center">
                     <label class="pt-1 title-username" for="2F Authentication">2F Authentication:</label>
@@ -24,7 +24,7 @@
                     
                 </div>
                 <div class="btn self-center">
-                    <button v-if="switchOn" @click="generate_qrcode()" class="px-7 py-3 pb-2">Enable 2FA</button>
+                    <button v-if="switchOn" @click="generate_qrcode()" class="px-7 py-3 pb-2">Generate qrcode</button>
                     <button v-else type="submit" class="px-7 py-3 pb-2"> Register </button>
                 </div>
             </form>
@@ -118,12 +118,13 @@ export default defineComponent({
             var formData = new FormData();
             formData.append('file', this.avatar);
             formData.append('id', this.$store.getters.getId);
-            API.post('users/update-nickname', {
-                id: this.$store.getters.getId,
-                nickname: this.nickname
-            }).catch(function(error) {
-                console.log(error);
-            });
+            if (this.nickname.length > 0)
+                API.post('users/update-nickname', {
+                    id: this.$store.getters.getId,
+                    nickname: this.nickname
+                }).catch(function(error) {
+                    console.log(error);
+                });
             console.log('avatar', this.avatar);
             if(this.avatar.size > 0)
                 API.post('users/update-avatar', formData, {
