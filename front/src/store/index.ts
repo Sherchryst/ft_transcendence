@@ -21,19 +21,19 @@ export const store = createStore<State>({
       return state.chatMessages
     },
     getLogin() : string{
-      const profile : Profile = JSON.parse(localStorage.getItem('user') || '')
+      const profile : Profile = JSON.parse(localStorage.getItem('user') || '{}')
       return profile?.user?.login
     },
     getNickname() : string{
-      const profile : Profile = JSON.parse(localStorage.getItem('user') || '')
+      const profile : Profile = JSON.parse(localStorage.getItem('user') || '{}')
       return profile?.user?.nickname
     },
     getId() : number{
-      const profile : Profile = JSON.parse(localStorage.getItem('user') || '')
+      const profile : Profile = JSON.parse(localStorage.getItem('user') || '{}')
       return profile?.user?.id
     },
     isNewUser(): boolean {
-      const profile : Profile = JSON.parse(localStorage.getItem('user') || '')
+      const profile : Profile = JSON.parse(localStorage.getItem('user') || '{}')
       return profile?.user?.newUser
     }
   },
