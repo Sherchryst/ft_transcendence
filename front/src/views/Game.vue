@@ -153,24 +153,25 @@
       }
     },
     beforeRouteLeave(to, from, next) {
-      const res = window.confirm("Are you sure you want to leave this page? You will lose your progress.")
-      if (res) {
-        console.log("leaving");
-        if (this.$props.match_id != "bot" && (this.id == 0 || this.id == 1))
-        {
+
+      if (!this.board.end && this.$props.match_id != "bot" && (this.id == 0 || this.id == 1))
+      {
+        const res = window.confirm("Are you sure you want to leave this page? You will lose your progress.")
+        if (res) {
+          console.log("leaving");
           gameSocket.emit('leave', { match_id : this.match_id, id : this.id });
+          next();
         }
-        next();
+        else
+          next(false);
       }
       else
-        next(false);
-      console.log("before leave");
+        next();
     },
     beforeUnmount() {
       gameSocket.off("board");
       gameSocket.off("gameMap");
       // const removed = document.removeEventListener("mousemove", this.moveRackets);
-      console.log("before destroy");
     },
     methods:
     {
