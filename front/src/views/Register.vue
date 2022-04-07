@@ -14,7 +14,7 @@
 					</template>
 				</ChooseAvatar>
 			</div>
-			<div class="self-center mb-12 space-y-4">
+			<div class="flex flex-col place-content-center mb-12 space-y-4">
 				<label for="username">Enter username:</label>
 				<input type="text" class="input" id="username" name="username" v-model="nickname" placeholder="username" required>
 			</div>
@@ -33,11 +33,13 @@ import SingleCardPage from '@/components/SingleCardPage.vue';
 import { API } from '@/scripts/auth';
 import { useMeta } from 'vue-meta';
 import router from '@/router';
+import ProfilePicture from '@/components/profile/ProfilePicture.vue';
 
 export default defineComponent({
 	components: {
 		ChooseAvatar,
-		SingleCardPage
+		SingleCardPage,
+		ProfilePicture,
 	},
 	setup () {
 		useMeta({ title: 'Création du compte' })
