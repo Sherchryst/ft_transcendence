@@ -87,6 +87,16 @@ export class UsersController {
     });
   }
 
+  @Get('is-2fa-enabled')
+  async is2faEnabled(@Query('id') id: number) {
+    if (!id)
+      throw new BadRequestException('No id provided');
+    const user = await this.usersService.findOne(id);
+    if (!user)
+      throw new NotFoundException('User not found');
+    return user.twofa;
+  }
+
   @Post('send-friend-request')
   async sendFriendRequest(@Body() dto: { fromId: number, toId: number }) {
     try {
