@@ -45,37 +45,38 @@ export default defineComponent({
 			})
 
 			// TEST
-			let user = {
-				id: 4,
-				login: "lnoirot",
-				mmr: 0,
-				nickname: "Tor",
-				role: "user",
-				newUser: false
-			} as User
-			let channel = {
-				id: 3,
-				name: "beginner",
-				visibility: 1,
-				password: "",
-			}
-			let dateEvent = new Date()
-			let gameRequest = { from: user, map: "Andromeda"} as GameInvitation
-			let ChannelRequest = { from: user, channel: channel} as ChannelInvitation
-			this.notifications.push({
-				container: 'NotifChannel',
-				content: ChannelRequest,
-				date: dateEvent
-			} as Notification)
-			this.notifications.push({
-				container: 'NotifGame',
-				content: gameRequest,
-				date: dateEvent
-			} as Notification)
+			
+			// let user = {
+			// 	id: 4,
+			// 	login: "lnoirot",
+			// 	mmr: 0,
+			// 	nickname: "Tor",
+			// 	role: "user",
+			// 	newUser: false
+			// } as User
+			// let channel = {
+			// 	id: 3,
+			// 	name: "beginner",
+			// 	visibility: 1,
+			// 	password: "",
+			// }
+			// let dateEvent = new Date()
+			// let gameRequest = { from: user, map: "Andromeda"} as GameInvitation
+			// let ChannelRequest = { from: user, channel: channel} as ChannelInvitation
+			// this.notifications.push({
+			// 	container: 'NotifChannel',
+			// 	content: ChannelRequest,
+			// 	date: dateEvent
+			// } as Notification)
+			// this.notifications.push({
+			// 	container: 'NotifGame',
+			// 	content: gameRequest,
+			// 	date: dateEvent
+			// } as Notification)
 
 		},
 		addFriendRequest(data: {id: number, nickname: string}): void {
-			let friendRequest =  { from: data.nickname} as FriendRequest
+			let friendRequest =  { from: data.nickname, id: data.id} as FriendRequest
 			let dateEvent = new Date()
 			this.notifications.push({
 				container: 'NotifFriend',

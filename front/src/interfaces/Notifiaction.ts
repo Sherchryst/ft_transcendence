@@ -2,7 +2,8 @@ import { Channel } from "./Channel"
 import { User } from "./Profile"
 
 export interface FriendRequest {
-	from: string
+	from: string,
+	id: number
 }
 
 export interface ChannelInvitation {
