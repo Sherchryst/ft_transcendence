@@ -214,12 +214,14 @@
         const line_width = ctx.canvas.width / 80;
         const starColor = `#${this.map.starsColor.toString(16).padStart(6, '0')}`;
         const lineColor = `#${this.map.racketColor.toString(16).padStart(6, '0')}`;
-        ctx.fillStyle = `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`;
+        const bgColor = `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`;
+        ctx.fillStyle = bgColor;
         // console.log("background color", `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`);
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         // ctx.fillStyle = "white";
-        for (let count = 0; count < 300; count++) //stars
-          this.roundStar(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height, Math.random() * ctx.canvas.height / 80, starColor);
+        if (starColor != bgColor)
+          for (let count = 0; count < 300; count++) //stars
+            this.roundStar(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height, Math.random() * ctx.canvas.height / 80, starColor);
         for (let i = line_width; i < ctx.canvas.width; i+= interval)
           this.roundRect((ctx.canvas.width- line_width) / 2, i, line_width, interval * 0.65, lineColor, ctx);
       },
@@ -325,7 +327,7 @@
       racketCollision(dist : number, idx : number, racket_dy : number)
       {
         var ball = this.board.ball;
-        const speed_factor = ball.dx > 3 ? 1 : 1.05;
+        const speed_factor = Math.abs(ball.dx) > 2 ? 1 : 1.05;
         ball.dx *= -speed_factor;
         ball.dy = speed_factor * ball.dy + racket_dy
             + dist * Math.abs(ball.dx) / this.board.player[idx].half_height;

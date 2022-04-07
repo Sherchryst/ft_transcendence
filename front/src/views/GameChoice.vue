@@ -42,7 +42,7 @@ export default defineComponent({
 	},
 	mounted() {
 		gameSocket.on("invited", (data : string) => {
-			gameSocket.emit("acceptInvit", data);
+			gameSocket.emit("acceptInvit", data); // TODO: ask for confirmation
 			console.log("accepted invite : ", data);
 		});
 		gameSocket.on("gameStart", (data: string) => {

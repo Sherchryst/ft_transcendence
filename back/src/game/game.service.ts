@@ -22,12 +22,7 @@ export class GameService {
   }
   racketCollision(dist: number, idx: number, racket_dy: number, board: Board) {
     const ball = board.ball;
-    const speed_factor = ball.dx > 3 ? 1 : 1.05;
-    if (speed_factor == 1) {
-      board.player[0].half_height *= 0.9;
-      board.player[1].half_height *= 0.9;
-      ball.half_width *= 0.9;
-    }
+    const speed_factor = Math.abs(ball.dx) > 2 ? 1 : 1.05;
     ball.dx *= -speed_factor;
     ball.dy =
       speed_factor * ball.dy +
