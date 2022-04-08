@@ -219,10 +219,11 @@ export default defineComponent({
 	},
 	created(): void {
 		watch(
-			() => this.$route.params,
-			(toParams) => {
-				if(toParams.username)
-					this.getUser(toParams.username)
+			() => this.$route.params.username,
+			(newUsername) => {
+				if(newUsername){
+					this.getUser(newUsername)
+				}
 			}
 		)
 	},

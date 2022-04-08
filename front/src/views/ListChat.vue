@@ -10,7 +10,7 @@
             </form>
         </div>
         <div class="col-span-2" :key="listChannel">
-            <channel-view v-for="chan in listChannel" :id="chan.id" :title="chan.name" :key="chan.id"/>
+            <channel-view v-for="chan in listChannel" :key="chan.id" :channel="chan"/>
         </div>
     </div>
 </template>

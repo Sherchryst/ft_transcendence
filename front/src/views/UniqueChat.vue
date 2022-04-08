@@ -1,6 +1,17 @@
 <template>
     <chat-wrapper hasConv>
         <!-- <div class="col-span-8 conversation flex flex-col justify-between px-7 py-5"> -->
+			<div class="flex flex-row justify-between items-center">
+				<div>Channel Name</div>
+				<div class="flex flex-row">
+					<button>
+						<info-icon class="h-10"></info-icon>
+					</button>
+					<button>
+						<option-icon class="h-10"></option-icon>
+					</button>
+				</div>
+			</div>
             <div id="chat" class="flex-auto flex flex-col-reverse mb-5 overflow-x-auto" :key="history">
                 <message :self="message.self" v-for="message in history" :key="message">
                     {{message.content}}
@@ -37,6 +48,8 @@ import { useStore } from 'vuex'
 import { key } from '@/store'
 import { Message_t, ServerMessage } from '@/interfaces/Message.ts'
 import { chatSocket } from '@/socket.ts'
+import InfoIcon from '@/assets/icon/info.svg'
+import OptionIcon from '@/assets/icon/option.svg'
 
 export default defineComponent({
     components: {
@@ -44,6 +57,8 @@ export default defineComponent({
         SendIcon,
         ChatWrapper,
         OneRowForm,
+		InfoIcon,
+		OptionIcon
     },
     props : {
         id: {type: String, required: true},
@@ -70,11 +85,11 @@ export default defineComponent({
     },
     created(): void {
 		watch(
-			() => this.$route.params,
-			(toParams) => {
-				if(toParams.id)
-					console.log("ID", toParams.id[0])
-					this.join(parseInt(toParams.id[0]))
+			() => this.$route.params.id,
+			(newId) => {
+				if(newId) {
+					this.join(parseInt(newId[0]))
+				}
 			}
 		)
 	},

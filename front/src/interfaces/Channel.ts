@@ -5,5 +5,5 @@ export interface Channel{
 	name: string,
 	owner?: User,
 	visibility: number,
-	password: string
+	password: string | null
 }

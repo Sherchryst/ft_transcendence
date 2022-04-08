@@ -1,20 +1,30 @@
 <template>
 	<div class="chan flex flex-row justify-between px-4 py-3">
 			<div class="flex flex-col items-start">
-				<span class="title font-bold text-xl">#-{{this.title}}</span>
+				<span class="title font-bold text-xl">#-{{channel?.name}}</span>
 				<span class="font-light">Username</span>
 			</div>
-			<button>join</button>
+			<button @click="join">join</button>
 	</div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, PropType } from 'vue';
+import { Channel } from '@/interfaces/Channel';
+import { API } from '@/scripts/auth';
 
 export default defineComponent({
 	props: {
-		title: {type: String, required: true}
+		channel: {type: Object as PropType<Channel>},
 	},
+	methods: {
+		join() {
+			API.post("chat/join", {
+				channelID: this.channel?.id,
+				password: ""
+			})
+		}
+	}
 })
 </script>
 
