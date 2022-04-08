@@ -12,18 +12,30 @@
 import { defineComponent, PropType } from 'vue';
 import { Channel } from '@/interfaces/Channel';
 import { API } from '@/scripts/auth';
+import { chatSocket } from '@/socket'
 
 export default defineComponent({
 	props: {
 		channel: {type: Object as PropType<Channel>},
 	},
-	methods: {
-		join() {
-			API.post("chat/join", {
-				channelID: this.channel?.id,
-				password: ""
-			})
+	data() {
+		return {
+			socket : chatSocket,
 		}
+	},
+	methods: {
+		join(): void {
+			this.socket.emit('join', {
+                channelId: this.channel?.id,
+                password: ""
+            });
+		},
+		// join() {
+		// 	API.post("chat/join", {
+		// 		channelID: this.channel?.id,
+		// 		password: ""
+		// 	})
+		// }
 	}
 })
 </script>
