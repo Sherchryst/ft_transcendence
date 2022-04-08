@@ -6,7 +6,7 @@
 			<h4 class="text-left font-bold text-xl mt-4" >Channels</h4>
 			<discussion-preview isChannel v-for="chan in listChannel" :id="chan.id" :title="chan.name" :key="chan.id" />
 		</div>
-		<div :class="[ !hasConv ? 'hidden md:flex' : 'flex' ]" class="col-span-12 md:col-span-8 conversation flex-col justify-center px-3 md:px-7 py-5">
+		<div :class="[ !hasConv ? 'hidden md:flex' : 'flex' ]" class="col-span-12 md:col-span-7 2xl:col-span-6 conversation flex-col justify-center px-3 md:px-7 py-5">
 			<slot></slot>
 		</div>
   </div>
@@ -57,7 +57,7 @@ export default defineComponent({
         }
     },
 	mounted() {
-		API.get('chat/list').then((response) => {
+		API.get('chat/join-list').then((response) => {
 			this.listChannel = response.data
 		}).catch((error) => {
 			this.listChannel = []
