@@ -85,6 +85,7 @@ import router from '@/router';
 import { SocketMessage } from '@/interfaces/Message';
 import { chatSocket } from '@/socket'
 import NotifPanel from '@/components/Notification/NotifPanel.vue';
+import { Statut } from '@/interfaces/Profile';
 
 export default defineComponent({
 	components: {
@@ -124,7 +125,7 @@ export default defineComponent({
 		},
 		logout(): void {
 			API.post('auth/logout')
-			sessionStorage.clear()
+			localStorage.setItem("state", Statut.NOTLOGIN.toString())
 			localStorage.removeItem('user')
 			router.push({name: "login"})
 		},

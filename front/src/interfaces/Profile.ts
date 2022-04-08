@@ -1,3 +1,8 @@
+export enum Statut {
+	NOTLOGIN,
+	TWOFA,
+	AUTH
+  }
 export interface Profile {
 	achievements: [],
 	friends: [],
