@@ -65,9 +65,10 @@ export default defineComponent({
 			.then((response) => {
 				this.connection()
 				console.log(response.data)
-			}).catch( () => {
-				this.twofa = false;
-				router.push({name: "login"})
+			}).catch( (error) => {
+				console.log("ERROR", error.response.data)
+				if (error.response && error.response.data.message == "Unauthorized")
+					this.handleUnauthorize()
 			})
 		},
 		connection() {
@@ -76,9 +77,13 @@ export default defineComponent({
 					router.push({name: "register"})
 				router.push({name: "home"})
 			}).catch( () => {
-				this.twofa = false;
-				router.push({name: "login"})
+				this.handleUnauthorize()
 			})
+		},
+		handleUnauthorize(){
+			this.twofa = false;
+			localStorage.setItem("state", Statut.NOTLOGIN.toString())
+			router.push({name: "login"})
 		}
 	}
 })
