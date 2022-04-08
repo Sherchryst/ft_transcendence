@@ -66,6 +66,7 @@ export default defineComponent({
 				this.connection()
 				console.log(response.data)
 			}).catch( () => {
+				this.twofa = false;
 				router.push({name: "login"})
 			})
 		},
@@ -75,6 +76,7 @@ export default defineComponent({
 					router.push({name: "register"})
 				router.push({name: "home"})
 			}).catch( () => {
+				this.twofa = false;
 				router.push({name: "login"})
 			})
 		}
