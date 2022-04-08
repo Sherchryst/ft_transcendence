@@ -116,9 +116,12 @@ router.beforeEach((to, form, next) => {
     else
       next()
   }
-  else {
-      next()
+  else if (to.name != 'login' && !localStorage.getItem('user')) {
+    localStorage.setItem('state', Statut.NOTLOGIN.toString())
+    next({ name: 'login' })
   }
+  else
+    next()
 })
 
 export default router
