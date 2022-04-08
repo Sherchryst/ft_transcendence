@@ -27,7 +27,7 @@
 
 <script lang="ts">
 
-import { defineComponent, PropType, computed } from 'vue';
+import { defineComponent, PropType, computed, watch } from 'vue';
 import Message from '@/components/chat/Message.vue'
 import OneRowForm from '@/components/OneRowForm.vue'
 import SendIcon from '@/assets/icon/send.svg';
@@ -68,9 +68,16 @@ export default defineComponent({
             channel: null,
         }
     },
-    unmounted() {
-        // this.socket.close();
-    },
+    created(): void {
+		watch(
+			() => this.$route.params,
+			(toParams) => {
+				if(toParams.id)
+					console.log("ID", toParams.id[0])
+					this.join(parseInt(toParams.id[0]))
+			}
+		)
+	},
 	mounted() {
         this.join(parseInt(this.id))
         this.socket
@@ -87,7 +94,7 @@ export default defineComponent({
             .on('message', (data) => {
                 if (data.channelMessage.channel.id == this.id)
                     this.recv(data.channelMessage.message)
-                this.readMessage()
+                this.readMessage(parseInt(this.id))
             })
         ;
 	},
@@ -95,8 +102,8 @@ export default defineComponent({
         console.log('update')
     },
 	methods: {
-        readMessage(){
-            this.$emit('read-message', this.id);
+        readMessage(chanId: number){
+            this.$emit('read-message', chanId);
         },
         send(message: string): void {
             console.log("message : ", message)
@@ -108,10 +115,10 @@ export default defineComponent({
 
 		join(chanId: number): void {
 			this.socket.emit('join', {
-                channelId: parseInt(this.id),
+                channelId: chanId,
                 password: ""
             });
-            this.readMessage()
+            this.readMessage(chanId)
 		},
 
 		leave_channel(): void {
