@@ -24,8 +24,7 @@
                     
                 </div>
                 <div class="btn self-center">
-                    <button v-if="switchOn" @click="generate_qrcode()" class="px-7 py-3 pb-2">Generate qrcode</button>
-                    <button v-else type="submit" class="px-7 py-3 pb-2"> Register </button>
+                    <button type="submit" class="px-7 py-3 pb-2"> Register </button>
                 </div>
             </form>
         </div>
@@ -86,6 +85,13 @@ export default defineComponent({
         qrcode: "",
         }
     },
+    watch: {
+        switchOn(newVal: boolean) {
+            if (newVal) {
+                this.generate_qrcode();
+            }
+        }
+    },
     methods: {
         generate_qrcode(): void {
         API.post('2fa/generate', {}, {responseType: 'arraybuffer'}).then((response) => {
@@ -111,7 +117,7 @@ export default defineComponent({
         },
         inputSwitch(is2fa: boolean) {
             is2fa ? this.switch = true : this.switch = false;
-            this.switchOn = is2fa;
+            this.switchOn = this.switch;
             console.log('switch', is2fa);
         },
         send() {
