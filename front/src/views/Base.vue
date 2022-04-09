@@ -3,7 +3,7 @@
 		<nav id="nav" class="flex flex-col md:items-center md:fixed h-full w-full md:w-28 pt-24 md:pt-0 dropdown-link-container">
 			<div class="mb-5 md:mb-0 md:mt-10 md:h-36">
 				<router-link :to="{name: 'profile', params: {username: whoiam}}">
-					<img class="h-16 w-16" src="../assets/blank-avatar.jpg" alt="profile">
+					<img class="h-16 w-16" :src="'http://localhost:3000/' + $store.getters.getAvatarPath" alt="profile">
 				</router-link>
 			</div>
 			<one-row-form class="md:hidden mb-6 mobile" placeholder="Recherche">
@@ -19,7 +19,7 @@
 				<nav-button text="Channels" route="channel">
 					<GroupIcon />
 				</nav-button>
-				<nav-button text="Chat" route="chat" class="chat-link" :notification="this.newMessage">
+				<nav-button text="Chat" route="chat" class="chat-link" :notification="newMessage">
 					<ChatIcon />
 				</nav-button>
 			</div>
@@ -36,7 +36,6 @@
 				</div>
 				<div class="hidden sm:flex flex-row justify-between justify-items-center h-16">
 					<div class="self-center">
-						<!-- If connected -->
 						<ButtonLink @click="logout()" class="btn-neutral" text="Deconnection" />
 					</div>
 					<div class="flex flex-row justify-between justify-items-center">
@@ -45,13 +44,23 @@
 								<SearchIcon />
 							</one-row-form>
 						</div>
-						<div class="ml-10">
+						<div class="self-center mx-7">
+							<button v-s-dropdown-toggle:some-dropdown>
+								<NotifIcon class="h-12 w-12" />
+							</button>
+							<s-dropdown name="some-dropdown" align="left">
+								<NotifPanel/>
+							</s-dropdown>
+						</div>
+						<div class="">
 							<Logo />
 						</div>
 					</div>
 				</div>
 			</div>
-			<router-view @read-message="removeMessageFrom"/>
+			<div class="pb-6">
+				<router-view @read-message="removeMessageFrom"/>
+			</div>
 		</div>
 	</div>
 </template>
@@ -67,13 +76,16 @@ import GroupIcon from '@/assets/icon/group.svg';
 import GameIcon from '@/assets/icon/game.svg';
 import SearchIcon from '@/assets/icon/search.svg';
 import MenuIcon from '@/assets/icon/menu.svg'
+import NotifIcon from '@/assets/icon/notification.svg';
 import Logo from '@/assets/ApongUs.svg';
 import { useStore } from 'vuex'
-import { key } from '@/store/index.ts'
-import { API } from '@/scripts/auth.ts';
+import { key } from '@/store/index'
+import { API } from '@/scripts/auth';
 import router from '@/router';
 import { SocketMessage } from '@/interfaces/Message';
-import { chatSocket } from '@/socket.ts'
+import { chatSocket } from '@/socket'
+import NotifPanel from '@/components/Notification/NotifPanel.vue';
+import { Statut } from '@/interfaces/Profile';
 
 export default defineComponent({
 	components: {
@@ -87,6 +99,8 @@ export default defineComponent({
 		SearchIcon,
 		MenuIcon,
 		Logo,
+		NotifIcon,
+		NotifPanel,
 	},
 	data() {
 		return {
@@ -95,6 +109,7 @@ export default defineComponent({
 		}
 	},
 	mounted() {
+		console.log('avatar', this.$store.state.profile.user.avatarPath)
 		this.socket
 			.on('message', (data: {channelMessage: SocketMessage}) => {
 				if (data.channelMessage.message.from.login != this.$store.getters.getLogin)
@@ -110,7 +125,7 @@ export default defineComponent({
 		},
 		logout(): void {
 			API.post('auth/logout')
-			sessionStorage.clear()
+			localStorage.setItem("state", Statut.NOTLOGIN.toString())
 			localStorage.removeItem('user')
 			router.push({name: "login"})
 		},

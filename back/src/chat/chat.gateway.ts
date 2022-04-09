@@ -10,6 +10,7 @@ import { User } from 'src/users/entities/user.entity';
 import { getJwtFromSocket } from 'src/auth/jwt/jwt.service';
 import { Req, UseGuards } from '@nestjs/common';
 import { WsJwt2faGuard } from 'src/auth/jwt/jwt.guard';
+import * as PostgresError from '@fiveem/postgres-error-codes'
 
 @UseGuards(WsJwt2faGuard)
 @WebSocketGateway(3001, {namespace: "chat"})
@@ -61,10 +62,15 @@ export class ChatGateway implements OnGatewayConnection{
 
     @SubscribeMessage('create')
     async createChannel(@Req() req, @ConnectedSocket() client : Socket, @MessageBody() data : {name: string, visibility: ChannelVisibility}) {
+      try {
         const channel = await this.chatService.createChannel(data.name, req.user, data.visibility);
         this.chatService.joinChannel(req.user, channel.id, ChannelMemberRole.ADMIN);
         this.server.emit("created", { channel: channel})
         client.join("channel:" + channel.id);
+      } catch (error) {
+        if (error.code === PostgresError.PG_UNIQUE_VIOLATION)
+          throw new WsException('channel already exists');
+      }
     }
 
     @SubscribeMessage('message')

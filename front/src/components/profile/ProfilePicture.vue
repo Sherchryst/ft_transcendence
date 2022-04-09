@@ -1,6 +1,6 @@
 <template>
 	<div class="flex flex-shrink-0 w-auto h-auto ">
-		<img class="frame h-64 w-64" src="../../assets/blank-avatar.jpg" alt="profile">
+		<img class="frame h-64 w-64" :src="avatar" alt="profile">
 	</div>
 </template>
 
@@ -8,7 +8,9 @@
 import { defineComponent } from 'vue';
 
 export default defineComponent({
-
+props:{
+	avatar: { type: String, required: true}
+}
 })
 </script>
 

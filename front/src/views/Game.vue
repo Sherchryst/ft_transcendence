@@ -24,77 +24,145 @@
 </style>
 
 <template>
-<div class="game">
+<div class="game" @mousemove="moveRackets">
   <div id="canvas-div" class="game-container w-full relative">
-    <canvas ref="background" id="background" class="game-bg" height="600" width="800">
-    </canvas>
-    <canvas ref="mycanvas" id="mycanvas" class="game-fg" height="600" width="800"></canvas>
+    <canvas ref="background" id="background" class="game-bg" height="600" width="800"></canvas>
+    <canvas ref="gamecanvas" id="gamecanvas" class="game-fg" height="600" width="800"></canvas>
   </div>
 </div>
 </template>
 
 <script lang="ts">
-  import {defineComponent, ssrContextKey} from 'vue'
-  import { gameSocket } from '../socket';
+  import { defineComponent } from 'vue'
+  import { gameSocket } from '@/socket';
+  import { Bot } from '@/interfaces/game/bot.interface'; // change to @
+  import { Board } from '@/interfaces/game/board.interface';
+  import { GameMap } from '@/interfaces/game/gameMap.interface';
+  import { Dimensions } from '@/interfaces/game/dimensions.interface';
+  // import gamecanvas from '@/components/game/gamecanvas.vue';
+  // import background from '@/components/game/background.vue';
 
   export default defineComponent({
-    name: 'mycanvas',
+    name: 'gamecanvas',
     props: {
-      match_id: Number,
+      match_id: String,
       msg: String
     },
+    // components: {
+    //   gamecanvas,
+    //   background
+    // },
     $refs!: {
-    input: HTMLInputElement
+      input: HTMLInputElement
     },
     data() {
       return {
-        login : ["player1", "player2"],
+        evts: [],
+        login : ["you", "bot"],
         ctx : null as any,
-        id : 123,
+        id : 0,
         map: {
-          ballColor : 0,
-          backgroundColor : 0,
-          starsColor: 0,
-          racketColor : 0 
-        },
-        dimX : 0,
-        dimY : 0,
-        racket : {
-          width: 2,
-          x : [6,94]
-        },
-        board: {
-          ball: {x: 400, y: 300, dx: 0, dy: 20, half_width: 25},
-          player: [{id:0, y: 300, old_y:300, score: 0, half_height: 40},
-                  {id:1, y: 300, old_y:300, score: 0, half_height: 40}],
-          dead: false,
-          end: false}
+          ballColor : 16562691,
+          backgroundColor : 344663,
+          starsColor: 12566194,
+          racketColor : 16777215
+        } as GameMap,
+        dimX : 1,
+        dimY : 1,
+        dim : {
+          width : 100,
+          height : 100,
+          racket : {
+            width: 2,
+            x : [6,94]
+          }
+        } as Dimensions,
+        board : {
+          ball: {
+            x: 50,
+            y: Math.random() * 50 + 25,
+            half_width: 2,
+            dx:  (Math.floor(Math.random() * 2)? -1:1), //random player
+            dy: Math.random() * 1.5 * (Math.floor(Math.random() * 2)? -1:1) }, //random top/bottom
+          player: [{
+            user_id : "player1",
+            id: 0,
+            y: 50,
+            old_y: 50,
+            score : 0,
+            half_height : 6 },{
+            user_id : "player2",
+            id: 1,
+            y: 50,
+            old_y: 50,
+            score : 0,
+            half_height : 6 }],
+          dead : false,
+          end : false,
+          ready : true,
+          pause_counter : 50 } as Board,
+        bot : {
+          bot_speed : 2,
+          bot_offset : 0,
+          bot_id : 1,
+        } as Bot
       }
     },
     mounted() {
-      gameSocket.emit('connection', this.match_id);
-      gameSocket.on("gameMap", (data : any) => {
-        this.map = { ...this.map, ...data.map };
-        console.log(" my map :", this.map);
-        this.login = { ...this.login, ...data.login };
-        console.log(" logins :", this.login);
-        this.id = data.id;
-        console.log(" id :", this.id);
-        this.drawBackground();
-        console.log('socket connected');
-      });
-      gameSocket.on("board", (data : any) => {
-        this.board = {...this.board, ...data}
-        this.clear();
-        this.addObjects();
-      });
-      // gameSocket.on("login", (data : any) => {
-      //   this.login[data.id] = data.login;
-      // });
-      this.ctx = (this.$refs.mycanvas as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
+      this.ctx = (this.$refs.gamecanvas as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
       this.dimX = this.ctx.canvas.width / 100;
+      console.log("mounted", this.ctx, this.$props);
       this.dimY = this.ctx.canvas.height / 100;
-      document.addEventListener("mousemove", this.moveRackets);
+      if (this.$props.match_id != "bot")
+      {
+        gameSocket.emit('connection', this.match_id);
+        gameSocket.on("gameMap", (data : any) => {
+          this.map = { ...this.map, ...data.map };
+          console.log(" my map :", this.map);
+          this.login = { ...this.login, ...data.login };
+          console.log(" logins :", this.login);
+          this.id = data.id;
+          console.log(" id :", this.id);
+          this.drawBackground();
+          // const setuped = document.addEventListener("mousemove", this.moveRackets);
+          // console.log(setuped, 'socket connected');
+        });
+        gameSocket.on("board", (data : any) => {
+          this.board = { ...this.board, ...data }
+          this.clear();
+          this.addObjects();
+        });
+      }
+      else
+      {
+        console.log("bot");
+        // this.reset(true);
+        this.drawBackground();
+        //const setuped = document.addEventListener("mousemove", this.moveRackets);
+        // console.log(setuped, 'evts', this.evts);
+        this.game_loop();
+      }
+    },
+    beforeRouteLeave(to, from, next) {
+      const res = window.confirm("Are you sure you want to leave this page? You will lose your progress.")
+      if (res) {
+        console.log("leaving");
+        if (this.$props.match_id != "bot" && (this.id == 0 || this.id == 1))
+        {
+          gameSocket.emit('leave', { match_id : this.match_id, id : this.id });
+        }
+        next();
+      }
+      else
+        next(false);
+      console.log("before leave");
+
+    },
+    beforeUnmount() {
+      gameSocket.off("board");
+      gameSocket.off("gameMap");
+      // const removed = document.removeEventListener("mousemove", this.moveRackets);
+      console.log("before destroy");
     },
     methods:
     {
@@ -117,7 +185,7 @@
         if (ctx == null)
           ctx = this.ctx;
         ctx.fillStyle = color;
-        console.log('color', color);
+        // console.log('color', color);
         ctx.beginPath();
         // ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
         ctx.arc(x - radius, y - radius, radius, 0, Math.PI / 2, false);
@@ -136,19 +204,26 @@
       },
       drawBackground()
       {
-        var ctx = (this.$refs.background as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
+        var canvas = this.$refs.background as HTMLCanvasElement;
+        if (!canvas)
+        {
+          console.log("canvas not found");
+          return ;
+        }
+        var ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
         const interval = ctx.canvas.height / 10;
         const start = ctx.canvas.height / 60;
         const line_width = ctx.canvas.width / 80;
-        ctx.fillStyle = "rgb(6, 40, 56)";
+        const starColor = `#${this.map.starsColor.toString(16).padStart(6, '0')}`;
+        const lineColor = `#${this.map.racketColor.toString(16).padStart(6, '0')}`;
+        ctx.fillStyle = `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`;
+        // console.log("background color", `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`);
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         // ctx.fillStyle = "white";
         for (let count = 0; count < 300; count++) //stars
-          this.roundStar(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height, Math.random() * 5, '#' + this.map.starsColor.toString(16), ctx);
-          console.log('stars color', this.map.starsColor);
-        for (let i = line_width; i < ctx.canvas.width; i+= interval) {
-          this.roundRect((ctx.canvas.width- line_width) / 2, i, line_width, interval * 0.65, "white", ctx);
-        }
+          this.roundStar(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height, Math.random() * ctx.canvas.height / 80, starColor, ctx);
+        for (let i = line_width; i < ctx.canvas.width; i+= interval)
+          this.roundRect((ctx.canvas.width- line_width) / 2, i, line_width, interval * 0.65, lineColor, ctx);
       },
       clear()
       {
@@ -157,11 +232,10 @@
       drawBall(x : number, y : number)
       {
         var h_width = this.board.ball.half_width;
-        var bColor = '#' + this.map.ballColor.toString(16);
-        // console.log('ball color', this.colorballColor);
+        var bColor = `#${this.map.ballColor.toString(16).padStart(6, '0')}`;
         if (this.board.ball.dx > 0)
         {
-          this.roundRect((x - h_width / 2) * this.dimX, (y - h_width) * this.dimY, h_width * (3 / 2)  * this.dimX, h_width * (5 / 3) * this.dimX, bColor);
+          this.roundRect((x - h_width / 2) * this.dimX, (y - h_width) * this.dimY, h_width * (3/2)  * this.dimX, h_width * (5 / 3) * this.dimX, bColor);
           this.roundRect((x - h_width) * this.dimX, (y + h_width / 3) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, bColor);
           this.roundRect((x - h_width) * this.dimX, (y - h_width) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, bColor);
           this.roundRect((x + h_width / 4) * this.dimX, (y - h_width * (3/4)) * this.dimY, (h_width / 2 * this.dimX), h_width * this.dimX, "#AEBBBC");
@@ -183,46 +257,190 @@
       },
       drawRackets(y1 : number, y2 : number)
       {
-        this.roundRect((this.racket.x[0] - this.racket.width) * this.dimX, (y1 - this.board.player[0].half_height) * this.dimY, this.racket.width * this.dimX, this.board.player[0].half_height * 2 * this.dimY);
-        this.roundRect(this.racket.x[1] * this.dimX, (y2 - this.board.player[1].half_height) * this.dimY, this.racket.width * this.dimX, this.board.player[1].half_height * 2 * this.dimY);
+        if (!this.dim)
+          return ;
+        var rColor = `#${this.map.racketColor.toString(16).padStart(6, '0')}`;
+        this.roundRect((this.dim.racket.x[0] - this.dim.racket.width) * this.dimX, (y1 - this.board.player[0].half_height) * this.dimY,
+          this.dim.racket.width * this.dimX, this.board.player[0].half_height * 2 * this.dimY, rColor);
+        this.roundRect(this.dim.racket.x[1] * this.dimX, (y2 - this.board.player[1].half_height) * this.dimY,
+          this.dim.racket.width * this.dimX, this.board.player[1].half_height * 2 * this.dimY, rColor);
       },
       drawScore()
       {
         this.ctx.fillStyle = "white";
-        this.ctx.font = "70px courier new" // absolute size /!\
+        this.ctx.font = `${this.ctx.canvas.height / 10}px courier new`;
         this.ctx.textAlign = "right";
         this.ctx.fillText((this.board.player[0].score).toString(), this.ctx.canvas.width / 2 - this.ctx.canvas.width / 20, this.ctx.canvas.height / 10);
         this.ctx.textAlign = "left";
         this.ctx.fillText((this.board.player[1].score).toString(), this.ctx.canvas.width / 2 + this.ctx.canvas.width / 20, this.ctx.canvas.height / 10);
-        this.ctx.font = "30px courier new" // absolute size /!\
+        this.ctx.font = `${this.ctx.canvas.height / 15}px courier new`;
         this.ctx.textAlign = "right";
-        this.ctx.fillText(this.login[1], this.ctx.canvas.width - this.ctx.canvas.width / 10, this.ctx.canvas.height / 10);
+        this.ctx.fillText(this.login[1], this.ctx.canvas.width - this.ctx.canvas.width / 22, this.ctx.canvas.height / 10);
         this.ctx.textAlign = "left";
-        this.ctx.fillText(this.login[0], this.ctx.canvas.width / 10, this.ctx.canvas.height / 10);
+        this.ctx.fillText(this.login[0], this.ctx.canvas.width / 22, this.ctx.canvas.height / 10);
       },
       drawWinner(winner : number)
       {
         this.ctx.fillStyle = "white";
-        this.ctx.font = "70px courier new" // absolute size /!\
+        this.ctx.font = `${this.ctx.canvas.height / 10}px courier new`; // absolute size /!\
         this.ctx.textAlign = "center";
         this.ctx.fillText(this.login[winner] + " wins", this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
       },
       addObjects()
       {
+        // console.log("end : ", this.board.end);
         if (this.board.end)
-          this.drawWinner(this.board.player[0].score >= 11 ? 0 : 1)
-        else
-          this.drawBall(this.board.ball.x, this.board.ball.y);
+          this.drawWinner(this.board.player[0].score > this.board.player[1].score ? 0 : 1);
+        else {
+            if (this.board.dead)
+              this.ctx.globalAlpha = 0.2;
+            this.drawBall(this.board.ball.x, this.board.ball.y);
+            this.ctx.globalAlpha = 1;
+          }
         this.drawRackets(this.board.player[0].y, this.board.player[1].y);
         this.drawScore();
       },
       moveRackets(evt : MouseEvent)
       {
+        // console.log("Evt: ", evt);
         if (this.id > 1)
           return ;
         let rect : DOMRect = this.ctx.canvas.getBoundingClientRect();
-        console.log("id :", this.id);
-        gameSocket.emit('player', {"match_id" : this.match_id, "id" : this.id, "y" : (evt.clientY - rect.top) / this.dimY})
+        // console.log("id :", this.id, this.match_id);
+        if (this.$props.match_id != "bot")
+          gameSocket.emit('player', {match_id : this.match_id, id : this.id, y : (evt.clientY - rect.top) / this.dimY})
+        else
+          this.updatePlayer(this.id, (evt.clientY - rect.top) / this.dimY);
+      },
+      updatePlayer(id : number, y : number)
+      {
+        var player = this.board.player[id];
+        if (y < player.half_height) // check if the racket position runs out of the canvas
+                player.y = player.half_height;
+            else if (y >= this.dim.height - player.half_height)
+                player.y = this.dim.height - player.half_height;
+        else
+          player.y = y;
+      },
+      racketCollision(dist : number, idx : number, racket_dy : number)
+      {
+        var ball = this.board.ball;
+        const speed_factor = ball.dx > 3 ? 1 : 1.05;
+        ball.dx *= -speed_factor;
+        ball.dy = speed_factor * ball.dy + racket_dy
+            + dist * Math.abs(ball.dx) / this.board.player[idx].half_height;
+        if (Math.abs(ball.dx) * 2 < Math.abs(ball.dy))
+          ball.dy = 2 * Math.sign(ball.dy) * Math.abs(ball.dx);
+        if (!idx)
+          this.bot.bot_offset = (Math.floor(Math.random() * 2) ? -1 : 1) * Math.random()
+              * this.board.player[this.bot.bot_id].half_height * this.board.ball.dx;
+      },
+      updateBall()
+      {
+        var ball = this.board.ball;
+        var player = ball.dx < 0? 0 : 1;
+        var tmpx = ball.x + ball.dx;
+        var tmpy = ball.y + ball.dy;
+        if (tmpy - ball.half_width < 0
+        || tmpy + ball.half_width >= this.dim.height) // wall collision
+            ball.dy = -ball.dy;
+        else if ((player == 0 && tmpx - ball.half_width < this.dim.racket.x[0])
+        || (player == 1 && tmpx + ball.half_width >= this.dim.racket.x[1]))
+        {
+          var dist = tmpy - this.board.player[player].y;
+          var racket_dy = this.board.player[player].y - this.board.player[player].old_y;
+          if (Math.abs(dist) <= this.board.player[player].half_height + ball.half_width && !this.board.dead) //racket collision
+            this.racketCollision(dist, player, racket_dy);
+          else if (tmpx < -ball.half_width
+            || tmpx  >= this.dim.width + ball.half_width) //ball out of map
+          {
+            this.board.player[player? 0 : 1].score++;
+            this.reset(false);
+          }
+        // else if ((tmpx > dim.racket.x[0] - dim.racket.width - (ball.half_width * 2)
+          // || tmpx <= dim.racket.x[1] + dim.racket.width + (ball.half_width * 2))
+          // && Math.abs(dist) <= this.this.board.player[player].half_height + ball.half_width
+          // && Math.sign(dist) == Math.sign(ball.dy)
+          // && (Math.sign(dist) == Math.sign(racket_dy) || racket_dy < 0.001)) //ball side of racket
+          // {
+          // 	ball.dy = Math.abs(ball.dy) * Math.sign(dist) + racket_dy;
+          // 	if (Math.abs(ball.dx) * 2 < Math.abs(ball.dy))
+          // 		ball.dy = 2 * Math.sign(ball.dy) * Math.abs(ball.dx);
+          // 	// ball.dy = -1 * Math.sign(dist) + ball.dy + (Math.sign(dist) != Math.sign(racket_dy)? racket_dy:0);
+          // 	ball.y = this.this.board.player[player].y + Math.sign(dist) * (ball.half_width + this.this.board.player[player].half_height);
+          // 	if (ball.y < ball.half_width)
+          // 		ball.y = ball.half_width;
+          // 	else if (ball.y > height - ball.half_width)
+          // 		ball.y = height - ball.half_width;
+          // 	this.this.board.dead = true;
+          // }
+          else //ball behind racket
+          {
+            this.moveBall();
+            if (tmpx < this.dim.racket.x[0]
+              || tmpx >= this.dim.racket.x[1])
+              this.board.dead = true;
+          }
+        }
+        else
+          this.moveBall();
+        this.board.player[0].old_y = this.board.player[0].y;
+        this.board.player[1].old_y = this.board.player[1].y;
+        return ;
+      },
+      moveBall()
+      {
+        var ball = this.board.ball;
+        ball.x += ball.dx;
+        ball.y += ball.dy;
+        if (!this.board.dead && this.bot.bot_id ? ball.dx > 0 : ball.dx < 0) // move Bot only if the ball goes in his direction
+        {
+          const weight = Math.abs((this.dim.racket.x[this.bot.bot_id] - ball.x) / this.dim.width);
+          var dy = (weight * this.dim.height / 2
+              + (1 - weight) * this.board.ball.y + this.bot.bot_offset)
+              - this.board.player[this.bot.bot_id].y;
+          this.updatePlayer(this.bot.bot_id, this.board.player[this.bot.bot_id].y + (Math.abs(dy) > Math.abs(this.bot.bot_speed) ? this.bot.bot_speed * Math.sign(dy) : dy)); //limit speed of bot
+        }
+        // this.updatePlayer(1, ball.y, this.board);
+        // this.updatePlayer(0, ball.y, this.board);
+      },
+      reset(all : boolean)
+      {
+        if (all)
+        {
+          this.board.player[0].score = 0;
+          this.board.player[1].score = 0;
+          this.board.end = false;
+        }
+        if (this.board.player[0].score >= 11 || this.board.player[1].score >= 11)
+          this.board.end = true;
+        this.board.pause_counter = 50;
+        this.board.dead = false;
+        this.board.ball.dx = this.board.ball.x < this.dim.width / 2? -1:1;
+        this.board.ball.dy = Math.random() * 1.5 * (Math.floor(Math.random() * 2)? -1:1);
+            this.board.ball.x = 50;
+            this.board.ball.y = Math.random() * this.dim.height / 2 + this.dim.height / 4;
+        this.board.ball.half_width = 2;
+        this.board.player[0].half_height = 6;
+        this.board.player[1].half_height = 6;
+        this.bot.bot_offset = (Math.floor(Math.random() * 2) ? -1 : 1) * Math.random()
+              * this.board.player[this.bot.bot_id].half_height * 1.2 * this.board.ball.dx;
+      },
+      async game_loop()
+      {
+        while (!this.board.end)
+        {
+          await this.sleep(20);
+          if (this.board.pause_counter > 0)
+            this.board.pause_counter--;
+          else
+            this.updateBall();
+          this.clear();
+          this.addObjects();
+        }
+      },
+      sleep(ms: number) {
+        return new Promise(resolve => setTimeout(resolve, ms));
       }
     }
   })

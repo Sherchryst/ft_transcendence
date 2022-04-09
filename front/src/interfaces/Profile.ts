@@ -1,3 +1,8 @@
+export enum Statut {
+	NOTLOGIN,
+	TWOFA,
+	AUTH
+  }
 export interface Profile {
 	achievements: [],
 	friends: [],
@@ -12,5 +17,6 @@ export interface User {
 	role: string,
 	twofa?: boolean,
 	twofaSecret?: string,
-	newUser: boolean
+	newUser: boolean,
+	avatarPath: string
 }
