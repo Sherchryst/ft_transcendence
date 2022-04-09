@@ -1,12 +1,29 @@
 <template>
 	<label>
-		<input type="checkbox">
+		<input type="checkbox" @change="onSwitch($event)">
 		<span class="slider"></span>
 	</label>
 </template>
 
 <script lang="ts">
+import { emit } from "process";
+import { defineComponent } from "vue";
 
+export default defineComponent({
+    name: "SwitchButton",
+	data() {
+		return {
+			checked: false,
+		}
+	},
+	methods: {
+		onSwitch(event: any) {
+			this.checked = event.target.checked;
+			this.$emit('onSwitched', this.checked);
+		}
+	}
+	
+});
 </script>
 
 <style lang="scss" scoped>
