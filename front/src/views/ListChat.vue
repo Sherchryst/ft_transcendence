@@ -79,7 +79,6 @@ export default defineComponent ({
 		},
         switchVisibility(): void {
             let visibility =  this.formCreate.visibility
-            console.log("SWITCH")
             this.formCreate.visibility =  visibility == "public" ? "private" : "public"
             console.log(this.formCreate.visibility)
         }

@@ -19,7 +19,7 @@
 				</div>
 			</div>
             <div id="chat" class="flex-auto flex flex-col-reverse mb-5 overflow-x-auto" :key="history">
-                <message :self="message.self" v-for="message in history" :key="message">
+                <message v-for="message in history" :key="message" :message="message" :channelId="parseInt(id)">
                     {{message.content}}
                 </message>
             </div>
@@ -44,7 +44,7 @@
 
 <script lang="ts">
 
-import { defineComponent, PropType, computed, watch } from 'vue';
+import { defineComponent, computed, watch, provide } from 'vue';
 import Message from '@/components/chat/Message.vue'
 import OneRowForm from '@/components/OneRowForm.vue'
 import SendIcon from '@/assets/icon/send.svg';
@@ -59,6 +59,7 @@ import InfoIcon from '@/assets/icon/info.svg'
 import OptionIcon from '@/assets/icon/option.svg'
 import InfoPanel from '@/components/chat/InfoPanel.vue';
 import OptionChannel from '../components/chat/OptionChannel.vue';
+import { ChannelKey } from '@/interfaces/Channel';
 
 export default defineComponent({
     components: {
@@ -95,6 +96,7 @@ export default defineComponent({
         }
     },
     created(): void {
+        provide(ChannelKey, this.channel);
 		watch(
 			() => this.$route.params.id,
 			(newId) => {

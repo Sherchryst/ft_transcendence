@@ -7,3 +7,7 @@ export interface Channel{
 	visibility: number,
 	password: string | null
 }
+
+import { InjectionKey, } from 'vue';
+
+export const ChannelKey: InjectionKey<Channel> = Symbol('Channel');
