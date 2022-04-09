@@ -1,4 +1,3 @@
-import { User } from 'src/users/entities/user.entity';
 import { getRepository } from 'typeorm';
 import { Match, MatchType } from './entities/match.entity';
 import { GameMap } from './entities/game-map.entity';
@@ -57,6 +56,31 @@ export class MatchService
       relations: ['to', 'from', 'map'],
       where: {
         from: { id: fromId },
+        to: { id: userId }
+      }
+    });
+  }
+
+  async getHistory(userId: number, limit: number): Promise<Match[]> {
+    return await getRepository(Match).find({
+      relations: ['player1', 'player2', 'map'],
+      where: {
+        $or: [
+          { player1: { id: userId } },
+          { player2: { id: userId } }
+        ]
+      },
+      order: {
+        beginAt: 'DESC'
+      },
+      take: limit
+    });
+  }
+
+  async matchCount(userId: number): Promise<number> {
+    return await getRepository(Match).count({
+      where: {
+        from: { id: userId },
         to: { id: userId }
       }
     });
