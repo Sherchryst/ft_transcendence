@@ -4,12 +4,18 @@
 			<div class="flex flex-row justify-between items-center">
 				<div>Channel Name</div>
 				<div class="flex flex-row">
-					<button>
+					<button v-s-dropdown-toggle:info>
 						<info-icon class="h-10"></info-icon>
 					</button>
-					<button>
+					<s-dropdown name="info" align="left">
+						<InfoPanel></InfoPanel>
+					</s-dropdown>
+					<button v-s-dropdown-toggle:option-channel>
 						<option-icon class="h-10"></option-icon>
 					</button>
+                    <s-dropdown name="option-channel" align="left">
+						<OptionChannel :channel="channel"></OptionChannel>
+					</s-dropdown>
 				</div>
 			</div>
             <div id="chat" class="flex-auto flex flex-col-reverse mb-5 overflow-x-auto" :key="history">
@@ -19,7 +25,7 @@
             </div>
             <one-row-form placeholder="Message" @callback="send">
                 <span class="flex flex-row items-center">
-                    <span class="hidden md:flex pl-2 pr-1">Envoyer</span>
+                    <span class="hidden md:flex pl-2 pr-1">Send</span>
                     <SendIcon/>
                 </span>
            </one-row-form>
@@ -46,20 +52,25 @@ import ChatWrapper from '@/components/chat/ChatWrapper.vue'
 import { useMeta } from 'vue-meta'
 import { useStore } from 'vuex'
 import { key } from '@/store'
-import { Message_t, ServerMessage } from '@/interfaces/Message.ts'
-import { chatSocket } from '@/socket.ts'
+import { Message_t, ServerMessage } from '@/interfaces/Message'
+import { Channel } from '@/interfaces/Channel';
+import { chatSocket } from '@/socket'
 import InfoIcon from '@/assets/icon/info.svg'
 import OptionIcon from '@/assets/icon/option.svg'
+import InfoPanel from '@/components/chat/InfoPanel.vue';
+import OptionChannel from '../components/chat/OptionChannel.vue';
 
 export default defineComponent({
     components: {
-        Message,
-        SendIcon,
-        ChatWrapper,
-        OneRowForm,
-		InfoIcon,
-		OptionIcon
-    },
+    Message,
+    SendIcon,
+    ChatWrapper,
+    OneRowForm,
+    InfoIcon,
+    OptionIcon,
+    InfoPanel,
+    OptionChannel
+},
     props : {
         id: {type: String, required: true},
         name: {type : String}
@@ -80,7 +91,7 @@ export default defineComponent({
             socket : chatSocket,
             history: [] as Message_t[],
             msg: "",
-            channel: null,
+            channel: {} as Channel,
         }
     },
     created(): void {
@@ -134,10 +145,6 @@ export default defineComponent({
                 password: ""
             });
             this.readMessage(chanId)
-		},
-
-		leave_channel(): void {
-			this.socket.emit('leave', this.id);
 		},
         recv(data: ServerMessage ): void {
             let message: Message_t = {

@@ -45,10 +45,10 @@
 							</one-row-form>
 						</div>
 						<div class="self-center mx-7">
-							<button v-s-dropdown-toggle:some-dropdown>
+							<button v-s-dropdown-toggle:notification>
 								<NotifIcon class="h-12 w-12" />
 							</button>
-							<s-dropdown name="some-dropdown" align="left">
+							<s-dropdown name="notification" align="left">
 								<NotifPanel/>
 							</s-dropdown>
 						</div>

@@ -59,5 +59,12 @@ export default defineComponent({
 				}
 			}
 		}
+		&.mobile{
+			div {
+				outline: $line-widht $action solid;
+				background: $bg--lg-color;
+				background: $--hover-bg-color;
+			}
+		}
 	}
 </style>

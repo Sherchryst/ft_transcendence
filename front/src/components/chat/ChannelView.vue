@@ -11,7 +11,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { Channel } from '@/interfaces/Channel';
-import { API } from '@/scripts/auth';
+// import { API } from '@/scripts/auth';
 import { chatSocket } from '@/socket'
 
 export default defineComponent({
