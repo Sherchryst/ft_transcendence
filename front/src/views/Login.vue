@@ -60,7 +60,7 @@ export default defineComponent({
 		}
 	},
 	methods: {
-		send_digit_code(path: string): void {
+		send_digit_code(): void {
 			API.post('2fa/authenticate', {twoFactorAuthenticationCode: this.digits})
 			.then((response) => {
 				this.connection()

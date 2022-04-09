@@ -2,7 +2,7 @@
     <div class="grid grid-cols-12 lg:gap-x-16 2xl:gap-x-32">
         <div class="col-span-12 md:col-span-4 flex flex-col max-w-sm">
             <form @submit.prevent="send">
-                <div class="mb-10">
+                <div class="mb-4">
                     <ChooseAvatar @onInputImage="inputImage($event)">
                         <template v-slot:activator>
                             <div v-if="inside" class="grey frame flex flex-col place-content-center w-64 h-64">
@@ -14,21 +14,23 @@
                         </template>
                     </ChooseAvatar>
                 </div>
-                <div class="flex flex-col title-username self-center mb-16 space-y-4">
+                <div class="flex flex-col title-username self-center mb-6 space-y-4">
                     <label for="username">Enter username:</label>
                     <input type="text" class="title-username input" id="username" name="username" v-model="nickname" placeholder="username">
                 </div>
-                <div class="mb-20 flex flex-row place-content-center">
+                <div v-if="Is2fa" class="mb-8">
+                    <button v-on:click="deactivated_2fa" class="btn px-7 py-3 pb-2"> Deactivated 2fa </button>
+                </div>
+                <div v-else class="mb-8 flex flex-row place-content-center">
                     <label class="pt-1 title-username" for="2F Authentication">2F Authentication:</label>
                     <SwitchButton @onSwitched="inputSwitch($event)"></SwitchButton>
-                    
                 </div>
                 <div class="btn self-center">
                     <button type="submit" class="px-7 py-3 pb-2"> Register </button>
                 </div>
             </form>
         </div>
-        <div v-if="qrcode && switchOn == true" class="col-span-12 lg:col-span-8 2xl:col-span-7 flex flex-col max-w-sm">
+        <div v-if="qrcode && SwitchOn == true" class="col-span-12 lg:col-span-8 2xl:col-span-7 flex flex-col max-w-sm">
             <ProfilePanel>
                 <template v-slot:title>
                     <MainTitle>QR Code</MainTitle>
@@ -36,7 +38,7 @@
                 <template v-slot:body>
                     <div class="flex flex-col justify-evenly place-content-center">
                     <div class="w-64" >
-                        <img class="w-64 h-64 mb-20" :src="qrcode">
+                        <img class="w-64 h-64 mb-8" :src="qrcode">
                         <input v-model="digits" class="mb-10" placeholder="Google authenticator Code">
                         <button v-on:click="send_digit_code('/turn-on')" class="btn px-7 py-3 pb-2"> Send </button>
                     </div>
@@ -78,21 +80,34 @@ export default defineComponent({
         avatar: {} as File,
         imageURL: '',
         nickname: '',
-        switch: false,
-        switchOn: false,
+        Switch: false,
+        SwitchOn: false,
+        Is2fa: false,
         inside: true,
         digits: "",
         qrcode: "",
         }
     },
     watch: {
-        switchOn(newVal: boolean) {
+        SwitchOn(newVal: boolean) {
             if (newVal) {
                 this.generate_qrcode();
             }
         }
     },
+    mounted() {
+        console.log('is2fa', this.$store.getters.is2FA);
+        this.Is2fa = this.$store.getters.is2FA;
+    },
     methods: {
+        deactivated_2fa() {
+            API.post('2fa/turn-off').then(() => {
+                this.SwitchOn = false;
+                this.Switch = false;
+                this.digits = "";
+                this.qrcode = "";
+            });
+        },
         generate_qrcode(): void {
         API.post('2fa/generate', {}, {responseType: 'arraybuffer'}).then((response) => {
             var bytes = new Uint8Array(response.data);
@@ -104,8 +119,11 @@ export default defineComponent({
         API.post('2fa' + path, {twoFactorAuthenticationCode: this.digits}).then((response) => {
             sessionStorage.setItem("state", State.AUTH.toString())
             this.state = State.AUTH
-            this.switchOn = false
+            this.SwitchOn = false
             console.log('Data', response.data)
+            this.$store.dispatch('connection');
+            this.Is2fa = this.$store.getters.is2FA;
+            console.log('is2fa', this.$store.getters.is2FA);
         }).catch((response) => {
             console.log('Response', response)
         })
@@ -116,9 +134,10 @@ export default defineComponent({
             this.inside = false;
         },
         inputSwitch(is2fa: boolean) {
-            is2fa ? this.switch = true : this.switch = false;
-            this.switchOn = this.switch;
-            console.log('switch', is2fa);
+            console.log('Switch',this.Switch)
+            is2fa ? this.Switch = true : this.Switch = false;
+            this.SwitchOn = this.Switch;
+            console.log('Switch', is2fa);
         },
         send() {
             var formData = new FormData();
@@ -139,6 +158,7 @@ export default defineComponent({
                     }}).catch(function(error) {
                     console.log("update failed", error);
                 });
+            this.$store.dispatch('connection');
             router.push({name: "profile", params: {username: this.$store.getters.getLogin}});
         }
     }

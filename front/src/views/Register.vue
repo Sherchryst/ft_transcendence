@@ -65,18 +65,18 @@ export default defineComponent({
 			API.post('users/update-nickname', {
 				id: this.$store.getters.getId,
 				nickname: this.nickname
-			}).then( () => {
-				this.$store.dispatch('connection').then( () => {
-					router.push({name: "home"})
-				})
 			}).catch(function(error) {
 				console.log(error);
 			});
 			API.post('users/update-avatar', formData, {
 				headers: {
 					'Content-Type': 'multipart/form-data'
-				}}).catch(function(error) {
+				}}).then( () => {
+				this.$store.dispatch('connection').then( () => {
+					router.push({name: "home"})
+				}).catch(function(error) {
 				console.log("update failed", error);
+				})
 			});
 		}
 	}
