@@ -1,4 +1,4 @@
-import { getRepository } from 'typeorm';
+import { getRepository, IsNull, Not } from 'typeorm';
 import { Match, MatchType } from './entities/match.entity';
 import { GameMap } from './entities/game-map.entity';
 import { Injectable } from '@nestjs/common';
@@ -63,26 +63,32 @@ export class MatchService
 
   async getHistory(userId: number, limit: number): Promise<Match[]> {
     return await getRepository(Match).find({
-      relations: ['player1', 'player2', 'map'],
-      where: {
-        $or: [
-          { player1: { id: userId } },
-          { player2: { id: userId } }
-        ]
-      },
-      order: {
-        beginAt: 'DESC'
-      },
+      relations: ['player1', 'player2', 'winner'],
+      where: [
+        { player1: { id: userId } },
+        { player2: { id: userId } }
+      ],
+      order: { beginAt: 'DESC' },
       take: limit
     });
   }
 
+  async getWinrate(userId: number): Promise<number> {
+    const winsCount = await getRepository(Match).count({
+      relations: ['winner'],
+      where: { winner: { id: userId } }
+    });
+    const matchsCount = await this.matchCount(userId);
+    return matchsCount > 0 ? 100 * winsCount / matchsCount : 0;
+  }
+
   async matchCount(userId: number): Promise<number> {
     return await getRepository(Match).count({
-      where: {
-        from: { id: userId },
-        to: { id: userId }
-      }
+      relations: ['player1', 'player2', 'winner'],
+      where: [
+        { player1: { id: userId }, winner: Not(IsNull()) },
+        { player2: { id: userId }, winner: Not(IsNull()) }
+      ]
     });
   }
 
