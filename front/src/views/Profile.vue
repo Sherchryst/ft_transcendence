@@ -32,7 +32,7 @@
 							<p>Winrate</p>
 						</template>
 						<template v-slot:body>
-							<div class="text-3xl font-bold">89%</div>
+							<div class="text-3xl font-bold">{{winrate}}%</div>
 						</template>
 					</LittleCard>
 				</div>
@@ -43,7 +43,7 @@
 						</template>
 						<template v-slot:body>
 							<div class="played text-4xl font-bold italic">
-								172
+								{{count}}
 							</div>
 						</template>
 					</LittleCard>
@@ -167,7 +167,10 @@ export default defineComponent({
 		return {
 			profile: {} as Profile,
 			showModal: false,
-			statut: "NONE"
+			statut: "NONE",
+			count: 0,
+			winrate: 0,
+			history: []
 		}
 	},
 	methods: {
@@ -180,7 +183,37 @@ export default defineComponent({
 			})
 			.then((res: any) => {
 				this.profile = res.data;
-				// Change statut
+				API.get('match/match-count', {
+					params: {
+						id: this.profile.user.id
+					}
+				}).then((res: any) => {
+					this.count = res.data.count;
+					console.log('Matches count',this.count)
+				}).catch((err: any) => {
+					console.log(err)
+				})
+				API.get('match/get-winrate', {
+					params: {
+						id: this.profile.user.id
+					}
+				}).then((res: any) => {
+					this.winrate = res.data.winrate;
+					console.log('Winrate',this.winrate)
+				}).catch((err: any) => {
+					console.log(err)
+				})
+				API.get('match/get-history', {
+					params: {
+						id: this.profile.user.id,
+						limit: 50
+					}
+				}).then((res: any) => {
+					this.history = res.data;
+					console.log('Matches' ,res.data)
+				}).catch((err: any) => {
+					console.log(err)
+				})
 			}).catch(() => {
 				router.push({name: 'not-found'})
 			})
