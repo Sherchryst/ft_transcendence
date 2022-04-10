@@ -1,15 +1,20 @@
 <template>
-    <div class="message flex my-3" v-bind:class="[ message.self ? 'flex-row-reverse' : 'flex-row' ]">
-        <div v-if="!message.self">
-            <button class="flex-shrink-0 h-10 w-10" v-s-dropdown-toggle:message->
+    <div class="message flex"  v-bind:class="[ message.self ? 'flex-row-reverse' : 'flex-row', message.photo ? 'mt-3' : 'mt-2']">
+        <div v-if="message.photo">
+            <div v-if="!message.self">
+                <button class="flex-shrink-0 h-10 w-10" v-s-dropdown-toggle:message->
+                    <img class="h-10 w-10" src="@/assets/blank-avatar.jpg" alt="">
+                </button>
+                <s-dropdown name="message-" position="top" :offset="30">
+                    <UserPanel :channelId="channelId" :user="message.from"></UserPanel>
+                </s-dropdown>
+            </div>
+            <div v-else>
                 <img class="h-10 w-10" src="@/assets/blank-avatar.jpg" alt="">
-            </button>
-            <s-dropdown name="message-" position="top" :offset="30">
-                <UserPanel :channelId="channelId"></UserPanel>
-            </s-dropdown>
+            </div>
         </div>
-        <div v-else>
-            <img class="h-10 w-10" src="@/assets/blank-avatar.jpg" alt="">
+        <div v-else class="h-10 w-10">
+
         </div>
         <div class="p-3 max-w-xl flex-shrink" v-bind:class="[ message.self ? 'text-right mr-3' : 'text-left ml-3' ]" >
              <slot></slot>

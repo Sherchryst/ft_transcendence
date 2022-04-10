@@ -12,6 +12,15 @@
 			</span>
 		</OneRowForm>
 	</div>
+	<button class="text-left">
+		Set password
+	</button>
+	<button class="text-left">
+		Modify password
+	</button>
+	<button class="text-left">
+		Remove password
+	</button>
 	<!-- <form>
 		<ModInput name="invition" placeholder="Nickname" class="mobile">Invitation</ModInput>
 		<button type="submit">

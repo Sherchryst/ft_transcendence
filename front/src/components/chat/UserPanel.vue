@@ -1,35 +1,41 @@
 <template>
 	<div class="flex flex-col gap-4">
-		<button @click="requestFriend">
+		<router-link :to="{name: 'profile', params: { username: user?.login }}">View profile</router-link>
+		<button class="text-left" @click="challenge">
+			Challenge
+		</button>
+		<button class="text-left" @click="requestFriend">
 			Ask a friend
 		</button>
-		<button @click="block">
+		<button class="text-left" @click="block">
 			Block
 		</button>
-		<button @click="challenge">
-			challenge
-		</button>
-		<button @click="mute">
+		<button class="text-left" @click="mute">
 			mute user
 		</button>
-		<button @click="ban">
+		<button class="text-left" @click="ban">
 			ban user
+		</button>
+		<button v-if="owner" class="text-left" @click="promute">
+			Promute admin
 		</button>
 	</div>
 </template>
 
 <script lang="ts">
-import { Channel, ChannelKey } from '@/interfaces/Channel';
 import { User } from '@/interfaces/Profile';
-import { defineComponent, inject, PropType } from 'vue';
+import { defineComponent, PropType } from 'vue';
 
 export default defineComponent({
 	name: "Message",
 	props: {
-		user: { type: Object as PropType<User> },
-		channelId: Number
+		user: { type: Object as PropType<User>, required: true },
+		channelId: { type: Number, required: true },
+		myRole: { type: String, default: "admin" },
+		owner: { type: Boolean, default: true }
 	},
 	created() {
+		console.log("User", this.user)
 		console.log("Channel", this.channelId)
 	},
 	methods: {
@@ -47,6 +53,9 @@ export default defineComponent({
 		},
 		ban(){
 			console.log("ban")
+		},
+		promute(){
+			console.log("promute")
 		},
 	}
 })
