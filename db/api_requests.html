@@ -24,10 +24,26 @@
 			<input type="number" name="id" id="id" required><br>
 			<input type="submit" value="Get friend requests">
 		</form><br>
+		<form action="http://localhost:3000/match/get-history" method="get">
+			<label for="userId">User id:</label><br>
+			<input type="number" name="userId" id="userId" required><br>
+			<input type="number" name="limit" id="limit" required><br>
+			<input type="submit" value="Get user's matchs history">
+		</form><br>
 		<form action="http://localhost:3000/users/get-profile" method="get">
 			<label for="id">User id:</label><br>
 			<input type="number" name="id" id="id" required><br>
 			<input type="submit" value="Get user profile">
+		</form><br>
+		<form action="http://localhost:3000/match/get-winrate" method="get">
+			<label for="userId">User id:</label><br>
+			<input type="number" name="userId" id="userId" required><br>
+			<input type="submit" value="Get user's winrate">
+		</form><br>
+		<form action="http://localhost:3000/match/match-count" method="get">
+			<label for="userId">User id:</label><br>
+			<input type="number" name="userId" id="userId" required><br>
+			<input type="submit" value="Get user's match count">
 		</form><br>
 		<form action="http://localhost:3000/users/send-friend-request" method="post">
 			<label for="fromId">From user id:</label><br>

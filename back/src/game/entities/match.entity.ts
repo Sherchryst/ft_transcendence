@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Check, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { GameMap } from './game-map.entity';
 
@@ -8,6 +8,7 @@ export enum MatchType {
 }
 
 @Entity()
+@Check('player1_id <> player2_id')
 export class Match {
   @PrimaryGeneratedColumn()
   id: number;
