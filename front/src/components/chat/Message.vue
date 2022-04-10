@@ -5,7 +5,7 @@
                 <button class="flex-shrink-0 h-10 w-10" v-s-dropdown-toggle:message->
                     <img class="h-10 w-10" src="@/assets/blank-avatar.jpg" alt="">
                 </button>
-                <s-dropdown name="message-" position="top" :offset="30">
+                <s-dropdown name="message-" position="top" align="right" :offset="30">
                     <UserPanel :channelId="channelId" :user="message.from"></UserPanel>
                 </s-dropdown>
             </div>

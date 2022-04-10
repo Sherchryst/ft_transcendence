@@ -14,6 +14,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import ChatViewWrapper from '@/components/chat/ChatViewWrapper.vue';
 
 export default defineComponent({
 	name: 'DirectMessage',
@@ -24,6 +25,7 @@ export default defineComponent({
 		return {
 			history: [] as Message_t[],
 		}
-	}
+	},
+	components: { ChatViewWrapper}
 })
 </script>

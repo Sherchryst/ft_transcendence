@@ -12,21 +12,16 @@
 			</span>
 		</OneRowForm>
 	</div>
-	<button class="text-left">
+	<button @click="openPassword" class="text-left">
 		Set password
 	</button>
+	<PasswordModal ref="password_block" ></PasswordModal>
 	<button class="text-left">
 		Modify password
 	</button>
 	<button class="text-left">
 		Remove password
 	</button>
-	<!-- <form>
-		<ModInput name="invition" placeholder="Nickname" class="mobile">Invitation</ModInput>
-		<button type="submit">
-			Send
-		</button>
-	</form> -->
 </div>
 </template>
 
@@ -34,6 +29,7 @@
 import { defineComponent, PropType } from "vue";
 import OneRowForm from "../OneRowForm.vue";
 import SendIcon from '@/assets/icon/send.svg';
+import PasswordModal from '@/components/modal/PasswordModal.vue'
 import { chatSocket } from "@/socket";
 import { Channel } from "@/interfaces/Channel";
 
@@ -53,8 +49,11 @@ export default defineComponent({
 		},
         invitation(nickname: string) {
 			console.log("INVITATION", nickname)
-		}
+		},
+		openPassword() : void {
+			(this.$refs['password_block'] as typeof PasswordModal).open()
+		},
     },
-    components: { OneRowForm, SendIcon }
+    components: { OneRowForm, SendIcon, PasswordModal }
 })
 </script>
