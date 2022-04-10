@@ -1,6 +1,18 @@
 <template>
-<div class="flex flex-col gap-4">
-	<button @click="leave_channel" class="text-left">
+<div class="opt flex flex-col gap-4">
+	<p class="opt-title">Admin</p>
+	<button @click="openPassword" class="text-left">
+		Set password
+	</button>
+	<PasswordModal ref="password_block" ></PasswordModal>
+	<button class="text-left">
+		Modify password
+	</button>
+	<button class="opt-danger text-left">
+		Remove password
+	</button>
+	<p class="opt-title">Option</p>
+	<button @click="leave_channel" class="opt-danger text-left">
 		Leave channel
 	</button>
 	<div>
@@ -12,18 +24,25 @@
 			</span>
 		</OneRowForm>
 	</div>
-	<button @click="openPassword" class="text-left">
-		Set password
-	</button>
-	<PasswordModal ref="password_block" ></PasswordModal>
-	<button class="text-left">
-		Modify password
-	</button>
-	<button class="text-left">
-		Remove password
-	</button>
 </div>
 </template>
+
+<style lang="scss" scoped>
+.opt{
+	button {
+		color: $action;
+		&.opt-danger{
+			color: $defeat-color;
+		}
+
+	}
+	&-title{
+		color: $dark-font;
+		@apply font-bold;
+	}
+}
+
+</style>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
