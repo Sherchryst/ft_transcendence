@@ -21,6 +21,7 @@
 					<switch-button />
 				</div>
 			</form> -->
+			<challenge-form></challenge-form>
 		</game-panel>
 		<game-panel title="Entrainement" @action="requestGame" action_name="Lancer">
 			<!-- <ButtonLink text="Bot game" href= /> -->
@@ -34,12 +35,13 @@ import BigRadioButton from '@/components/BigRadioButton.vue';
 import { defineComponent } from 'vue';
 import { gameSocket } from '@/socket';
 import router from '@/router';
+import ChallengeForm from '@/components/chat/game/ChallengeForm.vue';
 
 export default defineComponent({
 	components: {
-		GamePanel,
-		// BigRadioButton,
-	},
+    GamePanel,
+    ChallengeForm
+},
 	mounted() {
 		gameSocket.on("invited", (data : any) => {
 			gameSocket.emit("acceptInvit", data);

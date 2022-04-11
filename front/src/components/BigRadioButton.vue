@@ -1,6 +1,6 @@
 <template>
     <div class="-mt-5 radio-panel">
-        <input type="radio" name="my-input" v-bind:id="id" v-bind:value="id">
+        <input type="radio" name="my-input" v-bind:id="id" v-bind:value="id" :checked="checked" @change="input">
         <label class="flex" v-bind:for="id">
             <div class="round m-3"></div>
         </label>
@@ -13,7 +13,13 @@ import { defineComponent } from 'vue';
 export default defineComponent({
     name: "BigRadioButton",
     props: {
-        id: String
+        id: { type: String, required: true },
+        checked: Boolean
+  },
+  methods: {
+      input(): void {
+          this.$emit('minput', this.id)
+      }
   }
 })
 </script>
@@ -56,7 +62,6 @@ $transparent-color: rgb(102, 218, 233);
                 border: 3px solid #062B62;
             }
         }
-        width: 144px;
         height: 98px;
         background: #FFF;
         cursor: pointer;
