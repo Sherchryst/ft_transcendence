@@ -4,9 +4,11 @@ INSERT INTO "user" ("login", "nickname") VALUES
 ('sgaming', 'SuzzieGaming');
 
 INSERT INTO "achievement" ("name", "description") VALUES
-('achiev1', 'desc1'),
-('achiev2', 'desc2'),
-('achiev3', 'desc3');
+('win 1', 'win a game in ranked'),
+('win 10', 'win 10 games in ranked'),
+('combo 5', 'win 5 games in a row'),
+('loser combo 5', 'lose 5 games in a row'),
+('fanny', 'win 11 against 0')
 
 INSERT INTO "user_achievement" ("user_id", "achievement_id") VALUES
 (1, 1), (1, 3),

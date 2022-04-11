@@ -99,6 +99,30 @@ export class GameGateway implements OnGatewayConnection {
     console.log("Game : New connection to socket");
   }
 
+  async updateAchievements(user_id: number) {
+    // const achievements = await this.usersService.getUserAchievements(user_id);
+    try {
+      if (await this.matchService.winCount(user_id) >= 1) {
+        await this.usersService.unlockAchievement(user_id, 1); // win 1
+      }
+      if (await this.matchService.winCount(user_id) >= 10) {
+        await this.usersService.unlockAchievement(user_id, 2); // win 1
+      }
+      const history = await this.matchService.getHistory(user_id, 5);
+      if (history.filter((match) => match.winner.id == user_id).length >= 5) {
+        await this.usersService.unlockAchievement(user_id, 3); // win 5 in a row
+      }
+      else if (history.filter((match) => match.winner.id != user_id).length >= 5) {
+        await this.usersService.unlockAchievement(user_id, 4); // lose 5 in a row
+      }
+      if (history[0].winner.id == user_id
+      && (history[0].score1 == 0 || history[0].score2 == 0)) {
+        await this.usersService.unlockAchievement(user_id, 5); // fanny
+      }
+    }
+    catch (e) {}
+  }
+
   handleDisconnect(@ConnectedSocket() socket: Socket) {
     // --> put score of other player to 11 in bd
     // this.WsClients.delete(req.user?.id);
@@ -387,32 +411,36 @@ export class GameGateway implements OnGatewayConnection {
         } else this.gameService.updateBall(board);
         this.server.to(`game:${id}`).emit("board", board);
       }
-      // this.usersService.updateXP(board.player[0].user_id, board.player[0].score);
-/////////////////////////////////////////////////////////////////////////////////////////////
       const match = await this.matchService.findMatch(id);
-      await this.matchService.setWinner(
-        id,
-        board.player[0].score > board.player[1].score
-        ? match.player1.id
-        : match.player2
-        ? match.player2.id
-        : -1
-        );
-      await this.matchService.updateScore(
+      this.usersService.updateXP(board.player[0].user_id,
+      ((await this.usersService.findOne(board.player[0].user_id)).xp)
+      + (board.player[0].score == 11 ? 50 : board.player[0].score * 2) * (match.mode == MatchType.CASUAL ? 1 : 2));
+      this.usersService.updateXP(board.player[1].user_id,
+        ((await this.usersService.findOne(board.player[1].user_id)).xp)
+        + (board.player[1].score == 11 ? 50 : board.player[1].score * 2) * (match.mode == MatchType.CASUAL ? 1 : 2));
+        await this.matchService.setWinner(
+          id,
+          board.player[0].score > board.player[1].score
+          ? match.player1.id
+          : match.player2.id
+          );
+          await this.matchService.updateScore(
         id,
         board.player[0].score,
         board.player[1].score
-      );
-      console.log(
+        );
+        console.log(
         "Game : Match",
         id,
         "ended, score:",
         board.player[0].score,
         "-",
         board.player[1].score
-      );
-      this.server.socketsLeave(`game:${id}`);
-      boards.delete(`${id}`);
+        );
+        this.server.socketsLeave(`game:${id}`);
+        boards.delete(`${id}`);
+        this.updateAchievements(board.player[0].user_id);
+        this.updateAchievements(board.player[1].user_id);
     } catch (e) {}
   }
 }

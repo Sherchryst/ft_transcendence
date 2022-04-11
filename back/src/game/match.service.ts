@@ -97,12 +97,20 @@ export class MatchService {
     return matchsCount > 0 ? 100 * winsCount / matchsCount : 0;
   }
 
+  async winCount(userId: number): Promise<number> {
+    return await getRepository(Match).count({
+      relations: ['winner'],
+      where:
+        { winner: { id: userId }, mode: MatchType.RANKED }
+    });
+  }
+
   async matchCount(userId: number): Promise<number> {
     return await getRepository(Match).count({
       relations: ['player1', 'player2', 'winner'],
       where: [
-        { player1: { id: userId }, winner: Not(IsNull()) },
-        { player2: { id: userId }, winner: Not(IsNull()) }
+        { player1: { id: userId }, winner: Not(IsNull()), mode: MatchType.RANKED },
+        { player2: { id: userId }, winner: Not(IsNull()), mode: MatchType.RANKED }
       ]
     });
   }
