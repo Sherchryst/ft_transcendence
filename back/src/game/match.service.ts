@@ -90,10 +90,7 @@ export class MatchService {
   }
 
   async getWinrate(userId: number): Promise<number> {
-    const winsCount = await getRepository(Match).count({
-      relations: ['winner'],
-      where: { winner: { id: userId }, mode: MatchType.RANKED }
-    });
+    const winsCount = await this.winCount(userId);
     const matchsCount = await this.matchCount(userId);
     return matchsCount > 0 ? 100 * winsCount / matchsCount : 0;
   }

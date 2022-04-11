@@ -106,7 +106,7 @@ export class GameGateway implements OnGatewayConnection {
         await this.usersService.unlockAchievement(user_id, 1); // win 1
       }
       if (await this.matchService.winCount(user_id) >= 10) {
-        await this.usersService.unlockAchievement(user_id, 2); // win 1
+        await this.usersService.unlockAchievement(user_id, 2); // win 10
       }
       const history = await this.matchService.getHistory(user_id, 5);
       if (history.filter((match) => match.winner.id == user_id).length >= 5) {
