@@ -58,7 +58,7 @@
 				<template v-slot:body>
 					<div class="overflow-auto max-h-64" >
 						<div v-for="(match, index) in history" :key="index">
-							<MatchesHistory :match="match"></MatchesHistory>
+							<MatchesHistory :match="match" :userId="profile.user.id"></MatchesHistory>
 						</div>
 					</div>
 				</template>
