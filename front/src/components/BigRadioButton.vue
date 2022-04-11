@@ -62,7 +62,7 @@ $transparent-color: rgb(102, 218, 233);
                 border: 3px solid #062B62;
             }
         }
-        height: 98px;
+        @apply h-20;
         background: #FFF;
         cursor: pointer;
         border-radius: 0px 14px 14px 14px;

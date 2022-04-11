@@ -3,9 +3,7 @@
 		<template v-slot:title>
 			<slot>Challange</slot>
 		</template>
-		<ChallengeForm fill="test">
-
-		</ChallengeForm>
+		<ChallengeForm target="test"></ChallengeForm>
 	</Modal>
 </template>
 

@@ -34,7 +34,7 @@ export default defineComponent({
 div {
 	background-color: $panel-color;
 	border-radius: 25px;
-	height:70vh;
+	min-height:60vh;
 	h4 {
 		color: $action;
 	}

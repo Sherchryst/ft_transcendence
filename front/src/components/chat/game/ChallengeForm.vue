@@ -1,32 +1,28 @@
 <template>
-	<form class="flex flex-col" @submit.prevent="print">
-		<div v-if="!fill" class="flex flex-col-reverse mt-4">
+	<form class="flex flex-col mb-3" @submit.prevent="print">
+		<div v-if="!target" class="flex flex-col-reverse mt-4">
 			<ModInput name="username" placeholder="Username" v-model="formData.username">Username</ModInput>
 		</div>
 		<div v-else>
 			<div class="mod-input input-lock flex flex-col justify-start">
 				<ModLabel name="name">Username</ModLabel>
 				<div class="input-div flex flex-shrink">
-					<p class="m-2 w-full">{{fill}}</p>
+					<p class="m-2 w-full">{{target}}</p>
 				</div>
 			</div>
-			<!-- <ModInput class="input-lock" name="username" placeholder="Username" v-model="formData.username">Username</ModInput> -->
 		</div>
 		<div class="flex flex-col items-start mt-10">
-			<span>Maps</span>
-			<div class="grid grid-cols-2 gap-4 w-full">
+			<ModLabel name="map">Map</ModLabel>
+			<div class="grid grid-cols-2 2xl:grid-cols-3 gap-4 w-full">
 				<big-radio-button id="1" checked  @minput="setMap"/>
 				<big-radio-button id="2" @minput="setMap"/>
 				<big-radio-button id="3" @minput="setMap"/>
 			</div>
 		</div>
 		<div class="flex flex-col items-start mt-10">
-			<span class="mb-1">Bonus</span>
+			<ModLabel name="bonus">Bonus</ModLabel>
 			<switch-button @change="toggleOption" />
 		</div>
-		<button type="submit">
-			Test
-		</button>
 	</form>
 </template>
 
@@ -40,7 +36,7 @@ import ModLabel from '@/components/form/ModLabel.vue'
 export default defineComponent({
 	name:'ChallengeForm',
 	props: {
-		fill: String
+		target: String
 	},
 	data() {
 		return {
@@ -65,8 +61,8 @@ export default defineComponent({
 	},
 	components: { SwitchButton, BigRadioButton, ModInput, ModLabel},
 	created() {
-		if (this.fill)
-			this.formData.username = this.fill
+		if (this.target)
+			this.formData.username = this.target
 	}
 })
 </script>
