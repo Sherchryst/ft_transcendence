@@ -50,9 +50,9 @@ const basic_board: Board = {
   ],
   dead: false,
   end: false,
-  ready: false,
   pause_counter: 50,
   level: 2,
+  start: false
 };
 
 function sleep(ms: number) {
@@ -90,34 +90,42 @@ export class GameGateway implements OnGatewayConnection {
       // console.log("allo", user.id, socket.id, this.WsClients)
       this.WsClients.set(user.id, socket);
     } catch (reason) {
-      console.log("Game: Unauthorized connection", reason);
+      // console.log("Game: Unauthorized connection", reason);
       socket.disconnect(false);
       return;
     }
-    console.log("Game : new connection to socket");
+    console.log("Game : New connection to socket");
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {
     // --> put score of other player to 11 in bd
     // this.WsClients.delete(req.user?.id);
-    let player_id: number;
-    this.WsClients.forEach((value, key) => {
-      if (value == socket) {
-        boards.forEach((board, match_id) => {
-          if (board.player[0].user_id == value.id) player_id = 0;
-          else if (board.player[1].user_id == value.id) player_id = 1;
-          else return;
-          board.player[player_id == 0 ? 1 : 0].score = 11;
-          board.end = true;
-          this.server
-            .to(`game:${match_id}`)
-            .emit("board", this.gameService.updateBall(board));
-          this.server.socketsLeave(`game:${match_id}`);
-        });
-        this.WsClients.delete(key);
-      }
-    });
-    console.log("Game : disconnection from socket");
+    try {
+      let player_id: number;
+      this.WsClients.forEach((value, key) => {
+        if (value == socket) {
+          if (pending_player == key)
+            pending_player = -1;
+          boards.forEach((board, match_id) => {
+            if (board.player[0].user_id == value.id) player_id = 0;
+            else if (board.player[1].user_id == value.id) player_id = 1;
+            else return;
+            board.player[player_id == 0 ? 1 : 0].score = 11;
+            board.end = true;
+            if (!board.start)
+              this.sendUpdateBoard(parseInt(match_id));
+            this.server
+              .to(`game:${match_id}`)
+              .emit("board", this.gameService.updateBall(board));
+            // this.server.socketsLeave(`game:${match_id}`);
+          });
+          this.WsClients.delete(key);
+        }
+      });
+      console.log("Game : disconnection from socket");
+    } catch (e) {
+      console.log("Game : Error while disconnecting");
+    }
   }
 
   @SubscribeMessage("invite")
@@ -196,42 +204,50 @@ export class GameGateway implements OnGatewayConnection {
 
   @SubscribeMessage("matchmaking")
   async handleMatchmaking(@Req() req: any) {
-    if (pending_player >= 0 && pending_player != req.user.id) {
-      const pendingId = pending_player;
-      pending_player = -1;
-      const map = await this.matchService.findGameMap(1);
-      if (!map) {
-        console.log("Game : Error while finding map"); // error
-        return;
-      }
-      await this.createMatch(
-        map,
-        pendingId,
-        req.user.id,
-        MatchType.RANKED,
-        2
-      );
-    } else pending_player = req.user.id;
+    try {
+      if (pending_player >= 0 && pending_player != req.user.id) {
+        const pendingId = pending_player;
+        pending_player = -1;
+        const map = await this.matchService.findGameMap(1);
+        if (!map) {
+          console.log("Game : Error while finding map"); // error
+          return;
+        }
+        await this.createMatch(
+          map,
+          pendingId,
+          req.user.id,
+          MatchType.RANKED,
+          2
+        );
+      } else pending_player = req.user.id;
+    } catch (e) {
+      console.log("Game : Error while creating match"); // error
+    }
   }
 
   @SubscribeMessage("acceptInvit")
   async handleAcceptInvit(@MessageBody() data: MatchInvitation) {
     // console.log("data", data);
-    const matchInvit = await this.matchService.findMatchInvitation(
-      data.to.id,
-      data.from.id
-    );
-    if (matchInvit == null) console.log("Game : No invitation found");
-    // error
-    else {
-      await this.createMatch(
-        matchInvit.map,
-        matchInvit.to.id,
-        matchInvit.from.id,
-        MatchType.CASUAL,
-        matchInvit.level
-        );
-      await this.matchService.deleteMatchInvitation(data.from.id, data.to.id);
+    try {
+      const matchInvit = await this.matchService.findMatchInvitation(
+        data.to.id,
+        data.from.id
+      );
+      if (matchInvit == null) console.log("Game : No invitation found");
+      // error
+      else {
+        await this.createMatch(
+          matchInvit.map,
+          matchInvit.to.id,
+          matchInvit.from.id,
+          MatchType.CASUAL,
+          matchInvit.level
+          );
+        await this.matchService.deleteMatchInvitation(data.from.id, data.to.id);
+      }
+    } catch (e) {
+      console.log("Game : Error while accepting invitation"); // error
     }
   }
 
@@ -240,38 +256,38 @@ export class GameGateway implements OnGatewayConnection {
     @MessageBody() id: number,
     @ConnectedSocket() socket: Socket
   ) {
-    const board: Board = boards.get(`${id}`);
-    const match = await this.matchService.findMatch(id);
-    if (!board || !match) {
-      console.log("Game : No match found"); // error
-      return;
-    }
-    let player_id: number;
-
-    if (board.player[0].user_id == socket.id) player_id = 0;
-    else if (board.player[1].user_id == socket.id) player_id = 1;
-    else player_id = 2;
-    socket.emit("gameMap", {
-      id: player_id,
-      map: match.map,
-      login: [match.player1.login, match.player2.login],
-    }); //change to specific map
-    if (player_id == 0) {
-      board.isReady.then(() => {
-        console.log(
-          "Game : New match",
-          id,
-          ":",
-          match.player1.login,
-          "vs",
-          match.player2.login
-        );
-        board.level = match.level; // tmp --> should be in match invitation
-        this.sendUpdateBoard(id);
-      });
-    } else if (player_id == 1) {
-      board.ready = true;
-      board.setReady();
+    try
+    {
+      const board: Board = boards.get(`${id}`);
+      const match = await this.matchService.findMatch(id);
+      let player_id: number;
+  
+      if (board.player[0].user_id == socket.id) player_id = 0;
+      else if (board.player[1].user_id == socket.id) player_id = 1;
+      else player_id = 2;
+      socket.emit("gameMap", {
+        id: player_id,
+        map: match.map,
+        login: [match.player1.login, match.player2.login],
+      }); //change to specific map
+      if (player_id == 0) {
+        board.isReady.then(() => {
+          console.log(
+            "Game : New match",
+            id,
+            ":",
+            match.player1.login,
+            "vs",
+            match.player2.login
+          );
+          board.level = match.level;
+          this.sendUpdateBoard(id);
+        });
+      } else if (player_id == 1) {
+        board.setReady();
+      }
+    } catch (e) {
+      console.log("Game : Error while finding match"); // error
     }
   }
 
@@ -288,6 +304,8 @@ export class GameGateway implements OnGatewayConnection {
       ) {
         board.player[data.id == 0 ? 1 : 0].score = 11;
         board.end = true;
+        if (!board.start)
+          this.sendUpdateBoard(data.match_id);
         this.server
           .to(`game:${data.match_id}`)
           .emit("board", this.gameService.updateBall(board));
@@ -312,50 +330,54 @@ export class GameGateway implements OnGatewayConnection {
   }
 
   async sendUpdateBoard(id: number) {
-    const board = boards.get(`${id}`);
-    // console.log("id : \n", id, "boards :\n", boards, "board:", board);
-    if (board.level != 2) {
-      board.ball.dx *= board.level / 2;
-      board.ball.dy *= board.level / 2;
-      board.player[0].half_height *= 2 / board.level;
-      board.player[1].half_height *= 2 / board.level;
-    }
-    while (!board.end) {
-      await sleep(interval);
-      if (board.pause_counter > 0) {
-        if (board.pause_counter == 1)
-          this.matchService.updateScore(
-            id,
-            board.player[0].score,
-            board.player[1].score
-          );
-        board.pause_counter--;
-      } else this.gameService.updateBall(board);
-      this.server.to(`game:${id}`).emit("board", board);
-    }
-    const match = await this.matchService.findMatch(id);
-    await this.matchService.setWinner(
-      id,
-      board.player[0].score > board.player[1].score
-        ? match.player1.id
-        : match.player2
-        ? match.player2.id
-        : -1
-    );
-    await this.matchService.updateScore(
-      id,
-      board.player[0].score,
-      board.player[1].score
-    );
-    console.log(
-      "Game : Match",
-      id,
-      "ended, score:",
-      board.player[0].score,
-      "-",
-      board.player[1].score
-    );
-    this.server.socketsLeave(`game:${id}`);
-    boards.delete(`${id}`);
+    try
+    {
+      const board = boards.get(`${id}`);
+      // console.log("id : \n", id, "boards :\n", boards, "board:", board);
+      if (board.level != 2) {
+        board.ball.dx *= board.level / 2;
+        board.ball.dy *= board.level / 2;
+        board.player[0].half_height *= 2 / board.level;
+        board.player[1].half_height *= 2 / board.level;
+      }
+      board.start = true;
+      while (!board.end) {
+        await sleep(interval);
+        if (board.pause_counter > 0) {
+          if (board.pause_counter == 1)
+            this.matchService.updateScore(
+              id,
+              board.player[0].score,
+              board.player[1].score
+            );
+          board.pause_counter--;
+        } else this.gameService.updateBall(board);
+        this.server.to(`game:${id}`).emit("board", board);
+      }
+      const match = await this.matchService.findMatch(id);
+      await this.matchService.setWinner(
+        id,
+        board.player[0].score > board.player[1].score
+          ? match.player1.id
+          : match.player2
+          ? match.player2.id
+          : -1
+      );
+      await this.matchService.updateScore(
+        id,
+        board.player[0].score,
+        board.player[1].score
+      );
+      console.log(
+        "Game : Match",
+        id,
+        "ended, score:",
+        board.player[0].score,
+        "-",
+        board.player[1].score
+      );
+      this.server.socketsLeave(`game:${id}`);
+      boards.delete(`${id}`);
+    } catch (e) {}
   }
 }
