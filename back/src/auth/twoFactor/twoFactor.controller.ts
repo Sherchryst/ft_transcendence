@@ -51,6 +51,19 @@ import {
       res.send(req.user)
     }
 
+    @Post('turn-off')
+    @HttpCode(200)
+    @UseGuards(Jwt2faGuard)
+    async turn_off(
+      @Req() req,
+      @Res() res
+  ) {
+      this.twoFactorService.turnOff2fa(req.user);
+      const { access_token } = this.customJwtService.login(req.user, false);
+      res.cookie('jwt', access_token, {sameSite: "Lax"})
+      res.send(req.user)
+    }
+
     @Post('authenticate')
     @HttpCode(200)
     @UseGuards(JwtAuthGuard)

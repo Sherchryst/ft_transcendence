@@ -2,7 +2,7 @@
 	<div class="grid grid-cols-12 lg:gap-x-16 2xl:gap-x-32">
 		<div class="col-span-12 md:col-span-4 flex flex-col max-w-sm">
 			<div class="flex place-content-center mb-4">
-				<ProfilePicture></ProfilePicture>
+				<ProfilePicture v-if="profile.user != undefined" :avatar="'http://localhost:3000/' + profile.user?.avatarPath"></ProfilePicture>
 			</div>
 			<div class="mb-6">
 				<MainTitle class="title-username">{{ profile.user?.nickname }}</MainTitle>
@@ -12,7 +12,7 @@
 				<LevelBar :percent="68" :level="8" :nextLevel="9"></LevelBar>
 			</div>
 			<div class="mb-12">
-				<ButtonLink v-if="this.username == this.selfLogin" class="flex justify-center w-full" text="Edit Profile"></ButtonLink>
+				<ButtonLink v-if="username == selfLogin" route="edit-profile" class="flex justify-center w-full"  text="Edit Profile"></ButtonLink>
 				<div v-else class="flex flex-col gap-y-4">
 					<Transition mode="out-in" name="btn">
 						<button-link v-if="statut == 'NONE'" class="flex justify-center w-full" text="Ask a friend" @click="friendRequest"></button-link>
@@ -98,7 +98,7 @@
 			<template v-slot:title>
 				Block User
 			</template>
-			You will block the user <span class="font-bold">{{ this.username }}</span>. No more of his messages will appear. You could always unblock it later on this page.
+			You will block the user <span class="font-bold">{{ username }}</span>. No more of his messages will appear. You could always unblock it later on this page.
 			<template v-slot:footer>
 				<div class="flex flex-col lg:flex-row gap-4 lg:justify-end">
 					<ButtonLink @click="block" class="btn-danger">
@@ -128,10 +128,10 @@ import Modal from '@/components/Modal.vue';
 import Scrool from '@/assets/icon/list-game.svg';
 import Trophy from '@/assets/icon/achievement.svg';
 import {defineComponent, watch, computed} from 'vue';
-import { API } from '@/scripts/auth.ts';
+import { API } from '@/scripts/auth';
 import { Profile } from '@/interfaces/Profile';
 import { useStore } from 'vuex'
-import { key } from '@/store/index.ts'
+import { key } from '@/store/index'
 import router from '@/router';
 
 
@@ -178,7 +178,7 @@ export default defineComponent({
 					login: username
 				}
 			})
-			.then((res) => {
+			.then((res: any) => {
 				this.profile = res.data;
 				// Change statut
 			}).catch(() => {

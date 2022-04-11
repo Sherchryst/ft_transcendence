@@ -1,17 +1,39 @@
 <template>
-	<div>
-		<vue-avatar @finished="saveClicked" :width="220" :height="220" border="2" style=""> </vue-avatar>
-		<img ref="image">
-	</div>
+    <div>
+        <div @click="launchFilePicker()">
+            <slot name="activator"></slot>
+        </div>
+        <input type="file" accept=".png , .jpg" ref="file" :name="uploadFieldName" @change="onFileChange($event)" style="display:none">
+    </div>
 </template>
 
-<script>
+<script lang="ts">
 import { defineComponent } from 'vue';
-import {VueAvatar} from 'vue-avatar-editor-improved'
 
 export default defineComponent({
-	components: {
-		VueAvatar
-	}
+    data() {
+        return {
+            uploadFieldName: 'file'
+        }
+    },
+    props: {
+        value: Object,
+    },
+    methods: {
+        launchFilePicker() {
+            (this.$refs['file'] as HTMLElement).click();
+        },
+        onFileChange(event: any) {
+            const file = event.target.files[0];
+            console.log(file);
+            if (file && file instanceof File) {
+                this.$emit('onInputImage', file);
+            }
+        }
+    }
 });
 </script>
+
+
+
+

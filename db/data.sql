@@ -1,7 +1,7 @@
-INSERT INTO "user" ("login", "nickname", "role") VALUES
-('norminet', 'norminet', 'admin'),
-('dvador', 'xX-Dark-Vador-Xx', 'banned'),
-('sgaming', 'SuzzieGaming', 'user');
+INSERT INTO "user" ("login", "nickname") VALUES
+('norminet', 'norminet'),
+('dvador', 'xX-Dark-Vador-Xx'),
+('sgaming', 'SuzzieGaming');
 
 INSERT INTO "achievement" ("name", "description") VALUES
 ('achiev1', 'desc1'),
