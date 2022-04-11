@@ -32,7 +32,7 @@
 							<p>Winrate</p>
 						</template>
 						<template v-slot:body>
-							<div class="text-3xl font-bold">89%</div>
+							<div class="text-3xl font-bold">{{winrate}}%</div>
 						</template>
 					</LittleCard>
 				</div>
@@ -43,7 +43,7 @@
 						</template>
 						<template v-slot:body>
 							<div class="played text-4xl font-bold italic">
-								172
+								{{count}}
 							</div>
 						</template>
 					</LittleCard>
@@ -56,19 +56,10 @@
 					<TitlePanel title="Historique des matchs"> <Scrool/> </TitlePanel>
 				</template>
 				<template v-slot:body>
-					<div class="overflow-auto max-h-64">
-						<MatchesHistory :result="true" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
+					<div class="overflow-auto max-h-64" >
+						<div v-for="(match, index) in history" :key="index">
+							<MatchesHistory :match="match"></MatchesHistory>
+						</div>
 					</div>
 				</template>
 			</ProfilePanel>
@@ -167,20 +158,53 @@ export default defineComponent({
 		return {
 			profile: {} as Profile,
 			showModal: false,
-			statut: "NONE"
+			statut: "NONE",
+			count: 0,
+			winrate: 0,
+			history: []
 		}
 	},
 	methods: {
 		getUser(username: string | string[]): void {
-			API.get('users/get-profile', {
+			API.get<Profile>('users/get-profile', {
 				params: {
 					id: null,
 					login: username
 				}
 			})
-			.then((res: any) => {
+			.then((res) => {
 				this.profile = res.data;
-				// Change statut
+				API.get('match/match-count', {
+					params: {
+						userId: this.profile.user.id
+					}
+				}).then((res) => {
+					this.count = res.data.count;
+					console.log('Matches count',this.count)
+				}).catch((err) => {
+					console.log(err)
+				})
+				API.get('match/get-winrate', {
+					params: {
+						userId: this.profile.user.id
+					}
+				}).then((res) => {
+					this.winrate = parseInt(res.data.winrate) ;
+					console.log('Winrate',this.winrate)
+				}).catch((err) => {
+					console.log(err)
+				})
+				API.get('match/get-history', {
+					params: {
+						userId: this.profile.user.id,
+						limit: 50
+					}
+				}).then((res) => {
+					this.history = res.data;
+					console.log('Matches' ,res.data)
+				}).catch((err) => {
+					console.log(err)
+				})
 			}).catch(() => {
 				router.push({name: 'not-found'})
 			})
