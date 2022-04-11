@@ -40,18 +40,9 @@ export default defineComponent({
 		GamePanel,
 		// BigRadioButton,
 	},
-	mounted() {
-		gameSocket.on("invited", (data : string) => {
-			gameSocket.emit("acceptInvit", data); // TODO: ask for confirmation
-			console.log("accepted invite : ", data);
-		});
-		gameSocket.on("gameStart", (data: string) => {
-				router.push({ name: "game", params: { match_id: data }})
-		})
-	},
 	beforeUnmount() {
-      gameSocket.off("invited");
-      gameSocket.off("gameStart");
+    //   gameSocket.off("invited");
+    //   gameSocket.off("gameStart");
       // const removed = document.removeEventListener("mousemove", this.moveRackets);
       console.log("before destroy in gamechoice");
     },

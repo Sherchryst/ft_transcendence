@@ -50,7 +50,6 @@ const basic_board: Board = {
   ],
   dead: false,
   end: false,
-  ready: false,
   pause_counter: 50,
   level: 2,
 };
@@ -90,11 +89,11 @@ export class GameGateway implements OnGatewayConnection {
       // console.log("allo", user.id, socket.id, this.WsClients)
       this.WsClients.set(user.id, socket);
     } catch (reason) {
-      console.log("Game: Unauthorized connection", reason);
+      // console.log("Game: Unauthorized connection", reason);
       socket.disconnect(false);
       return;
     }
-    console.log("Game : new connection to socket");
+    console.log("Game : New connection to socket");
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {
@@ -266,11 +265,10 @@ export class GameGateway implements OnGatewayConnection {
           "vs",
           match.player2.login
         );
-        board.level = match.level; // tmp --> should be in match invitation
+        board.level = match.level;
         this.sendUpdateBoard(id);
       });
     } else if (player_id == 1) {
-      board.ready = true;
       board.setReady();
     }
   }

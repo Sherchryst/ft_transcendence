@@ -8,7 +8,6 @@ export interface Board {
   player: Player[];
   dead: boolean;
   end: boolean;
-  ready: boolean;
   pause_counter: number;
   level: number;
   isReady?: Promise<boolean>;

@@ -22,13 +22,14 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import NotifCard from '@/components/Notification/NotifCard.vue';
-import { Notification, FriendRequest } from "@/interfaces/Notifiaction";
-// import { GameInvitation, ChannelInvitation } from "@/interfaces/Notifiaction";
+import { Notification, FriendRequest, GameStart } from "@/interfaces/Notification";
+// import { GameInvitation, ChannelInvitation } from "@/interfaces/Notification";
 // import { User } from "@/interfaces/Profile";
 import { API } from "@/scripts/auth";
 import NotifFriend from "./NotifFriend.vue";
 import NotifGame from "./NotifGame.vue";
 import NotifChannel from "./NotifChannel.vue";
+import { gameSocket } from "@/socket";
 
 export default defineComponent({
 	name: 'NotifPanel',
@@ -40,6 +41,7 @@ export default defineComponent({
 	},
 	data() {
 		return {
+			socket: gameSocket,
 			notifications: [] as Notification[]
 		}
 	},
@@ -95,6 +97,15 @@ export default defineComponent({
 				date: dateEvent
 			} as Notification)
 		},
+		addGameStart(data: string): void {
+			let gameStart = JSON.parse(data) as GameStart
+			let dateEvent = new Date()
+			this.notifications.push({
+				container: 'NotifGameStart',
+				content: gameStart,
+				date: dateEvent
+			} as Notification)
+		},
 		removeNotif(data: any): void {
 			let index = this.notifications.findIndex( (notif) => {
 				return (notif.content == data)
@@ -103,7 +114,11 @@ export default defineComponent({
 			this.notifications.splice(index)
 		}
 	},
+	created() {
+		console.log("NotifPanel created")
+	},
 	mounted() {
+		console.log("NotifPanel mounted")
 		this.getNotif()
 	}
 })
