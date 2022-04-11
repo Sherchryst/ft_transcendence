@@ -113,7 +113,11 @@ export class GameGateway implements OnGatewayConnection {
             board.player[player_id == 0 ? 1 : 0].score = 11;
             board.end = true;
             if (!board.start)
-              this.sendUpdateBoard(parseInt(match_id));
+            {
+              this.matchService.deleteMatch(parseInt(match_id));
+              boards.delete(match_id);
+              return;
+            }
             this.server
               .to(`game:${match_id}`)
               .emit("board", this.gameService.updateBall(board));
@@ -291,6 +295,19 @@ export class GameGateway implements OnGatewayConnection {
     }
   }
 
+  @SubscribeMessage("leave_matchmaking")
+  handleLeaveMatchmaking(
+  //   @MessageBody() data: { match_id: number; id: number },
+    @ConnectedSocket() socket: Socket
+  ) {
+    try {
+      this.WsClients.forEach((value, key) => {
+        if (value == socket && pending_player == key)
+            pending_player = -1;
+      });
+    } catch (e) {}
+  }
+
   @SubscribeMessage("leave")
   async handleLeave(
     @MessageBody() data: { match_id: number; id: number },
@@ -298,14 +315,16 @@ export class GameGateway implements OnGatewayConnection {
   ) {
     try {
       const board = boards.get(`${data.match_id}`);
-      if (
-        (data.id == 0 || data.id == 1) &&
-        board.player[data.id].user_id == socket.id
-      ) {
+      if ((data.id == 0 || data.id == 1) &&
+      board.player[data.id].user_id == socket.id) {
         board.player[data.id == 0 ? 1 : 0].score = 11;
         board.end = true;
         if (!board.start)
-          this.sendUpdateBoard(data.match_id);
+        {
+          this.matchService.deleteMatch(data.match_id);
+          boards.delete(`${data.match_id}`);
+          return;
+        }
         this.server
           .to(`game:${data.match_id}`)
           .emit("board", this.gameService.updateBall(board));
