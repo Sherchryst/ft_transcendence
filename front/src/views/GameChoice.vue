@@ -50,9 +50,9 @@ export default defineComponent({
 		})
 	},
 	beforeUnmount() {
-      gameSocket.off("invited");
-      gameSocket.off("gameStart");
-    gameSocket.emit("leave_matchmaking");
+    gameSocket.off("invited");
+    gameSocket.off("gameStart");
+    gameSocket.emit("leaveMatchmaking");
       // const removed = document.removeEventListener("mousemove", this.moveRackets);
       console.log("before destroy in gamechoice");
     },
