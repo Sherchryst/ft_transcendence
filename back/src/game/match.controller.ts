@@ -3,7 +3,7 @@ import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
 import { MatchService } from './match.service';
 
 @Controller('match')
-//@UseGuards(Jwt2faGuard)
+@UseGuards(Jwt2faGuard)
 export class MatchController {
   constructor(private matchsService: MatchService) {}
 

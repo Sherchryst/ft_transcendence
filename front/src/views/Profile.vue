@@ -56,19 +56,10 @@
 					<TitlePanel title="Historique des matchs"> <Scrool/> </TitlePanel>
 				</template>
 				<template v-slot:body>
-					<div class="overflow-auto max-h-64">
-						<MatchesHistory :result="true" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
+					<div class="overflow-auto max-h-64" >
+						<div v-for="(match, index) in history" :key="index">
+							<MatchesHistory :match="match"></MatchesHistory>
+						</div>
 					</div>
 				</template>
 			</ProfilePanel>
@@ -175,43 +166,43 @@ export default defineComponent({
 	},
 	methods: {
 		getUser(username: string | string[]): void {
-			API.get('users/get-profile', {
+			API.get<Profile>('users/get-profile', {
 				params: {
 					id: null,
 					login: username
 				}
 			})
-			.then((res: any) => {
+			.then((res) => {
 				this.profile = res.data;
 				API.get('match/match-count', {
 					params: {
-						id: this.profile.user.id
+						userId: this.profile.user.id
 					}
-				}).then((res: any) => {
+				}).then((res) => {
 					this.count = res.data.count;
 					console.log('Matches count',this.count)
-				}).catch((err: any) => {
+				}).catch((err) => {
 					console.log(err)
 				})
 				API.get('match/get-winrate', {
 					params: {
-						id: this.profile.user.id
+						userId: this.profile.user.id
 					}
-				}).then((res: any) => {
-					this.winrate = res.data.winrate;
+				}).then((res) => {
+					this.winrate = parseInt(res.data.winrate) ;
 					console.log('Winrate',this.winrate)
-				}).catch((err: any) => {
+				}).catch((err) => {
 					console.log(err)
 				})
 				API.get('match/get-history', {
 					params: {
-						id: this.profile.user.id,
+						userId: this.profile.user.id,
 						limit: 50
 					}
-				}).then((res: any) => {
+				}).then((res) => {
 					this.history = res.data;
 					console.log('Matches' ,res.data)
-				}).catch((err: any) => {
+				}).catch((err) => {
 					console.log(err)
 				})
 			}).catch(() => {

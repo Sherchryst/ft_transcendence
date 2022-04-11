@@ -2,7 +2,7 @@
   .game{
     overflow: hidden;
     canvas{
-      transform: translateX(-50%) translateY(-50%);
+      transform: translateX(-50%) translateY(0%);
       position: absolute;
       left: 0;
       top: 0;
