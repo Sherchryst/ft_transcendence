@@ -20,6 +20,7 @@
 			Promute admin
 		</button>
 		<BlockModal ref="modal_block" :user="user"></BlockModal>
+        <ChallengeModal ref="modal_challenge"></ChallengeModal>
 	</div>
 </template>
 
@@ -27,6 +28,7 @@
 import { User } from '@/interfaces/Profile';
 import { defineComponent, PropType } from 'vue';
 import BlockModal from '../modal/BlockModal.vue';
+import ChallengeModal from '../modal/ChallengeModal.vue';
 
 export default defineComponent({
     name: "Message",
@@ -48,7 +50,7 @@ export default defineComponent({
             (this.$refs["modal_block"] as typeof BlockModal).open();
         },
         challenge() {
-            console.log("Challange");
+            (this.$refs["modal_challenge"] as typeof BlockModal).open()
         },
         mute() {
             console.log("mute");
@@ -60,6 +62,6 @@ export default defineComponent({
             console.log("promute");
         },
     },
-    components: { BlockModal }
+    components: { BlockModal, ChallengeModal }
 })
 </script>

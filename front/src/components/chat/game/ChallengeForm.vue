@@ -1,7 +1,16 @@
 <template>
 	<form class="flex flex-col" @submit.prevent="print">
-		<div v-if="!userSet" class="flex flex-col-reverse mt-4">
+		<div v-if="!fill" class="flex flex-col-reverse mt-4">
 			<ModInput name="username" placeholder="Username" v-model="formData.username">Username</ModInput>
+		</div>
+		<div v-else>
+			<div class="mod-input input-lock flex flex-col justify-start">
+				<ModLabel name="name">Username</ModLabel>
+				<div class="input-div flex flex-shrink">
+					<p class="m-2 w-full">{{fill}}</p>
+				</div>
+			</div>
+			<!-- <ModInput class="input-lock" name="username" placeholder="Username" v-model="formData.username">Username</ModInput> -->
 		</div>
 		<div class="flex flex-col items-start mt-10">
 			<span>Maps</span>
@@ -26,6 +35,7 @@ import { defineComponent } from 'vue'
 import SwitchButton from '@/components/SwitchButton.vue'
 import BigRadioButton from '@/components/BigRadioButton.vue'
 import ModInput from '@/components/form/ModInput.vue'
+import ModLabel from '@/components/form/ModLabel.vue'
 
 export default defineComponent({
 	name:'ChallengeForm',
@@ -53,7 +63,11 @@ export default defineComponent({
 			this.formData.map = map
 		}
 	},
-	components: { SwitchButton, BigRadioButton, ModInput }
+	components: { SwitchButton, BigRadioButton, ModInput, ModLabel},
+	created() {
+		if (this.fill)
+			this.formData.username = this.fill
+	}
 })
 </script>
 

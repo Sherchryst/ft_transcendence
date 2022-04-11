@@ -66,5 +66,16 @@ export default defineComponent({
 				background: $--hover-bg-color;
 			}
 		}
+		&.input-lock{
+			.input-div {
+				color: $text-title;
+				background: #dfdfdf;
+				input {
+					cursor: unset;
+					color: $text-title;
+					background: #dfdfdf;
+				}
+			}
+		}
 	}
 </style>
