@@ -30,7 +30,7 @@
 
 <script lang="ts">
 import GamePanel from '@/components/GamePanel.vue';
-import BigRadioButton from '@/components/BigRadioButton.vue';
+// import BigRadioButton from '@/components/BigRadioButton.vue';
 import { defineComponent } from 'vue';
 import { gameSocket } from '@/socket';
 import router from '@/router';
@@ -41,23 +41,24 @@ export default defineComponent({
 		// BigRadioButton,
 	},
 	mounted() {
-		gameSocket.on("invited", (data : any) => {
-			gameSocket.emit("acceptInvit", data);
+		gameSocket.on("invited", (data : string) => {
+			gameSocket.emit("acceptInvit", data); // TODO: ask for confirmation
 			console.log("accepted invite : ", data);
 		});
-		gameSocket.on("gameStart", (data: any) => {
+		gameSocket.on("gameStart", (data: string) => {
 				router.push({ name: "game", params: { match_id: data }})
 		})
 	},
 	beforeUnmount() {
-      gameSocket.off("invited");
-      gameSocket.off("gameStart");
+    gameSocket.off("invited");
+    gameSocket.off("gameStart");
+    gameSocket.emit("leaveMatchmaking");
       // const removed = document.removeEventListener("mousemove", this.moveRackets);
       console.log("before destroy in gamechoice");
     },
 	methods: {
 		sendInvite() {
-			gameSocket.emit("invite", { login : "cheat_user", mapId : 2, level : 1});
+			gameSocket.emit("invite", { login : "cheat_user", mapId : 3, level : 1});
 		},
 		requestGame() {
 			router.push({ name: "game", params: { match_id: `bot` }})
