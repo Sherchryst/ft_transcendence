@@ -126,7 +126,7 @@ export class GameGateway implements OnGatewayConnection {
           });
         }
       });
-      console.log("Game : disconnection from socket");
+      console.log("Game : Disconnection from socket");
     } catch (e) {
       console.log("Game : Error while disconnecting");
     }
@@ -228,8 +228,13 @@ export class GameGateway implements OnGatewayConnection {
     board.player[1].user_id = match.player2.id;
     player1_socket.join(`game:${match.id}`);
     player2_socket.join(`game:${match.id}`);
-    this.statusGateway.sendStatus(player1, "in game", `${match.id}`);
-    this.statusGateway.sendStatus(player2, "in game", `${match.id}`);
+    try {
+      this.statusGateway.sendStatus(player1, "in game", `${match.id}`);
+      this.statusGateway.sendStatus(player2, "in game", `${match.id}`);
+    } catch (e) {
+      console.log("Game : Error while sending status", e);
+    }
+    // this.server.to(`game:${match.id}`).emit("gameStart", match.id);
     return match;
   }
 
@@ -253,7 +258,7 @@ export class GameGateway implements OnGatewayConnection {
         );
       } else pending_player = req.user.id;
     } catch (e) {
-      console.log("Game : Error while creating match"); // error
+      console.log("Game : Error while creating match", e); // error
     }
   }
 

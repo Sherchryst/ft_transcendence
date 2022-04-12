@@ -20,8 +20,6 @@ export class StatusGateway implements OnGatewayConnection {
     throw new Error("Status : Method not implemented.");
   }
 
-  WsClients = new Map<number, Socket>();
-
   @WebSocketServer()
   server: Server;
   constructor(
@@ -40,8 +38,9 @@ export class StatusGateway implements OnGatewayConnection {
       const user = await this.usersService.findOne(payload.sub);
       if (user.twofa && !payload.isSecondFactorAuth) throw new WsException("");
       // console.log("allo", user.id, socket.id, this.WsClients)
-      this.WsClients.set(user.id, socket);
+      this.usersService.WsClients.set(user.id, socket);
       this.sendStatus(user.id, "online", "");
+      //get friends online TODO ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     } catch (reason) {
       // console.log("Status: Unauthorized connection", reason);
       socket.disconnect(false);
@@ -55,10 +54,10 @@ export class StatusGateway implements OnGatewayConnection {
     // this.WsClients.delete(req.user?.id);
     try {
       let player_id: number;
-      this.WsClients.forEach(async (value, key) => {
+      this.usersService.WsClients.forEach(async (value, key) => {
         if (value == socket) {
           await this.sendStatus(key, "offline", "");
-          this.WsClients.delete(key);
+          this.usersService.WsClients.delete(key);
         }
       });
       console.log("Status : disconnection from socket");
@@ -70,8 +69,8 @@ export class StatusGateway implements OnGatewayConnection {
   async sendStatus(userId: number, status : string, message : string) {
     const friends = await this.usersService.getFriends(userId);
     friends.forEach((friend) => {
-      if (this.WsClients.has(friend.id))
-        this.WsClients.get(friend.id).emit("status", { userId : userId, status : status, message : message });
+      if (this.usersService.WsClients.has(friend.id))
+        this.usersService.WsClients.get(friend.id).emit("status", { userId : userId, status : status, message : message });
     });
   }
 }
