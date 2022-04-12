@@ -17,7 +17,7 @@ export const imageFilter: any = (req: any, file: { mimetype: string, size: numbe
 };
 
 @Controller('users')
-//@UseGuards(Jwt2faGuard)
+@UseGuards(Jwt2faGuard)
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
