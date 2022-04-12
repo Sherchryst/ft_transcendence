@@ -105,22 +105,22 @@ export class GameGateway implements OnGatewayConnection {
       if (await this.matchService.winCount(user_id) >= 1) {
         await this.usersService.unlockAchievement(user_id, 1); // win 1
       }
-      if (await this.matchService.winCount(user_id) >= 10) {
-        await this.usersService.unlockAchievement(user_id, 2); // win 10
-      }
-      const history = await this.matchService.getHistory(user_id, 5);
+    } catch (e) {}
+    const history = await this.matchService.getHistory(user_id, 5);
+    try {
       if (history.filter((match) => match.winner.id == user_id).length >= 5) {
-        await this.usersService.unlockAchievement(user_id, 3); // win 5 in a row
+        await this.usersService.unlockAchievement(user_id, 2); // win 5 in a row
       }
       else if (history.filter((match) => match.winner.id != user_id).length >= 5) {
-        await this.usersService.unlockAchievement(user_id, 4); // lose 5 in a row
+        await this.usersService.unlockAchievement(user_id, 3); // lose 5 in a row
       }
+    } catch (e) {}
+    try {
       if (history[0].winner.id == user_id
       && (history[0].score1 == 0 || history[0].score2 == 0)) {
-        await this.usersService.unlockAchievement(user_id, 5); // fanny
+        await this.usersService.unlockAchievement(user_id, 4); // fanny
       }
-    }
-    catch (e) {}
+    } catch (e) {}
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {
@@ -328,9 +328,10 @@ export class GameGateway implements OnGatewayConnection {
       } else if (player_id == 1) {
         board.setReady();
       }
-    } catch (e) {
-      console.log("Game : Error while finding match"); // error
-    }
+      else {
+        socket.join(`game:${id}`);
+      }
+    } catch (e) {}
   }
 
   @SubscribeMessage("leaveMatchmaking")
@@ -387,60 +388,57 @@ export class GameGateway implements OnGatewayConnection {
   }
 
   async sendUpdateBoard(id: number) {
-    try
-    {
-      const board = boards.get(`${id}`);
-      // console.log("id : \n", id, "boards :\n", boards, "board:", board);
-      if (board.level != 2) {
-        board.ball.dx *= board.level / 2;
-        board.ball.dy *= board.level / 2;
-        board.player[0].half_height *= 2 / board.level;
-        board.player[1].half_height *= 2 / board.level;
-      }
-      board.start = true;
-      while (!board.end) {
-        await sleep(interval);
-        if (board.pause_counter > 0) {
-          if (board.pause_counter == 1)
-            this.matchService.updateScore(
-              id,
-              board.player[0].score,
-              board.player[1].score
-            );
-          board.pause_counter--;
-        } else this.gameService.updateBall(board);
-        this.server.to(`game:${id}`).emit("board", board);
-      }
-      const match = await this.matchService.findMatch(id);
-      this.usersService.updateXP(board.player[0].user_id,
-      ((await this.usersService.findOne(board.player[0].user_id)).xp)
-      + (board.player[0].score == 11 ? 50 : board.player[0].score * 2) * (match.mode == MatchType.CASUAL ? 1 : 2));
-      this.usersService.updateXP(board.player[1].user_id,
-        ((await this.usersService.findOne(board.player[1].user_id)).xp)
-        + (board.player[1].score == 11 ? 50 : board.player[1].score * 2) * (match.mode == MatchType.CASUAL ? 1 : 2));
-        await this.matchService.setWinner(
-          id,
-          board.player[0].score > board.player[1].score
-          ? match.player1.id
-          : match.player2.id
+    const board = boards.get(`${id}`);
+    // console.log("id : \n", id, "boards :\n", boards, "board:", board);
+    if (board.level != 2) {
+      board.ball.dx *= board.level / 2;
+      board.ball.dy *= board.level / 2;
+      board.player[0].half_height *= 2 / board.level;
+      board.player[1].half_height *= 2 / board.level;
+    }
+    board.start = true;
+    while (!board.end) {
+      await sleep(interval);
+      if (board.pause_counter > 0) {
+        if (board.pause_counter == 1)
+          this.matchService.updateScore(
+            id,
+            board.player[0].score,
+            board.player[1].score
           );
-          await this.matchService.updateScore(
+        board.pause_counter--;
+      } else this.gameService.updateBall(board);
+      this.server.to(`game:${id}`).emit("board", board);
+    }
+    const match = await this.matchService.findMatch(id);
+    this.usersService.updateXP(board.player[0].user_id,
+    ((await this.usersService.findOne(board.player[0].user_id)).xp)
+    + (board.player[0].score == 11 ? 50 : board.player[0].score * 2) * (match.mode == MatchType.CASUAL ? 1 : 2));
+    this.usersService.updateXP(board.player[1].user_id,
+      ((await this.usersService.findOne(board.player[1].user_id)).xp)
+      + (board.player[1].score == 11 ? 50 : board.player[1].score * 2) * (match.mode == MatchType.CASUAL ? 1 : 2));
+      await this.matchService.setWinner(
         id,
-        board.player[0].score,
-        board.player[1].score
+        board.player[0].score > board.player[1].score
+        ? match.player1.id
+        : match.player2.id
         );
-        console.log(
-        "Game : Match",
-        id,
-        "ended, score:",
-        board.player[0].score,
-        "-",
-        board.player[1].score
-        );
-        this.server.socketsLeave(`game:${id}`);
-        boards.delete(`${id}`);
-        this.updateAchievements(board.player[0].user_id);
-        this.updateAchievements(board.player[1].user_id);
-    } catch (e) {}
+        await this.matchService.updateScore(
+      id,
+      board.player[0].score,
+      board.player[1].score
+      );
+      console.log(
+      "Game : Match",
+      id,
+      "ended, score:",
+      board.player[0].score,
+      "-",
+      board.player[1].score
+      );
+      this.server.socketsLeave(`game:${id}`);
+      boards.delete(`${id}`);
+      this.updateAchievements(board.player[0].user_id);
+      this.updateAchievements(board.player[1].user_id);
   }
 }

@@ -5,7 +5,6 @@ INSERT INTO "user" ("login", "nickname") VALUES
 
 INSERT INTO "achievement" ("name", "description") VALUES
 ('win 1', 'win a game in ranked'),
-('win 10', 'win 10 games in ranked'),
 ('combo 5', 'win 5 games in a row'),
 ('loser combo 5', 'lose 5 games in a row'),
 ('fanny', 'win 11 against 0')
