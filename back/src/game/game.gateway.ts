@@ -374,10 +374,12 @@ export class GameGateway implements OnGatewayConnection {
         this.server
           .to(`game:${data.match_id}`)
           .emit("board", this.gameService.updateBall(board));
+        this.server.socketsLeave(`game:${data.match_id}`);
+        console.log("Game : Player left game"); // warning
       }
-      this.server.socketsLeave(`game:${data.match_id}`);
+      else
+        socket.leave(`game:${data.match_id}`);
     } catch (e) {}
-    console.log("Game : Player left game");
   }
 
   @SubscribeMessage("player")
