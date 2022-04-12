@@ -6,7 +6,7 @@
                     <div>
                         <p class="text-left">Pong is one of the first computer games that ever created, this simple "tennis like" game features two paddles and a ball, the goal is to defeat your opponent ...</p>
                     </div>
-                    <button-link text="Go faire un PONG" href="http://localhost:8080/#/game"/>
+                    <button-link text="Go faire un PONG" href="http://localhost:8080/#/game-choice"/>
                 </div>
             </template>
             <template v-slot:right>
@@ -27,19 +27,12 @@
         </div>
       </SquarePanel>
       <SquarePanel>
-        <div class="h-full flex flex-col justify-between gap-3">
-            <MainTitle>Top 10</MainTitle>
+        <div class="flex flex-col gap-3">
+            <MainTitle>Top {{topPlayer?.length}}</MainTitle>
             <div class="flex flex-col overflow-auto gap-6">
-                <TopPlayerPanel login="login" username="Username" :rank="1"></TopPlayerPanel>
-                <TopPlayerPanel login="login" username="Username" :rank="2"></TopPlayerPanel>
-                <TopPlayerPanel login="login" username="Username" :rank="3"></TopPlayerPanel>
-                <TopPlayerPanel login="login" username="Username" :rank="4"></TopPlayerPanel>
-                <TopPlayerPanel login="login" username="Username" :rank="5"></TopPlayerPanel>
-                <TopPlayerPanel login="login" username="Username" :rank="6"></TopPlayerPanel>
-                <TopPlayerPanel login="login" username="Username" :rank="7"></TopPlayerPanel>
-                <TopPlayerPanel login="login" username="Username" :rank="8"></TopPlayerPanel>
-                <TopPlayerPanel login="login" username="Username" :rank="9"></TopPlayerPanel>
-                <TopPlayerPanel login="login" username="Username" :rank="10"></TopPlayerPanel>
+              <div v-for="(player, index) in topPlayer" :key="index">
+                <TopPlayerPanel :player="player" :rank="index + 1"></TopPlayerPanel>
+              </div>
             </div>
         </div>
       </SquarePanel>
@@ -70,6 +63,7 @@ export default defineComponent({
     return {
       winrate: 0,
       history: [],
+      topPlayer: [],
     }
   },
   setup () {
@@ -77,6 +71,10 @@ export default defineComponent({
   },
   mounted () {
     console.log('created', this.$store.getters.getId)
+    API.get('users/top-ten').then((res) => {
+      this.topPlayer = res.data
+      console.log(res.data)
+    })
     API.get('match/get-winrate', {
       params: {
         userId: this.$store.getters.getId
