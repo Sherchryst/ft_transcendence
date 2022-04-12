@@ -303,7 +303,8 @@ export class GameGateway implements OnGatewayConnection {
       const board: Board = boards.get(`${id}`);
       const match = await this.matchService.findMatch(id);
       let player_id: number;
-  
+      
+      console.log("Game : connection", socket.id, "match", id);
       if (board.player[0].user_socket == socket.id) player_id = 0;
       else if (board.player[1].user_socket == socket.id) player_id = 1;
       else player_id = 2;
@@ -329,9 +330,12 @@ export class GameGateway implements OnGatewayConnection {
         board.setReady();
       }
       else {
+        console.log("Game : Spectator connected");
         socket.join(`game:${id}`);
       }
-    } catch (e) {}
+    } catch (e) {
+      console.log("Game : Error while handling connection"); // error
+    }
   }
 
   @SubscribeMessage("leaveMatchmaking")
@@ -342,7 +346,10 @@ export class GameGateway implements OnGatewayConnection {
     try {
       this.WsClients.forEach((value, key) => {
         if (value == socket && pending_player == key)
-            pending_player = -1;
+        {
+          console.log("Game : Player", key, "left matchmaking");
+          pending_player = -1;
+        }
       });
     } catch (e) {}
   }
