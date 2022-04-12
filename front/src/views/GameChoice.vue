@@ -32,7 +32,7 @@
 import GamePanel from '@/components/GamePanel.vue';
 // import BigRadioButton from '@/components/BigRadioButton.vue';
 import { defineComponent } from 'vue';
-import { gameSocket } from '@/socket';
+import { gameSocket, statusSocket } from '@/socket';
 import router from '@/router';
 
 export default defineComponent({
@@ -46,8 +46,11 @@ export default defineComponent({
 			console.log("accepted invite : ", data);
 		});
 		gameSocket.on("gameStart", (data: string) => {
-				router.push({ name: "game", params: { match_id: data }})
-		})
+			router.push({ name: "game", params: { match_id: data }})
+		});
+		statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
+			console.log("match status : ", data);
+		});
 	},
 	beforeUnmount() {
     gameSocket.off("invited");

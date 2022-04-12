@@ -8,9 +8,13 @@ import { UserAchievement } from './entities/user-achievement.entity';
 import { UserRelationship, UserRelationshipType } from './entities/user-relationship.entity';
 import * as PostgresError from '@fiveem/postgres-error-codes'
 import { Achievement } from './entities/achievement.entity';
+import { Socket } from 'socket.io';
 
 @Injectable()
 export class UsersService {
+
+  WsClients = new Map<number, Socket>();
+
   private async getRelationships(fromUserId: number, type: UserRelationshipType): Promise<User[]> {
     return getRepository(UserRelationship).find({
       relations: ['to'],

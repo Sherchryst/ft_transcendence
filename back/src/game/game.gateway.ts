@@ -18,6 +18,7 @@ import { Req, UseGuards } from "@nestjs/common";
 import { Match, MatchType } from "./entities/match.entity";
 import { GameMap } from "./entities/game-map.entity";
 import { MatchInvitation } from "./entities/match-invitation.entity";
+import { StatusGateway } from "src/users/users.gateway";
 
 const interval = 20;
 let pending_player = -1;
@@ -68,15 +69,14 @@ export class GameGateway implements OnGatewayConnection {
     throw new Error("Game : Method not implemented.");
   }
 
-  WsClients = new Map<number, Socket>();
-
   @WebSocketServer()
   server: Server;
   constructor(
     private readonly gameService: GameService,
     private readonly matchService: MatchService,
     private readonly customJwtService: CustomJwtService,
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
+    private readonly statusGateway: StatusGateway
   ) {}
 
   afterInit() {
@@ -89,8 +89,7 @@ export class GameGateway implements OnGatewayConnection {
       const payload = this.customJwtService.verify(jwt);
       const user = await this.usersService.findOne(payload.sub);
       if (user.twofa && !payload.isSecondFactorAuth) throw new WsException("");
-      // console.log("allo", user.id, socket.id, this.WsClients)
-      this.WsClients.set(user.id, socket);
+      // console.log("allo", user.id, socket.id, this.usersService.WsClients)
     } catch (reason) {
       // console.log("Game: Unauthorized connection", reason);
       socket.disconnect(false);
@@ -99,8 +98,41 @@ export class GameGateway implements OnGatewayConnection {
     console.log("Game : New connection to socket");
   }
 
+  handleDisconnect(@ConnectedSocket() socket: Socket) {
+    // --> put score of other player to 11 in bd
+    // this.usersService.WsClients.delete(req.user?.id);
+    try {
+      let player_id: number;
+      this.usersService.WsClients.forEach(async (value, key) => {
+        if (value == socket) {
+          if (pending_player == key)
+          pending_player = -1;
+          boards.forEach((board, match_id) => {
+            if (board.player[0].user_socket == value.id) player_id = 0;
+            else if (board.player[1].user_socket == value.id) player_id = 1;
+            else return;
+            board.player[player_id == 0 ? 1 : 0].score = 11;
+            board.end = true;
+            if (!board.start)
+            {
+              this.matchService.deleteMatch(parseInt(match_id));
+              boards.delete(match_id);
+              return;
+            }
+            this.server
+              .to(`game:${match_id}`)
+              .emit("board", this.gameService.updateBall(board));
+            // this.server.socketsLeave(`game:${match_id}`);
+          });
+        }
+      });
+      console.log("Game : disconnection from socket");
+    } catch (e) {
+      console.log("Game : Error while disconnecting");
+    }
+  }
+  
   async updateAchievements(user_id: number) {
-    // const achievements = await this.usersService.getUserAchievements(user_id);
     try {
       if (await this.matchService.winCount(user_id) >= 1) {
         await this.usersService.unlockAchievement(user_id, 1); // win 1
@@ -123,41 +155,6 @@ export class GameGateway implements OnGatewayConnection {
     } catch (e) {}
   }
 
-  handleDisconnect(@ConnectedSocket() socket: Socket) {
-    // --> put score of other player to 11 in bd
-    // this.WsClients.delete(req.user?.id);
-    try {
-      let player_id: number;
-      this.WsClients.forEach((value, key) => {
-        if (value == socket) {
-          if (pending_player == key)
-            pending_player = -1;
-          boards.forEach((board, match_id) => {
-            if (board.player[0].user_socket == value.id) player_id = 0;
-            else if (board.player[1].user_socket == value.id) player_id = 1;
-            else return;
-            board.player[player_id == 0 ? 1 : 0].score = 11;
-            board.end = true;
-            if (!board.start)
-            {
-              this.matchService.deleteMatch(parseInt(match_id));
-              boards.delete(match_id);
-              return;
-            }
-            this.server
-              .to(`game:${match_id}`)
-              .emit("board", this.gameService.updateBall(board));
-            // this.server.socketsLeave(`game:${match_id}`);
-          });
-          this.WsClients.delete(key);
-        }
-      });
-      console.log("Game : disconnection from socket");
-    } catch (e) {
-      console.log("Game : Error while disconnecting");
-    }
-  }
-
   @SubscribeMessage("invite")
   async handleInvite(
     @Req() req: any,
@@ -178,13 +175,13 @@ export class GameGateway implements OnGatewayConnection {
           map,
           data.level
         );
-        this.WsClients.get(to_user.id).emit("invited", invitation);
+        this.usersService.WsClients.get(to_user.id).emit("invited", invitation);
         console.log("Game : Invitation sent to", to_user.login);
       } catch (e) {
         console.log("Game : Error while sending invitation"); // error
       }
       // console.log("invitation", invitation)
-      // while(!this.WsClients.has(to_user.id))
+      // while(!this.usersService.WsClients.has(to_user.id))
       //   await sleep(5000);
     }
   }
@@ -223,15 +220,16 @@ export class GameGateway implements OnGatewayConnection {
       level
     );
     // console.log("Match created : (in create match) ", match.id);
-    const player1_socket = this.WsClients.get(match.player1.id);
-    const player2_socket = this.WsClients.get(match.player2.id);
+    const player1_socket = this.usersService.WsClients.get(match.player1.id);
+    const player2_socket = this.usersService.WsClients.get(match.player2.id);
     this.createBoard(match.id, player1_socket.id, player2_socket.id);
     const board = boards.get(`${match.id}`);
     board.player[0].user_id = match.player1.id;
     board.player[1].user_id = match.player2.id;
     player1_socket.join(`game:${match.id}`);
     player2_socket.join(`game:${match.id}`);
-    this.server.to(`game:${match.id}`).emit("gameStart", match.id);
+    this.statusGateway.sendStatus(player1, "in game", `${match.id}`);
+    this.statusGateway.sendStatus(player2, "in game", `${match.id}`);
     return match;
   }
 
@@ -344,7 +342,7 @@ export class GameGateway implements OnGatewayConnection {
     @ConnectedSocket() socket: Socket
   ) {
     try {
-      this.WsClients.forEach((value, key) => {
+      this.usersService.WsClients.forEach((value, key) => {
         if (value == socket && pending_player == key)
         {
           console.log("Game : Player", key, "left matchmaking");
@@ -447,6 +445,8 @@ export class GameGateway implements OnGatewayConnection {
       );
       this.server.socketsLeave(`game:${id}`);
       boards.delete(`${id}`);
+      this.statusGateway.sendStatus(match.player1.id, "online", "");
+      this.statusGateway.sendStatus(match.player2.id, "online", "");
       this.updateAchievements(board.player[0].user_id);
       this.updateAchievements(board.player[1].user_id);
   }
