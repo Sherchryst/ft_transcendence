@@ -1,8 +1,8 @@
 <template>
 	<div class="lg-card flex flex-col justify-around text-left h-32 py-2 px-5">
-		<div class="lg-card-title text-xl font-bold">Achievements Title</div>
+		<div class="lg-card-title text-xl font-bold">{{title}}</div>
 		<div>
-			Lorem ipsum dolor sit amet consectetur adipisicing elit.
+			{{description}}
 		</div>
 	</div>
 </template>
@@ -11,7 +11,10 @@
 import { defineComponent } from 'vue';
 
 export default defineComponent({
-
+	props: {
+		title: { type: String, required: true },
+		description: { type: String, required: true }
+	},
 })
 </script>
 

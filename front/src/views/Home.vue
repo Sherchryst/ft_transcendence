@@ -29,7 +29,7 @@
       <SquarePanel>
         <div class="flex flex-col gap-3">
             <MainTitle>Top {{topPlayer?.length}}</MainTitle>
-            <div class="flex flex-col overflow-auto gap-6">
+            <div class="flex flex-col overflow-auto max-h-52 gap-5">
               <div v-for="(player, index) in topPlayer" :key="index">
                 <TopPlayerPanel :player="player" :rank="index + 1"></TopPlayerPanel>
               </div>

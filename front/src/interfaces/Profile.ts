@@ -3,6 +3,13 @@ export enum Statut {
 	TWOFA,
 	AUTH
   }
+
+export interface Achievement {
+	id: number;
+	name: string;
+	description: string;
+	unlocked_at: string | null;
+}
 export interface Profile {
 	achievements: [],
 	friends: [],

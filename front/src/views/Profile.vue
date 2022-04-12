@@ -68,20 +68,7 @@
 					<TitlePanel title="Achievements"> <Trophy /> </TitlePanel>
 				</template>
 				<template v-slot:body>
-					<div class="grid md:grid-cols-2 gap-x-10 gap-y-5">
-						<div>
-							<LargerCard></LargerCard>
-						</div>
-						<div>
-							<LargerCard></LargerCard>
-						</div>
-						<div>
-							<LargerCard></LargerCard>
-						</div>
-						<div>
-							<LargerCard class="lg-card-inactive"></LargerCard>
-						</div>
-					</div>
+					<Achievements :achievementsTab="achievements"></Achievements>
 				</template>
 			</ProfilePanel>
 		</div>
@@ -111,7 +98,6 @@ import ProfilePicture from '@/components/profile/ProfilePicture.vue';
 import LevelBar from '@/components/profile/LevelBar.vue';
 import MatchesHistory from '@/components/profile/MatchesHistory.vue';
 import LittleCard from '@/components/profile/LittleCard.vue';
-import LargerCard from '@/components/profile/LargerCard.vue';
 import TitlePanel from '@/components/profile/TitlePanel.vue';
 import ButtonLink from '@/components/ButtonLink.vue';
 import MainTitle from '@/components/MainTitle.vue';
@@ -120,28 +106,29 @@ import Scrool from '@/assets/icon/list-game.svg';
 import Trophy from '@/assets/icon/achievement.svg';
 import {defineComponent, watch, computed} from 'vue';
 import { API } from '@/scripts/auth';
-import { Profile } from '@/interfaces/Profile';
+import { Achievement, Profile } from '@/interfaces/Profile';
 import { useStore } from 'vuex'
 import { key } from '@/store/index'
 import router from '@/router';
+import Achievements from '@/components/profile/Achievements.vue';
 
 
 export default defineComponent({
 	name: "Profile",
 	components: {
-		ProfilePicture,
-		MainTitle,
-		LevelBar,
-		ButtonLink,
-		LittleCard,
-		TitlePanel,
-		MatchesHistory,
-		Scrool,
-		Trophy,
-		ProfilePanel,
-		LargerCard,
-		Modal
-	},
+    ProfilePicture,
+    MainTitle,
+    LevelBar,
+    ButtonLink,
+    LittleCard,
+    TitlePanel,
+    MatchesHistory,
+    Scrool,
+    Trophy,
+    ProfilePanel,
+    Modal,
+    Achievements
+},
 	props:
 	{
 		username: { type: String, required: true}
@@ -161,7 +148,8 @@ export default defineComponent({
 			statut: "NONE",
 			count: 0,
 			winrate: 0,
-			history: []
+			history: [],
+			achievements: [] as Achievement[]
 		}
 	},
 	methods: {
@@ -173,6 +161,8 @@ export default defineComponent({
 				}
 			})
 			.then((res) => {
+				this.achievements = res.data.achievements
+				console.log('achievements', this.achievements)
 				this.profile = res.data;
 				API.get('match/match-count', {
 					params: {
@@ -180,7 +170,6 @@ export default defineComponent({
 					}
 				}).then((res) => {
 					this.count = res.data.count;
-					console.log('Matches count',this.count)
 				}).catch((err) => {
 					console.log(err)
 				})
@@ -190,7 +179,6 @@ export default defineComponent({
 					}
 				}).then((res) => {
 					this.winrate = parseInt(res.data.winrate) ;
-					console.log('Winrate',this.winrate)
 				}).catch((err) => {
 					console.log(err)
 				})
@@ -201,7 +189,6 @@ export default defineComponent({
 					}
 				}).then((res) => {
 					this.history = res.data;
-					console.log('Matches' ,res.data)
 				}).catch((err) => {
 					console.log(err)
 				})
