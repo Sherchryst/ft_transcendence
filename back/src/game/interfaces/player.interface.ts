@@ -1,5 +1,6 @@
 export interface Player {
-  user_id: string;
+  user_socket: string;
+  user_id: number;
   id: number;
   y: number;
   old_y: number;

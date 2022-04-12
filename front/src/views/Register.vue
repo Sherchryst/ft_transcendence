@@ -62,21 +62,25 @@ export default defineComponent({
 			var formData = new FormData();
 			formData.append('file', this.avatar);
 			formData.append('id', this.$store.getters.getId);
+			if (this.avatar.size > 0)
+				API.post('users/update-avatar', formData, {
+					headers: {
+						'Content-Type': 'multipart/form-data'
+					}}).catch(err => {
+						console.log(err);
+						this.$store.commit('setError', err.response.data.message);
+					})
 			API.post('users/update-nickname', {
 				id: this.$store.getters.getId,
 				nickname: this.nickname
-			}).catch(function(error) {
-				console.log(error);
-			});
-			API.post('users/update-avatar', formData, {
-				headers: {
-					'Content-Type': 'multipart/form-data'
-				}}).then( () => {
-				this.$store.dispatch('connection').then( () => {
-					router.push({name: "home"})
+			}).then( () => {
+					this.$store.dispatch('connection').then( () => {
+						router.push({name: "home"})
+					}).catch(function(error) {
+					console.log("update failed", error);
+					})
 				}).catch(function(error) {
-				console.log("update failed", error);
-				})
+				console.log(error);
 			});
 		}
 	}

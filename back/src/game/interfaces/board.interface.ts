@@ -12,4 +12,5 @@ export interface Board {
   level: number;
   isReady?: Promise<boolean>;
   setReady?: voidFunc;
+  start: boolean;
 }

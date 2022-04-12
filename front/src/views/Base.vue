@@ -1,7 +1,7 @@
 <template>
 	<div id="base" class="grid grid-cols-12 min-h-screen">
 		<nav id="nav" class="flex flex-col md:items-center md:fixed h-full w-full md:w-28 pt-24 md:pt-0 dropdown-link-container">
-			<div class="mb-5 md:mb-0 md:mt-10 md:h-36">
+			<div class="mb-5 md:mb-0 md:pt-10 md:h-36">
 				<router-link :to="{name: 'profile', params: {username: whoiam}}">
 					<img class="h-16 w-16" :src="'http://localhost:3000/' + $store.getters.getAvatarPath" alt="profile">
 				</router-link>
@@ -25,7 +25,7 @@
 			</div>
 		</nav>
 		<div class="flex flex-col col-span-12 md:col-start-2 md:col-span-11 px-4 md:px-16">
-			<div class="md:mt-10 md:h-36 ">
+			<div class="md:pt-10 md:h-36 ">
 				<div class="flex flex-row justify-between md:hidden mobile-dropdown mt-3 mb-10">
 					<div class="">
 						<Logo />
@@ -59,7 +59,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="pb-6">
+			<div class="">
 				<router-view @read-message="removeMessageFrom"/>
 			</div>
 		</div>

@@ -80,8 +80,8 @@ export class MatchService {
     return await getRepository(Match).find({
       relations: ['player1', 'player2', 'winner'],
       where: [
-        { player1: { id: userId } },
-        { player2: { id: userId } }
+        { player1: { id: userId }, winner: Not(IsNull()) },
+        { player2: { id: userId }, winner: Not(IsNull()) }
       ],
       order: { beginAt: 'DESC' },
       take: limit
@@ -89,20 +89,25 @@ export class MatchService {
   }
 
   async getWinrate(userId: number): Promise<number> {
-    const winsCount = await getRepository(Match).count({
-      relations: ['winner'],
-      where: { winner: { id: userId } }
-    });
+    const winsCount = await this.winCount(userId);
     const matchsCount = await this.matchCount(userId);
     return matchsCount > 0 ? 100 * winsCount / matchsCount : 0;
+  }
+
+  async winCount(userId: number): Promise<number> {
+    return await getRepository(Match).count({
+      relations: ['winner'],
+      where:
+        { winner: { id: userId }, mode: MatchType.RANKED }
+    });
   }
 
   async matchCount(userId: number): Promise<number> {
     return await getRepository(Match).count({
       relations: ['player1', 'player2', 'winner'],
       where: [
-        { player1: { id: userId }, winner: Not(IsNull()) },
-        { player2: { id: userId }, winner: Not(IsNull()) }
+        { player1: { id: userId }, winner: Not(IsNull()), mode: MatchType.RANKED },
+        { player2: { id: userId }, winner: Not(IsNull()), mode: MatchType.RANKED }
       ]
     });
   }
