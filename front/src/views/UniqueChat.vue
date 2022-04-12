@@ -27,7 +27,6 @@ import { Channel } from '@/interfaces/Channel';
 import { chatSocket } from '@/socket'
 import InfoPanel from '@/components/chat/InfoPanel.vue';
 import OptionChannel from '../components/chat/OptionChannel.vue';
-import { ChannelKey } from '@/interfaces/Channel';
 import ChatViewWrapper from '@/components/chat/ChatViewWrapper.vue';
 
 export default defineComponent({
@@ -62,7 +61,6 @@ export default defineComponent({
         }
     },
     created(): void {
-        provide(ChannelKey, this.channel);
 		watch(
 			() => this.$route.params.id,
 			(newId) => {

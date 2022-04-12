@@ -10,8 +10,12 @@
             </form>
         </div>
         <div class="col-span-2 flex flex-col gap-4 w-3/4">
-            <h3 class="form-title font-bold text-2xl text-left">Your channels</h3>
-            <h3 class="form-title font-bold text-2xl text-left">public channels</h3>
+            <title-count :lenght="0">
+                <h3 class="form-title font-bold text-2xl text-left">Your channels</h3>
+            </title-count>
+            <title-count :lenght="listChannel.length">
+                <h3 class="form-title font-bold text-2xl text-left">public channels</h3>
+            </title-count>
             <channel-view v-for="chan in listChannel" :key="chan.id" :channel="chan"/>
         </div>
     </div>
@@ -27,6 +31,7 @@ import { Channel } from '@/interfaces/Channel'
 import SwitchButton from '../components/SwitchButton.vue'
 import ModInput from '@/components/form/ModInput.vue';
 import ButtonLink from '@/components/ButtonLink.vue';
+import TitleCount from '@/components/common/TitleCount.vue'
 
 export default defineComponent ({
     components: {
@@ -34,6 +39,7 @@ export default defineComponent ({
     SwitchButton,
     ModInput,
     ButtonLink,
+    TitleCount
 },
     beforeRouteLeave(to, from, next) {
         next()
