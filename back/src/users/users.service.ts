@@ -1,12 +1,13 @@
 import { Channel } from 'src/chat/entities/channel.entity';
 import { ChannelMember } from 'src/chat/entities/channel-member.entity';
 import { createWriteStream } from 'fs';
-import { getRepository, Not } from 'typeorm';
+import { getManager, getRepository, Not } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { UserAchievement } from './entities/user-achievement.entity';
 import { UserRelationship, UserRelationshipType } from './entities/user-relationship.entity';
 import * as PostgresError from '@fiveem/postgres-error-codes'
+import { Achievement } from './entities/achievement.entity';
 
 @Injectable()
 export class UsersService {
@@ -89,11 +90,15 @@ export class UsersService {
     }).then(relations => relations.map(r => r.from));
   }
 
-  async getUserAchievements(userId: number): Promise<UserAchievement[]> {
-    return await getRepository(UserAchievement).find({
-      relations: ['achievement'],
-      where: { user: userId }
-    });
+  async getUserAchievements(userId: number): Promise<any[]> {
+    return await getManager().query(
+      'SELECT a.id, a.name, a.description, ua.unlocked_at ' +
+      'FROM achievement a ' +
+      'LEFT JOIN user_achievement ua ' +
+      'ON a.id = ua.achievement_id AND ua.user_id = $1' +
+      'ORDER BY ua.unlocked_at, a.name',
+      [userId]
+    );
   }
 
   async getAllChannelsConnected(userId: number): Promise<Channel[]> {
@@ -135,6 +140,29 @@ export class UsersService {
     });
   }
 
+  async topTen() {
+    return await getManager().query(
+      'SELECT u.id, u.login, u.nickname, u.xp, u.avatar_path, COUNT(m) AS wins, t.total, COUNT(m)::float / t.total AS win_rate ' +
+      'FROM "user" u ' +
+      'LEFT OUTER JOIN "match" m ' +
+      'ON m.mode = \'ranked\' ' +
+      'AND m.winner_id = u.id ' +
+      'JOIN ( ' +
+      '  SELECT u.id, COUNT(m) AS total ' +
+      '  FROM "user" u ' +
+      '  JOIN "match" m ' +
+      '  ON m.mode = \'ranked\' ' +
+      '  AND (m.player1_id = u.id OR m.player2_id = u.id) ' +
+      '  AND m.winner_id IS NOT NULL ' +
+      '  GROUP BY u.id ' +
+      ') t ' +
+      'ON t.id = u.id ' +
+      'GROUP BY u.id, t.total ' +
+      'ORDER BY xp DESC ' +
+      'LIMIT 10'
+    );
+  }
+
   async unblockUser(fromUserId: number, toUserId: number) {
     await getRepository(UserRelationship).delete({
       from: { id: fromUserId },
@@ -173,4 +201,3 @@ export class UsersService {
     });
   }
 }
-

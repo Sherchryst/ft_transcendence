@@ -158,8 +158,9 @@ export default defineComponent({
                     }}).catch(function(error) {
                     console.log("update failed", error);
                 });
-            this.$store.dispatch('connection');
-            router.push({name: "profile", params: {username: this.$store.getters.getLogin}});
+            this.$store.dispatch('connection').then(() => {
+                router.push({name: "profile", params: {username: this.$store.getters.getLogin}});
+            });
         }
     }
 });
