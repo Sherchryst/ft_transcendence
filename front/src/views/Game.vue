@@ -10,7 +10,7 @@
     &-container{
       left: 50%;
       top: 50%;
-      height: 80vh;
+      height: calc(100vh - 144px);
     }
     &-bg{
       border: 5px solid $action;
@@ -24,7 +24,7 @@
 </style>
 
 <template>
-<div class="game" @mousemove="moveRackets">
+<div ref="container" class="game" @mousemove="moveRackets">
   <div id="canvas-div" class="game-container w-full relative">
     <canvas ref="background" id="background" class="game-bg" height="600" width="800"></canvas>
     <canvas ref="gamecanvas" id="gamecanvas" class="game-fg" height="600" width="800"></canvas>
@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent } from 'vue'
+  import { defineComponent, watch } from 'vue'
   import { gameSocket } from '@/socket';
   import { Bot } from '@/interfaces/game/bot.interface';
   import { Board } from '@/interfaces/game/board.interface';
@@ -114,67 +114,113 @@
       bg_canvas: function () { return this.$refs.background as HTMLCanvasElement},
       bg_ctx: function () { return this.bg_canvas.getContext('2d') as CanvasRenderingContext2D}
     },
+    created() {
+      watch(
+        () => this.$route.params.match_id,
+        (newId, oldId) => {
+          if (oldId){
+            console.log("leaving", oldId);
+            if (oldId != 'bot') {
+              gameSocket.emit('leave', { match_id : oldId, id : this.id });
+              gameSocket.off("board");
+              gameSocket.off("gameMap");
+            }
+            document.removeEventListener("mousemove", this.moveRackets);
+            window.removeEventListener("resize", this.resizeCanvas);
+          }
+          if (newId) {
+            console.log("joining", newId);
+            this.initGame(newId.toString());
+          }
+        }
+      )
+    },
     mounted() {
-      this.dimX = this.game_ctx.canvas.width / 100;
+      this.initGame(this.$props.match_id);
+      // this.dimX = this.game_ctx.canvas.width / 100;
       console.log("mounted", this.game_ctx, this.$props);
-      this.dimY = this.game_ctx.canvas.height / 100;
-      if (this.$props.match_id != "bot")
-      {
-        gameSocket.emit('connection', this.match_id);
-        gameSocket.on("gameMap", (data : {
-          map: GameMap,
-          login : string[],
-          id : number
-        }) => {
-          this.map = { ...this.map, ...data.map };
-          console.log(" my map :", this.map);
-          this.login = { ...this.login, ...data.login };
-          console.log(" logins :", this.login);
-          this.id = data.id;
-          console.log(" id :", this.id);
-          this.drawBackground();
-          document.addEventListener("mousemove", this.moveRackets);
-          // console.log(setuped, 'socket connected');
-        });
-        gameSocket.on("board", (data : Board) => {
-          this.board = { ...this.board, ...data }
-          this.addObjects();
-        });
-      }
-      else
-      {
-        console.log("bot");
-        // this.reset(true);
-        this.drawBackground();
-        console.log(this.game_ctx);
-        document.addEventListener("mousemove", this.moveRackets);
-        // console.log(setuped, 'evts', this.evts);
-        this.game_loop();
-      }
+      // this.dimY = this.game_ctx.canvas.height / 100;
     },
     beforeRouteLeave(to, from, next) {
 
-      if (!this.board.end && this.$props.match_id != "bot" && (this.id == 0 || this.id == 1))
-      {
-        const res = window.confirm("Are you sure you want to leave this page? You will lose your progress.")
-        if (res) {
-          console.log("leaving");
-          gameSocket.emit('leave', { match_id : this.match_id, id : this.id });
-          next();
-        }
-        else
-          next(false);
+      if (!this.board.end && this.$props.match_id != "bot" && (this.id == 0 || this.id == 1)) {
+        console.log("leaving");
+        gameSocket.emit('leave', { match_id : this.$props.match_id, id : this.id });
       }
-      else
-        next();
+      next();
     },
     beforeUnmount() {
-      gameSocket.off("board");
-      gameSocket.off("gameMap");
-      // const removed = document.removeEventListener("mousemove", this.moveRackets);
+      if (this.$props.match_id != "bot" ){
+        gameSocket.off("board");
+        gameSocket.off("gameMap");
+      }
+      document.removeEventListener("mousemove", this.moveRackets);
+      window.removeEventListener("resize", this.resizeCanvas);
     },
     methods:
     {
+      initGame(matchId : string | undefined) {
+        if (matchId == undefined) {
+          return;
+        }
+        else if (matchId != "bot")
+        {
+          gameSocket.emit('connection', matchId);
+          gameSocket.on("gameMap", (data : {
+            map: GameMap,
+            login : string[],
+            id : number
+          }) => {
+            this.map = { ...this.map, ...data.map };
+            console.log(" my map :", this.map);
+            this.login = { ...this.login, ...data.login };
+            console.log(" logins :", this.login);
+            this.id = data.id;
+            console.log(" id :", this.id);
+            this.resizeCanvas();
+            // this.drawBackground();
+            window.addEventListener("resize", this.resizeCanvas);
+            document.addEventListener("mousemove", this.moveRackets);
+            // console.log(setuped, 'socket connected');
+          });
+          gameSocket.on("board", (data : Board) => {
+            this.board = { ...this.board, ...data }
+            this.addObjects();
+          });
+        }
+        else
+        {
+          console.log("bot");
+          // this.reset(true);
+          // this.drawBackground();
+          this.resizeCanvas();
+          console.log(this.game_ctx);
+          window.addEventListener("resize", this.resizeCanvas);
+          document.addEventListener("mousemove", this.moveRackets);
+          // console.log(setuped, 'evts', this.evts);
+          this.game_loop();
+        }
+      },
+      resizeCanvas() {
+        let container : HTMLElement = this.$refs.container as HTMLElement;
+        let containerRect : DOMRect = container.getBoundingClientRect();
+        const width = containerRect.right - containerRect.left;
+        const height = containerRect.bottom - containerRect.top;
+        console.log(width, height, this.$refs.container); // logs 0
+        const margin = 20;
+        if ((width - margin) * (3/4)  < height - margin) {
+          this.game_canvas.width = (width - margin);
+          this.game_canvas.height = (width - margin) * (3/4);
+        } else {
+          this.game_canvas.width = (height - margin) * (4/3);
+          this.game_canvas.height = height - margin;
+        }
+        this.bg_canvas.width = this.game_canvas.width;
+        this.bg_canvas.height = this.game_canvas.height;
+        this.dimX = this.game_ctx.canvas.width / 100;
+        this.dimY = this.game_ctx.canvas.height / 100;
+        this.drawBackground();
+      },
       roundRect(x : number, y : number, x2 : number, y2 : number, color = "white", ctx : CanvasRenderingContext2D)
       {
         ctx.fillStyle = color;
@@ -311,7 +357,7 @@
         let rect : DOMRect = this.game_ctx.canvas.getBoundingClientRect();
         // console.log("id :", this.id, this.match_id);
         if (this.$props.match_id != "bot")
-          gameSocket.emit('player', {match_id : this.match_id, id : this.id, y : (evt.clientY - rect.top) / this.dimY})
+          gameSocket.emit('player', {match_id : this.$props.match_id, id : this.id, y : (evt.clientY - rect.top) / this.dimY})
         else
           this.updatePlayer(this.id, (evt.clientY - rect.top) / this.dimY);
       },
