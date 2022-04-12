@@ -2,7 +2,7 @@
   .game{
     overflow: hidden;
     canvas{
-      transform: translateX(-50%) translateY(0%);
+      transform: translateX(-50%);
       position: absolute;
       left: 0;
       top: 0;
@@ -35,7 +35,7 @@
 <script lang="ts">
   import { defineComponent } from 'vue'
   import { gameSocket } from '@/socket';
-  import { Bot } from '@/interfaces/game/bot.interface'; // change to @
+  import { Bot } from '@/interfaces/game/bot.interface';
   import { Board } from '@/interfaces/game/board.interface';
   import { GameMap } from '@/interfaces/game/gameMap.interface';
   import { Dimensions } from '@/interfaces/game/dimensions.interface';
@@ -59,7 +59,6 @@
       return {
         evts: [],
         login : ["you", "bot"],
-        ctx : null as any,
         id : 0,
         map: {
           ballColor : 16562691,
@@ -108,15 +107,25 @@
         } as Bot
       }
     },
+    computed :
+    {
+      game_canvas: function () { return this.$refs.gamecanvas as HTMLCanvasElement},
+      game_ctx: function () { return this.game_canvas.getContext('2d') as CanvasRenderingContext2D},
+      bg_canvas: function () { return this.$refs.background as HTMLCanvasElement},
+      bg_ctx: function () { return this.bg_canvas.getContext('2d') as CanvasRenderingContext2D}
+    },
     mounted() {
-      this.ctx = (this.$refs.gamecanvas as HTMLCanvasElement).getContext("2d") as CanvasRenderingContext2D;
-      this.dimX = this.ctx.canvas.width / 100;
-      console.log("mounted", this.ctx, this.$props);
-      this.dimY = this.ctx.canvas.height / 100;
+      this.dimX = this.game_ctx.canvas.width / 100;
+      console.log("mounted", this.game_ctx, this.$props);
+      this.dimY = this.game_ctx.canvas.height / 100;
       if (this.$props.match_id != "bot")
       {
         gameSocket.emit('connection', this.match_id);
-        gameSocket.on("gameMap", (data : any) => {
+        gameSocket.on("gameMap", (data : {
+          map: GameMap,
+          login : string[],
+          id : number
+        }) => {
           this.map = { ...this.map, ...data.map };
           console.log(" my map :", this.map);
           this.login = { ...this.login, ...data.login };
@@ -124,12 +133,11 @@
           this.id = data.id;
           console.log(" id :", this.id);
           this.drawBackground();
-          // const setuped = document.addEventListener("mousemove", this.moveRackets);
+          document.addEventListener("mousemove", this.moveRackets);
           // console.log(setuped, 'socket connected');
         });
-        gameSocket.on("board", (data : any) => {
+        gameSocket.on("board", (data : Board) => {
           this.board = { ...this.board, ...data }
-          this.clear();
           this.addObjects();
         });
       }
@@ -138,38 +146,37 @@
         console.log("bot");
         // this.reset(true);
         this.drawBackground();
-        //const setuped = document.addEventListener("mousemove", this.moveRackets);
+        console.log(this.game_ctx);
+        document.addEventListener("mousemove", this.moveRackets);
         // console.log(setuped, 'evts', this.evts);
         this.game_loop();
       }
     },
     beforeRouteLeave(to, from, next) {
-      const res = window.confirm("Are you sure you want to leave this page? You will lose your progress.")
-      if (res) {
-        console.log("leaving");
-        if (this.$props.match_id != "bot" && (this.id == 0 || this.id == 1))
-        {
+
+      if (!this.board.end && this.$props.match_id != "bot" && (this.id == 0 || this.id == 1))
+      {
+        const res = window.confirm("Are you sure you want to leave this page? You will lose your progress.")
+        if (res) {
+          console.log("leaving");
           gameSocket.emit('leave', { match_id : this.match_id, id : this.id });
+          next();
         }
-        next();
+        else
+          next(false);
       }
       else
-        next(false);
-      console.log("before leave");
-
+        next();
     },
     beforeUnmount() {
       gameSocket.off("board");
       gameSocket.off("gameMap");
       // const removed = document.removeEventListener("mousemove", this.moveRackets);
-      console.log("before destroy");
     },
     methods:
     {
-      roundRect(x : number, y : number, x2 : number, y2 : number, color = "white", ctx : any = null)
+      roundRect(x : number, y : number, x2 : number, y2 : number, color = "white", ctx : CanvasRenderingContext2D)
       {
-        if (ctx == null)
-          ctx = this.ctx;
         ctx.fillStyle = color;
         const dist_x = x2 > y2? y2 / 3 : x2 / 3;
         ctx.beginPath();
@@ -180,10 +187,9 @@
         ctx.closePath();
         ctx.fill();
       },
-      roundStar(x : number, y : number, radius : number, color = "white", ctx : any = null)
+      roundStar(x : number, y : number, radius : number, color = "white")
       {
-        if (ctx == null)
-          ctx = this.ctx;
+        var ctx = this.bg_ctx;
         ctx.fillStyle = color;
         // console.log('color', color);
         ctx.beginPath();
@@ -204,98 +210,95 @@
       },
       drawBackground()
       {
-        var canvas = this.$refs.background as HTMLCanvasElement;
-        if (!canvas)
-        {
-          console.log("canvas not found");
-          return ;
-        }
-        var ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+        var ctx = this.bg_ctx;
         const interval = ctx.canvas.height / 10;
-        const start = ctx.canvas.height / 60;
         const line_width = ctx.canvas.width / 80;
         const starColor = `#${this.map.starsColor.toString(16).padStart(6, '0')}`;
         const lineColor = `#${this.map.racketColor.toString(16).padStart(6, '0')}`;
-        ctx.fillStyle = `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`;
+        const bgColor = `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`;
+        ctx.fillStyle = bgColor;
         // console.log("background color", `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`);
         ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         // ctx.fillStyle = "white";
-        for (let count = 0; count < 300; count++) //stars
-          this.roundStar(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height, Math.random() * ctx.canvas.height / 80, starColor, ctx);
+        if (starColor != bgColor)
+          for (let count = 0; count < 300; count++) //stars
+            this.roundStar(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height, Math.random() * ctx.canvas.height / 80, starColor);
         for (let i = line_width; i < ctx.canvas.width; i+= interval)
           this.roundRect((ctx.canvas.width- line_width) / 2, i, line_width, interval * 0.65, lineColor, ctx);
       },
-      clear()
+      drawBall(x : number, y : number, )
       {
-          this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-      },
-      drawBall(x : number, y : number)
-      {
+        var ctx = this.game_ctx;
         var h_width = this.board.ball.half_width;
         var bColor = `#${this.map.ballColor.toString(16).padStart(6, '0')}`;
         if (this.board.ball.dx > 0)
         {
-          this.roundRect((x - h_width / 2) * this.dimX, (y - h_width) * this.dimY, h_width * (3/2)  * this.dimX, h_width * (5 / 3) * this.dimX, bColor);
-          this.roundRect((x - h_width) * this.dimX, (y + h_width / 3) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, bColor);
-          this.roundRect((x - h_width) * this.dimX, (y - h_width) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, bColor);
-          this.roundRect((x + h_width / 4) * this.dimX, (y - h_width * (3/4)) * this.dimY, (h_width / 2 * this.dimX), h_width * this.dimX, "#AEBBBC");
-          this.roundRect((x - h_width / 2) * this.dimX, (y + h_width * (2/3)) * this.dimY, h_width * this.dimX, h_width * (2 / 3) * this.dimX, bColor);
+          this.roundRect((x - h_width / 2) * this.dimX, (y - h_width) * this.dimY, h_width * (3/2)  * this.dimX, h_width * (5 / 3) * this.dimX, bColor, ctx);
+          this.roundRect((x - h_width) * this.dimX, (y + h_width / 3) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, bColor, ctx);
+          this.roundRect((x - h_width) * this.dimX, (y - h_width) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, bColor, ctx);
+          this.roundRect((x + h_width / 4) * this.dimX, (y - h_width * (3/4)) * this.dimY, (h_width / 2 * this.dimX), h_width * this.dimX, "#AEBBBC", ctx);
+          this.roundRect((x - h_width / 2) * this.dimX, (y + h_width * (2/3)) * this.dimY, h_width * this.dimX, h_width * (2 / 3) * this.dimX, bColor, ctx);
         }
         else
         {
-          this.roundRect((x - h_width) * this.dimX, (y - h_width) * this.dimY, h_width * (3 / 2)  * this.dimX, h_width * (5 / 3) * this.dimX, bColor);
-          this.roundRect((x - h_width / 2) * this.dimX, (y - h_width) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, bColor);
-          this.roundRect((x - h_width / 2) * this.dimX, (y + h_width / 3) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, bColor);
-          this.roundRect((x - h_width * (3/4)) * this.dimX, (y - h_width * (3/4)) * this.dimY, (h_width / 2 * this.dimX), h_width * this.dimX, "#AEBBBC");
-          this.roundRect((x - h_width / 2) * this.dimX, (y + h_width * (2/3)) * this.dimY, h_width * this.dimX, h_width * (2 / 3) * this.dimX, bColor);
+          this.roundRect((x - h_width) * this.dimX, (y - h_width) * this.dimY, h_width * (3 / 2)  * this.dimX, h_width * (5 / 3) * this.dimX, bColor, ctx);
+          this.roundRect((x - h_width / 2) * this.dimX, (y - h_width) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, bColor, ctx);
+          this.roundRect((x - h_width / 2) * this.dimX, (y + h_width / 3) * this.dimY, h_width * (3/2) * this.dimX, h_width * (2 / 3) * this.dimX, bColor, ctx);
+          this.roundRect((x - h_width * (3/4)) * this.dimX, (y - h_width * (3/4)) * this.dimY, (h_width / 2 * this.dimX), h_width * this.dimX, "#AEBBBC", ctx);
+          this.roundRect((x - h_width / 2) * this.dimX, (y + h_width * (2/3)) * this.dimY, h_width * this.dimX, h_width * (2 / 3) * this.dimX, bColor, ctx);
         }
-        // this.ctx.fillStyle = "#b8a500";
-        // this.ctx.fillRect(0, 0, 400, 50);
+        // ctx.fillStyle = "#b8a500";
+        // ctx.fillRect(0, 0, 400, 50);
         // this.roundRect(0, 0, 400, 50, "white");
-        // this.ctx.fillRect(this.ctx.canvas.height, this.ctx.canvas.height, -100, -350);
-        // this.roundRect(this.ctx.canvas.height, this.ctx.canvas.height, -100, -350, "white");
+        // ctx.fillRect(ctx.canvas.height, ctx.canvas.height, -100, -350);
+        // this.roundRect(ctx.canvas.height, ctx.canvas.height, -100, -350, "white");
       },
-      drawRackets(y1 : number, y2 : number)
+      drawRackets(y1 : number, y2 : number, )
       {
+        var ctx = this.game_ctx;
         if (!this.dim)
           return ;
         var rColor = `#${this.map.racketColor.toString(16).padStart(6, '0')}`;
         this.roundRect((this.dim.racket.x[0] - this.dim.racket.width) * this.dimX, (y1 - this.board.player[0].half_height) * this.dimY,
-          this.dim.racket.width * this.dimX, this.board.player[0].half_height * 2 * this.dimY, rColor);
+          this.dim.racket.width * this.dimX, this.board.player[0].half_height * 2 * this.dimY, rColor, ctx);
         this.roundRect(this.dim.racket.x[1] * this.dimX, (y2 - this.board.player[1].half_height) * this.dimY,
-          this.dim.racket.width * this.dimX, this.board.player[1].half_height * 2 * this.dimY, rColor);
+          this.dim.racket.width * this.dimX, this.board.player[1].half_height * 2 * this.dimY, rColor, ctx);
       },
       drawScore()
       {
-        this.ctx.fillStyle = "white";
-        this.ctx.font = `${this.ctx.canvas.height / 10}px courier new`;
-        this.ctx.textAlign = "right";
-        this.ctx.fillText((this.board.player[0].score).toString(), this.ctx.canvas.width / 2 - this.ctx.canvas.width / 20, this.ctx.canvas.height / 10);
-        this.ctx.textAlign = "left";
-        this.ctx.fillText((this.board.player[1].score).toString(), this.ctx.canvas.width / 2 + this.ctx.canvas.width / 20, this.ctx.canvas.height / 10);
-        this.ctx.font = `${this.ctx.canvas.height / 15}px courier new`;
-        this.ctx.textAlign = "right";
-        this.ctx.fillText(this.login[1], this.ctx.canvas.width - this.ctx.canvas.width / 22, this.ctx.canvas.height / 10);
-        this.ctx.textAlign = "left";
-        this.ctx.fillText(this.login[0], this.ctx.canvas.width / 22, this.ctx.canvas.height / 10);
+        var ctx = this.game_ctx;
+        ctx.fillStyle = "white";
+        ctx.font = `${ctx.canvas.height / 10}px courier new`;
+        ctx.textAlign = "right";
+        ctx.fillText((this.board.player[0].score).toString(), ctx.canvas.width / 2 - ctx.canvas.width / 20, ctx.canvas.height / 10);
+        ctx.textAlign = "left";
+        ctx.fillText((this.board.player[1].score).toString(), ctx.canvas.width / 2 + ctx.canvas.width / 20, ctx.canvas.height / 10);
+        ctx.font = `${ctx.canvas.height / 15}px courier new`;
+        ctx.textAlign = "right";
+        ctx.fillText(this.login[1], ctx.canvas.width - ctx.canvas.width / 22, ctx.canvas.height / 10);
+        ctx.textAlign = "left";
+        ctx.fillText(this.login[0], ctx.canvas.width / 22, ctx.canvas.height / 10);
       },
       drawWinner(winner : number)
       {
-        this.ctx.fillStyle = "white";
-        this.ctx.font = `${this.ctx.canvas.height / 10}px courier new`; // absolute size /!\
-        this.ctx.textAlign = "center";
-        this.ctx.fillText(this.login[winner] + " wins", this.ctx.canvas.width / 2, this.ctx.canvas.height / 2);
+        var ctx = this.game_ctx;
+        ctx.fillStyle = "white";
+        ctx.font = `${ctx.canvas.height / 10}px courier new`; // absolute size /!\
+        ctx.textAlign = "center";
+        ctx.fillText(this.login[winner] + " wins", ctx.canvas.width / 2, ctx.canvas.height / 2);
       },
       addObjects()
       {
         // console.log("end : ", this.board.end);
+        var ctx = this.game_ctx;
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         if (this.board.end)
           this.drawWinner(this.board.player[0].score > this.board.player[1].score ? 0 : 1);
         else {
             if (this.board.dead)
-              this.ctx.globalAlpha = 0.2;
+              ctx.globalAlpha = 0.2;
             this.drawBall(this.board.ball.x, this.board.ball.y);
-            this.ctx.globalAlpha = 1;
+            ctx.globalAlpha = 1;
           }
         this.drawRackets(this.board.player[0].y, this.board.player[1].y);
         this.drawScore();
@@ -305,7 +308,7 @@
         // console.log("Evt: ", evt);
         if (this.id > 1)
           return ;
-        let rect : DOMRect = this.ctx.canvas.getBoundingClientRect();
+        let rect : DOMRect = this.game_ctx.canvas.getBoundingClientRect();
         // console.log("id :", this.id, this.match_id);
         if (this.$props.match_id != "bot")
           gameSocket.emit('player', {match_id : this.match_id, id : this.id, y : (evt.clientY - rect.top) / this.dimY})
@@ -325,7 +328,7 @@
       racketCollision(dist : number, idx : number, racket_dy : number)
       {
         var ball = this.board.ball;
-        const speed_factor = ball.dx > 3 ? 1 : 1.05;
+        const speed_factor = Math.abs(ball.dx) > 2 ? 1 : 1.05;
         ball.dx *= -speed_factor;
         ball.dy = speed_factor * ball.dy + racket_dy
             + dist * Math.abs(ball.dx) / this.board.player[idx].half_height;
@@ -357,23 +360,6 @@
             this.board.player[player? 0 : 1].score++;
             this.reset(false);
           }
-        // else if ((tmpx > dim.racket.x[0] - dim.racket.width - (ball.half_width * 2)
-          // || tmpx <= dim.racket.x[1] + dim.racket.width + (ball.half_width * 2))
-          // && Math.abs(dist) <= this.this.board.player[player].half_height + ball.half_width
-          // && Math.sign(dist) == Math.sign(ball.dy)
-          // && (Math.sign(dist) == Math.sign(racket_dy) || racket_dy < 0.001)) //ball side of racket
-          // {
-          // 	ball.dy = Math.abs(ball.dy) * Math.sign(dist) + racket_dy;
-          // 	if (Math.abs(ball.dx) * 2 < Math.abs(ball.dy))
-          // 		ball.dy = 2 * Math.sign(ball.dy) * Math.abs(ball.dx);
-          // 	// ball.dy = -1 * Math.sign(dist) + ball.dy + (Math.sign(dist) != Math.sign(racket_dy)? racket_dy:0);
-          // 	ball.y = this.this.board.player[player].y + Math.sign(dist) * (ball.half_width + this.this.board.player[player].half_height);
-          // 	if (ball.y < ball.half_width)
-          // 		ball.y = ball.half_width;
-          // 	else if (ball.y > height - ball.half_width)
-          // 		ball.y = height - ball.half_width;
-          // 	this.this.board.dead = true;
-          // }
           else //ball behind racket
           {
             this.moveBall();
@@ -435,7 +421,6 @@
             this.board.pause_counter--;
           else
             this.updateBall();
-          this.clear();
           this.addObjects();
         }
       },

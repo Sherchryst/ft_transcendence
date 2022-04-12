@@ -193,5 +193,12 @@ export class UsersService {
       newUser: false
     });
   }
+
+  async updateXP(userId: number, xp: number) {
+    await getRepository(User).update(userId, {
+      xp: xp,
+      newUser: false
+    });
+  }
 }
 
