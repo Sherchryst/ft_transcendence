@@ -80,9 +80,8 @@ export class MatchService {
     return await getRepository(Match).find({
       relations: ['player1', 'player2', 'winner'],
       where: [
-        { player1: { id: userId } },
-        { player2: { id: userId } },
-        { winner: Not(IsNull()) }
+        { player1: { id: userId }, winner: Not(IsNull()) },
+        { player2: { id: userId }, winner: Not(IsNull()) }
       ],
       order: { beginAt: 'DESC' },
       take: limit
