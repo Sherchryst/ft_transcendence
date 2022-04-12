@@ -1,16 +1,16 @@
 <template>
-  <div class="home grid grid-cols-12 gap-8">
+  <div class="home flex flex-col justify-arround md:grid md:grid-cols-12 gap-8">
       <LargePanel>
             <template v-slot:left>
                 <div class="flex flex-col justify-between p-7 h-full">
-                    <div>
+                    <div class="pb-10">
                         <p class="text-left">Pong is one of the first computer games that ever created, this simple "tennis like" game features two paddles and a ball, the goal is to defeat your opponent ...</p>
                     </div>
-                    <button-link text="Go faire un PONG" href="http://localhost:8080/#/game"/>
+                    <button-link text="Go faire un PONG" href="http://localhost:8080/#/game-choice"/>
                 </div>
             </template>
             <template v-slot:right>
-                <div class="h-full w-full panel-dk item-center">
+                <div class=" w-full self-center">
                     <img class="" src="@/assets/boule.gif" alt="Upon Us">
                 </div>
             </template>
@@ -23,23 +23,16 @@
       <SquarePanel>
         <div class="h-full flex flex-col justify-between">
             <MainTitle>Winrate</MainTitle>
-            <div class="text-8xl font-bold pb-12">{{winrate}}%</div>
+            <div class="text-8xl font-bold pt-5 md:pb-12">{{winrate}}%</div>
         </div>
       </SquarePanel>
       <SquarePanel>
-        <div class="h-full flex flex-col justify-between gap-3">
-            <MainTitle>Top 10</MainTitle>
-            <div class="flex flex-col overflow-auto gap-6">
-                <TopPlayerPanel login="login" username="Username" :rank="1"></TopPlayerPanel>
-                <TopPlayerPanel login="login" username="Username" :rank="2"></TopPlayerPanel>
-                <TopPlayerPanel login="login" username="Username" :rank="3"></TopPlayerPanel>
-                <TopPlayerPanel login="login" username="Username" :rank="4"></TopPlayerPanel>
-                <TopPlayerPanel login="login" username="Username" :rank="5"></TopPlayerPanel>
-                <TopPlayerPanel login="login" username="Username" :rank="6"></TopPlayerPanel>
-                <TopPlayerPanel login="login" username="Username" :rank="7"></TopPlayerPanel>
-                <TopPlayerPanel login="login" username="Username" :rank="8"></TopPlayerPanel>
-                <TopPlayerPanel login="login" username="Username" :rank="9"></TopPlayerPanel>
-                <TopPlayerPanel login="login" username="Username" :rank="10"></TopPlayerPanel>
+        <div class="flex flex-col gap-3">
+            <MainTitle>Top {{topPlayer?.length}}</MainTitle>
+            <div class="flex flex-col overflow-auto max-h-52 gap-5">
+              <div v-for="(player, index) in topPlayer" :key="index">
+                <TopPlayerPanel :player="player" :rank="index + 1"></TopPlayerPanel>
+              </div>
             </div>
         </div>
       </SquarePanel>
@@ -70,6 +63,7 @@ export default defineComponent({
     return {
       winrate: 0,
       history: [],
+      topPlayer: [],
     }
   },
   setup () {
@@ -77,6 +71,10 @@ export default defineComponent({
   },
   mounted () {
     console.log('created', this.$store.getters.getId)
+    API.get('users/top-ten').then((res) => {
+      this.topPlayer = res.data
+      console.log(res.data)
+    })
     API.get('match/get-winrate', {
       params: {
         userId: this.$store.getters.getId
@@ -106,12 +104,6 @@ export default defineComponent({
 .panel {
   background-color: $panel-color;
   border-radius: 25px;
-  height: 35vh;
-}
-.panel-dk {
-  background-color: $panel--dk-color;
-  border-radius: 25px;
-  height: 35vh;
 }
 
 </style>
