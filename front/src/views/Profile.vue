@@ -167,7 +167,7 @@ export default defineComponent({
 				this.profile = res.data;
 				// Change statut
 			}).catch(() => {
-				router.push({name: 'not-found'})
+				router.push({name: 'not-found', replace: true })
 			})
 		},
 		openModal() : void {
