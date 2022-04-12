@@ -1,5 +1,5 @@
 <template>
-    <div class="grid-cols-1 md:grid grid-cols-3 gap-4 span-4">
+    <div class="grid-cols-1 md:grid grid-cols-3 gap-16 span-4">
         <div class=" mb-5">
             <form id="form-channel" class="flex flex-col gap-3" @submit.prevent="create">
                 <div class="text-xl text-left font-bold form-title">New channel</div>
@@ -9,7 +9,9 @@
                 <button-link type="submit" >Create</button-link>
             </form>
         </div>
-        <div class="col-span-2" :key="listChannel">
+        <div class="col-span-2 flex flex-col gap-4 w-3/4">
+            <h3 class="form-title font-bold text-2xl text-left">Your channels</h3>
+            <h3 class="form-title font-bold text-2xl text-left">public channels</h3>
             <channel-view v-for="chan in listChannel" :key="chan.id" :channel="chan"/>
         </div>
     </div>
@@ -17,10 +19,10 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { API } from '@/scripts/auth.ts';
+import { API } from '@/scripts/auth';
 import { useMeta } from 'vue-meta'
 import ChannelView from '@/components/chat/ChannelView.vue'
-import { chatSocket } from '@/socket.ts'
+import { chatSocket } from '@/socket'
 import { Channel } from '@/interfaces/Channel'
 import SwitchButton from '../components/SwitchButton.vue'
 import ModInput from '@/components/form/ModInput.vue';
