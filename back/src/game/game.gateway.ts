@@ -98,6 +98,33 @@ export class GameGateway implements OnGatewayConnection {
     console.log("Game : New connection to socket");
   }
 
+<<<<<<< HEAD
+=======
+  async updateAchievements(user_id: number) {
+    // const achievements = await this.usersService.getUserAchievements(user_id);
+    try {
+      if (await this.matchService.winCount(user_id) >= 1) {
+        await this.usersService.unlockAchievement(user_id, 1); // win 1
+      }
+    } catch (e) {}
+    const history = await this.matchService.getHistory(user_id, 5);
+    try {
+      if (history.filter((match) => match.winner.id == user_id).length >= 5) {
+        await this.usersService.unlockAchievement(user_id, 2); // win 5 in a row
+      }
+      else if (history.filter((match) => match.winner.id != user_id).length >= 5) {
+        await this.usersService.unlockAchievement(user_id, 3); // lose 5 in a row
+      }
+    } catch (e) {}
+    try {
+      if (history[0].winner.id == user_id
+      && (history[0].score1 == 0 || history[0].score2 == 0)) {
+        await this.usersService.unlockAchievement(user_id, 4); // fanny
+      }
+    } catch (e) {}
+  }
+
+>>>>>>> main
   handleDisconnect(@ConnectedSocket() socket: Socket) {
     // --> put score of other player to 11 in bd
     // this.usersService.WsClients.delete(req.user?.id);
@@ -445,8 +472,11 @@ export class GameGateway implements OnGatewayConnection {
       );
       this.server.socketsLeave(`game:${id}`);
       boards.delete(`${id}`);
+<<<<<<< HEAD
       this.statusGateway.sendStatus(match.player1.id, "online", "");
       this.statusGateway.sendStatus(match.player2.id, "online", "");
+=======
+>>>>>>> main
       this.updateAchievements(board.player[0].user_id);
       this.updateAchievements(board.player[1].user_id);
   }
