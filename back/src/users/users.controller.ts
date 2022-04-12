@@ -65,13 +65,7 @@ export class UsersController {
       throw new BadRequestException('No id nor login provided');
     if (!user)
       throw new NotFoundException('User not found');
-    /*
-    * TODO: Add requests for achievements
-    */
     const achievements = await this.usersService.getUserAchievements(id);
-    /*
-    * TODO: Add requests for friends
-    */
     const friends = await this.usersService.getFriends(id);
     /* TODO: Add relationship status with current user
       - User can be blocked
@@ -106,6 +100,11 @@ export class UsersController {
     } catch (error) {
       throw new UnauthorizedException();
     }
+  }
+
+  @Get('top-ten')
+  async topTen() {
+    return JSON.stringify(await this.usersService.topTen());
   }
 
   @Post('unblock-user')
