@@ -1,16 +1,16 @@
 <template>
-  <div class="home grid grid-cols-12 gap-8">
+  <div class="home flex flex-col justify-arround md:grid md:grid-cols-12 gap-8">
       <LargePanel>
             <template v-slot:left>
                 <div class="flex flex-col justify-between p-7 h-full">
-                    <div>
+                    <div class="pb-10">
                         <p class="text-left">Pong is one of the first computer games that ever created, this simple "tennis like" game features two paddles and a ball, the goal is to defeat your opponent ...</p>
                     </div>
                     <button-link text="Go faire un PONG" href="http://localhost:8080/#/game-choice"/>
                 </div>
             </template>
             <template v-slot:right>
-                <div class="h-full w-full panel-dk item-center">
+                <div class=" w-full self-center">
                     <img class="" src="@/assets/boule.gif" alt="Upon Us">
                 </div>
             </template>
@@ -23,7 +23,7 @@
       <SquarePanel>
         <div class="h-full flex flex-col justify-between">
             <MainTitle>Winrate</MainTitle>
-            <div class="text-8xl font-bold pb-12">{{winrate}}%</div>
+            <div class="text-8xl font-bold pt-5 md:pb-12">{{winrate}}%</div>
         </div>
       </SquarePanel>
       <SquarePanel>
@@ -104,12 +104,6 @@ export default defineComponent({
 .panel {
   background-color: $panel-color;
   border-radius: 25px;
-  height: 35vh;
-}
-.panel-dk {
-  background-color: $panel--dk-color;
-  border-radius: 25px;
-  height: 35vh;
 }
 
 </style>

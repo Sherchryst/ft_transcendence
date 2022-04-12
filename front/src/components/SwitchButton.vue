@@ -6,7 +6,6 @@
 </template>
 
 <script lang="ts">
-import { emit } from "process";
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -17,8 +16,9 @@ export default defineComponent({
 		}
 	},
 	methods: {
-		onSwitch(event: any) {
-			this.checked = event.target.checked;
+		onSwitch(event: Event) {
+			console.log(event);
+			this.checked = (event.target as HTMLInputElement).checked;
 			this.$emit('onSwitched', this.checked);
 		}
 	}
