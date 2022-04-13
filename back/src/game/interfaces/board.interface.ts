@@ -10,7 +10,8 @@ export interface Board {
   end: boolean;
   pause_counter: number;
   level: number;
-  isReady?: Promise<boolean>;
-  setReady?: voidFunc;
+  // isReady?: Promise<boolean>;
+  // setReady?: voidFunc;
+  ready : number;
   start: boolean;
 }

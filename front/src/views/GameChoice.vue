@@ -32,18 +32,13 @@
 import GamePanel from '@/components/GamePanel.vue';
 // import BigRadioButton from '@/components/BigRadioButton.vue';
 import { defineComponent } from 'vue';
-import { gameSocket, statusSocket } from '@/socket';
+import { gameSocket } from '@/socket';
 import router from '@/router';
 
 export default defineComponent({
 	components: {
 		GamePanel,
 		// BigRadioButton,
-	},
-	mounted() {
-			statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
-			console.log("match status : ", data);
-		});
 	},
 	beforeUnmount() {
 		//   gameSocket.off("invited");
