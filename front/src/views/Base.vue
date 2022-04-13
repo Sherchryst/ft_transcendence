@@ -84,7 +84,7 @@ import { key } from '@/store/index'
 import { API } from '@/scripts/auth';
 import router from '@/router';
 import { SocketMessage } from '@/interfaces/Message';
-import { chatSocket, gameSocket } from '@/socket'
+import { chatSocket, gameSocket, statusSocket } from '@/socket'
 import NotifPanel from '@/components/Notification/NotifPanel.vue';
 import { Statut } from '@/interfaces/Profile';
 import BadgeNotif from '@/components/Notification/BadgeNotif.vue'; 
@@ -115,6 +115,9 @@ export default defineComponent({
 		}
 	},
 	mounted() {
+		statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
+			console.log("match status : ", data);
+		});
 		console.log('avatar', this.$store.state.profile.user.avatarPath)
 		this.getNotif()
 		this.chatSocket

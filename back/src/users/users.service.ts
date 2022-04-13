@@ -1,7 +1,7 @@
 import { Channel } from 'src/chat/entities/channel.entity';
 import { ChannelMember } from 'src/chat/entities/channel-member.entity';
 import { createWriteStream } from 'fs';
-import { getManager, getRepository, Not } from 'typeorm';
+import { getManager, getRepository, IsNull, Not } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { UserAchievement } from './entities/user-achievement.entity';
@@ -9,6 +9,7 @@ import { UserRelationship, UserRelationshipType } from './entities/user-relation
 import * as PostgresError from '@fiveem/postgres-error-codes'
 import { Achievement } from './entities/achievement.entity';
 import { Socket } from 'socket.io';
+import { Match } from 'src/game/entities/match.entity';
 
 @Injectable()
 export class UsersService {
@@ -36,9 +37,29 @@ export class UsersService {
     this.sendNewFriendStatus(fromUserId, toUserId);
   }
 
+  async inMatch(userId: number): Promise<Match> {
+    return await getRepository(Match).findOne({
+      relations: ['player1', 'player2', 'winner'],
+      where: [
+        { player1: { id: userId }, winner: IsNull() },
+        { player2: { id: userId }, winner: IsNull() }
+      ],
+    });
+  }
+
   async sendNewFriendStatus(userId1 : number, userId2 : number) {
-    this.WsClients.get(userId1)?.emit("status", { userId : userId2, status : (this.WsClients.has(userId2)? "online" : "offline"), message : "" });
-    this.WsClients.get(userId2)?.emit("status", { userId : userId1, status : (this.WsClients.has(userId1)? "online" : "offline"), message : "" });
+    const match1 = await this.inMatch(userId1);
+    const match2 = await this.inMatch(userId2);
+    if (match1) {
+      this.WsClients.get(userId2)?.emit("status", { userId : userId1, status : "in game", message : `${match1.id}` });
+    } else {
+      this.WsClients.get(userId2)?.emit("status", { userId : userId1, status : (this.WsClients.has(userId1)? "online" : "offline"), message : "" });
+    }
+    if (match2) {
+      this.WsClients.get(userId1)?.emit("status", { userId : userId2, status : "in game", message : `${match2.id}` });
+    } else {
+      this.WsClients.get(userId1)?.emit("status", { userId : userId2, status : (this.WsClients.has(userId2)? "online" : "offline"), message : "" });
+    }
   }
 
   async blockUser(fromUserId: number, toUserId: number) {
