@@ -2,6 +2,7 @@ import { InjectionKey } from 'vue'
 import { createStore, Store } from 'vuex';
 import { Profile, User } from '@/interfaces/Profile';
 import { API } from '@/scripts/auth';
+import { Statut } from '@/interfaces/Profile';
 // define your typings for the store state
 export interface State {
   profile: Profile,
@@ -24,6 +25,10 @@ export const store = createStore<State>({
       const profile : Profile = JSON.parse(localStorage.getItem('user') || '{}')
       return profile?.user?.login
     },
+    getAvatarPath() : string{
+      const profile : Profile = JSON.parse(localStorage.getItem('user') || '{}')
+      return profile?.user?.avatarPath
+    },
     getNickname() : string{
       const profile : Profile = JSON.parse(localStorage.getItem('user') || '{}')
       return profile?.user?.nickname
@@ -35,10 +40,15 @@ export const store = createStore<State>({
     isNewUser(): boolean {
       const profile : Profile = JSON.parse(localStorage.getItem('user') || '{}')
       return profile?.user?.newUser
+    },
+    is2FA(): boolean | undefined {
+      const profile : Profile = JSON.parse(localStorage.getItem('user') || '{}')
+      return profile?.user?.twofa;
     }
   },
   mutations: {
     setProfile(state, _profile) {
+      localStorage.setItem("state", Statut.AUTH.toString())
       localStorage.setItem('user', JSON.stringify(_profile))
       // state.profile = _profile
     },
@@ -48,7 +58,7 @@ export const store = createStore<State>({
   },
   actions: {
     async connection({commit}){
-      const response = await API.get('users/profile');
+        const response = await API.get('users/profile');
         commit("setProfile", response.data);
     },
     SOCKET_addMessage({ commit }, message) {

@@ -2,17 +2,17 @@
 	<div class="grid grid-cols-12 lg:gap-x-16 2xl:gap-x-32">
 		<div class="col-span-12 md:col-span-4 flex flex-col max-w-sm">
 			<div class="flex place-content-center mb-4">
-				<ProfilePicture></ProfilePicture>
+				<ProfilePicture v-if="profile.user != undefined" :avatar="'http://localhost:3000/' + profile.user?.avatarPath"></ProfilePicture>
 			</div>
 			<div class="mb-6">
 				<MainTitle class="title-username">{{ profile.user?.nickname }}</MainTitle>
 				<p>{{ profile.user?.login }}</p>
 			</div>
 			<div class="mb-8">
-				<LevelBar :percent="68" :level="8" :nextLevel="9"></LevelBar>
+				<LevelBar :xp="profile.user?.xp"></LevelBar>
 			</div>
 			<div class="mb-12">
-				<ButtonLink v-if="username == selfLogin" class="flex justify-center w-full" text="Edit Profile"></ButtonLink>
+				<ButtonLink v-if="username == selfLogin" route="edit-profile" class="flex justify-center w-full"  text="Edit Profile"></ButtonLink>
 				<div v-else class="flex flex-col gap-y-4">
 					<Transition mode="out-in" name="btn">
 						<button-link v-if="statut == 'NONE'" class="flex justify-center w-full" text="Ask a friend" @click="friendRequest"></button-link>
@@ -32,7 +32,7 @@
 							<p>Winrate</p>
 						</template>
 						<template v-slot:body>
-							<div class="text-3xl font-bold">89%</div>
+							<div class="text-3xl font-bold">{{winrate}}%</div>
 						</template>
 					</LittleCard>
 				</div>
@@ -43,7 +43,7 @@
 						</template>
 						<template v-slot:body>
 							<div class="played text-4xl font-bold italic">
-								172
+								{{count}}
 							</div>
 						</template>
 					</LittleCard>
@@ -56,19 +56,10 @@
 					<TitlePanel title="Historique des matchs"> <Scrool/> </TitlePanel>
 				</template>
 				<template v-slot:body>
-					<div class="overflow-auto max-h-64">
-						<MatchesHistory :result="true" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
-						<MatchesHistory :result="false" type="type of battle" :first="5" :second="3"></MatchesHistory>
+					<div class="overflow-auto max-h-64" >
+						<div v-for="(match, index) in history" :key="index">
+							<MatchesHistory :match="match" :userId="profile.user.id"></MatchesHistory>
+						</div>
 					</div>
 				</template>
 			</ProfilePanel>
@@ -77,20 +68,7 @@
 					<TitlePanel title="Achievements"> <Trophy /> </TitlePanel>
 				</template>
 				<template v-slot:body>
-					<div class="grid md:grid-cols-2 gap-x-10 gap-y-5">
-						<div>
-							<LargerCard></LargerCard>
-						</div>
-						<div>
-							<LargerCard></LargerCard>
-						</div>
-						<div>
-							<LargerCard></LargerCard>
-						</div>
-						<div>
-							<LargerCard class="lg-card-inactive"></LargerCard>
-						</div>
-					</div>
+					<Achievements :achievements="achievements"></Achievements>
 				</template>
 			</ProfilePanel>
 		</div>
@@ -105,7 +83,6 @@ import ProfilePicture from '@/components/profile/ProfilePicture.vue';
 import LevelBar from '@/components/profile/LevelBar.vue';
 import MatchesHistory from '@/components/profile/MatchesHistory.vue';
 import LittleCard from '@/components/profile/LittleCard.vue';
-import LargerCard from '@/components/profile/LargerCard.vue';
 import TitlePanel from '@/components/profile/TitlePanel.vue';
 import ButtonLink from '@/components/ButtonLink.vue';
 import MainTitle from '@/components/MainTitle.vue';
@@ -113,11 +90,12 @@ import Scrool from '@/assets/icon/list-game.svg';
 import Trophy from '@/assets/icon/achievement.svg';
 import {defineComponent, watch, computed} from 'vue';
 import { API } from '@/scripts/auth';
-import { Profile } from '@/interfaces/Profile';
+import BlockModal from '@/components/modal/BlockModal.vue';
+import { Achievement, Profile } from '@/interfaces/Profile';
 import { useStore } from 'vuex'
 import { key } from '@/store/index'
 import router from '@/router';
-import BlockModal from '@/components/modal/BlockModal.vue';
+import Achievements from '@/components/profile/Achievements.vue';
 
 
 export default defineComponent({
@@ -133,8 +111,8 @@ export default defineComponent({
     Scrool,
     Trophy,
     ProfilePanel,
-    LargerCard,
-    BlockModal
+    BlockModal,
+    Achievements
 },
 	props:
 	{
@@ -152,20 +130,52 @@ export default defineComponent({
 		return {
 			profile: {} as Profile,
 			showModal: false,
-			statut: "NONE"
+			statut: "NONE",
+			count: 0,
+			winrate: 0,
+			history: [],
+			achievements: [] as Achievement[]
 		}
 	},
 	methods: {
 		getUser(username: string | string[]): void {
-			API.get('users/get-profile', {
+			API.get<Profile>('users/get-profile', {
 				params: {
 					id: null,
 					login: username
 				}
 			})
 			.then((res) => {
+				this.achievements = res.data.achievements
 				this.profile = res.data;
-				// Change statut
+				API.get('match/match-count', {
+					params: {
+						userId: this.profile.user.id
+					}
+				}).then((res) => {
+					this.count = res.data.count;
+				}).catch((err) => {
+					console.log(err)
+				})
+				API.get('match/get-winrate', {
+					params: {
+						userId: this.profile.user.id
+					}
+				}).then((res) => {
+					this.winrate = parseInt(res.data.winrate) ;
+				}).catch((err) => {
+					console.log(err)
+				})
+				API.get('match/get-history', {
+					params: {
+						userId: this.profile.user.id,
+						limit: 50
+					}
+				}).then((res) => {
+					this.history = res.data;
+				}).catch((err) => {
+					console.log(err)
+				})
 			}).catch(() => {
 				router.push({name: 'not-found', replace: true })
 			})

@@ -2,7 +2,7 @@
 <div class="flex flex-col">
 	<span class="mb-2 text-left label"><slot></slot></span>
 	<label :name="name" class="mod-switch">
-		<input :name="name" type="checkbox">
+		<input :name="name" type="checkbox" @change="onSwitch($event)">
 		<span class="slider"></span>
 	</label>
 </div>
@@ -10,15 +10,26 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import ModLabel from "./form/ModLabel.vue";
 
 export default defineComponent({
-	name: "SwitchButton",
+    name: "SwitchButton",
 	props: {
 		name: { type: String, default: "check" }
 	},
-	// components: { ModLabel }
-})
+	data() {
+		return {
+			checked: false,
+		}
+	},
+	methods: {
+		onSwitch(event: Event) {
+			console.log(event);
+			this.checked = (event.target as HTMLInputElement).checked;
+			this.$emit('onSwitched', this.checked);
+		}
+	}
+	
+});
 </script>
 
 <style lang="scss">
