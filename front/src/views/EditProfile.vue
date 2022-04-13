@@ -19,15 +19,13 @@
                     <input type="text" class="title-username input" id="username" name="username" v-model="nickname" placeholder="username">
                 </div>
                 <div v-if="Is2fa" class="mb-8">
-                    <button v-on:click="deactivated_2fa" class="btn px-7 py-3 pb-2"> Deactivated 2fa </button>
+                    <button type="button" v-on:click="deactivated_2fa" class="btn px-7 py-3 pb-2"> Deactivated 2fa </button>
                 </div>
                 <div v-else class="mb-8 flex flex-row place-content-center">
                     <label class="pt-1 title-username" for="2F Authentication">2F Authentication:</label>
                     <SwitchButton @onSwitched="inputSwitch($event)"></SwitchButton>
                 </div>
-                <div class="btn self-center">
-                    <button type="submit" class="px-7 py-3 pb-2"> Register </button>
-                </div>
+                <ButtonLink class="flex justify-center w-full" type="submit"> Edit Profile </ButtonLink>
             </form>
         </div>
         <div v-if="qrcode && SwitchOn == true" class="col-span-12 lg:col-span-8 2xl:col-span-7 flex flex-col max-w-sm">
@@ -58,6 +56,7 @@ import { API } from "@/scripts/auth";
 import router from "@/router";
 import ProfilePanel from "@/components/profile/ProfilePanel.vue";
 import MainTitle from "@/components/MainTitle.vue";
+import ButtonLink from "@/components/ButtonLink.vue";
 
 export enum State {
   NOTLOGIN,
@@ -72,7 +71,8 @@ export default defineComponent({
     SwitchButton,
     ProfilePicture,
     ProfilePanel,
-    MainTitle
+    MainTitle,
+    ButtonLink
 },
     data () {
         return {
@@ -102,6 +102,7 @@ export default defineComponent({
     methods: {
         deactivated_2fa() {
             API.post('2fa/turn-off').then(() => {
+                this.Is2fa = false;
                 this.SwitchOn = false;
                 this.Switch = false;
                 this.digits = "";

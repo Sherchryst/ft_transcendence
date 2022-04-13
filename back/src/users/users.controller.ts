@@ -65,8 +65,8 @@ export class UsersController {
       throw new BadRequestException('No id nor login provided');
     if (!user)
       throw new NotFoundException('User not found');
-    const achievements = await this.usersService.getUserAchievements(id);
-    const friends = await this.usersService.getFriends(id);
+    const achievements = await this.usersService.getUserAchievements(user.id);
+    const friends = await this.usersService.getFriends(user.id);
     /* TODO: Add relationship status with current user
       - User can be blocked
       - User can unblock user

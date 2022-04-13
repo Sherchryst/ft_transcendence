@@ -9,7 +9,7 @@
 				<p>{{ profile.user?.login }}</p>
 			</div>
 			<div class="mb-8">
-				<LevelBar :percent="68" :level="8" :nextLevel="9"></LevelBar>
+				<LevelBar :xp="profile.user?.xp"></LevelBar>
 			</div>
 			<div class="mb-12">
 				<ButtonLink v-if="username == selfLogin" route="edit-profile" class="flex justify-center w-full"  text="Edit Profile"></ButtonLink>
@@ -68,7 +68,7 @@
 					<TitlePanel title="Achievements"> <Trophy /> </TitlePanel>
 				</template>
 				<template v-slot:body>
-					<Achievements :achievementsTab="achievements"></Achievements>
+					<Achievements :achievements="achievements"></Achievements>
 				</template>
 			</ProfilePanel>
 		</div>
@@ -162,7 +162,6 @@ export default defineComponent({
 			})
 			.then((res) => {
 				this.achievements = res.data.achievements
-				console.log('achievements', this.achievements)
 				this.profile = res.data;
 				API.get('match/match-count', {
 					params: {
