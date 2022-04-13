@@ -1,15 +1,19 @@
-import { Body, Controller, Get, Post, Req, UseGuards, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards, UnauthorizedException, HttpException, ForbiddenException } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
 import { UsersService } from 'src/users/users.service';
 import { ChannelMemberRole } from './entities/channel-member.entity';
+import { ChatGateway } from './chat.gateway';
+import { ChannelVisibility } from './entities/channel.entity';
+import { HttpErrorByCode } from '@nestjs/common/utils/http-error-by-code.util';
 
 @Controller('chat')
 @UseGuards(Jwt2faGuard)
 export class ChatController {
   constructor(
     private chatService: ChatService,
-    private userService: UsersService
+    private userService: UsersService,
+    private chatGateway: ChatGateway
   ) {}
 
   @Get('list')
@@ -27,11 +31,21 @@ export class ChatController {
 
   //same as chatGateway.join
   @Post('join')
-  async join(@Req() req, @Body() dto: {channelID: number, password: string}) : Promise<string> {
-    let channel = await this.chatService.findChannel(dto.channelID);
-    if (channel.password && channel.password !== dto.password)
-      throw new UnauthorizedException('Invalid password');
-    this.chatService.joinChannel(req.user, dto.channelID, ChannelMemberRole.MEMBER);
-    return 'join channel !'
+  async join(@Req() req, @Body() dto: {channelId: number, password: string}) {
+    try {
+      this.chatGateway.join(req, this.chatGateway.wsClients.get(req.user.id), dto)
+    }
+    catch (error) {
+      throw new HttpException(error, 403);
+    }
+  }
+
+  @Post('create')
+  async create(@Req() req, @Body() data: {name: string, password: string, visibility: ChannelVisibility}) {
+    try {
+      this.chatGateway.create(req, this.chatGateway.wsClients.get(req.user.id), data)
+    } catch (error) {
+        throw new HttpException(error, 403);
+    }
   }
 }

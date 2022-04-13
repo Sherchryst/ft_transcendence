@@ -6,16 +6,15 @@ import { UsersService } from 'src/users/users.service';
 import { ChannelMember, ChannelMemberRole } from './entities/channel-member.entity';
 import { ChannelVisibility } from './entities/channel.entity';
 import { ChannelModerationType } from './entities/channel-moderation.entity';
-import { User } from 'src/users/entities/user.entity';
 import { getJwtFromSocket } from 'src/auth/jwt/jwt.service';
-import { Req, UseGuards } from '@nestjs/common';
+import { ForbiddenException, Req, UseGuards } from '@nestjs/common';
 import { WsJwt2faGuard } from 'src/auth/jwt/jwt.guard';
 import * as PostgresError from '@fiveem/postgres-error-codes'
 
 @UseGuards(WsJwt2faGuard)
 @WebSocketGateway(3001, {namespace: "chat"})
 export class ChatGateway implements OnGatewayConnection{
-    wsClients = new Map<number, any>();
+    wsClients = new Map<number, Socket>();
 
     @WebSocketServer()
     server
@@ -30,7 +29,8 @@ export class ChatGateway implements OnGatewayConnection{
             const payload = this.customJwtService.verify(jwt)
             const user = await this.usersService.findOne(payload.sub)
             if (user.twofa && !payload.isSecondFactorAuth)
-            throw new WsException("")
+                throw new WsException("")
+            this.wsClients.set(user.id, socket);
             const channels = await this.usersService.getAllChannelsConnected(user.id)
             channels.forEach(channel => {
                 socket.join('channel:' + channel.id)
@@ -44,24 +44,18 @@ export class ChatGateway implements OnGatewayConnection{
         console.log("connected to chat...")
     }
 
-    @SubscribeMessage('join')
     async join(@Req() req, @ConnectedSocket() client, @MessageBody() data: {channelId: number, password: string}) {
         let channel = await this.chatService.findChannel(data.channelId);
         if (channel.password && channel.password !== data.password)
-            return client.emit("error", "wrong password")
+            throw new ForbiddenException("Wrong Password")
         this.chatService.joinChannel(req.user, data.channelId, ChannelMemberRole.MEMBER);
         const history = await this.chatService.getChannelMessages(data.channelId, new Date(), 100);
-        client.emit("joined", {channel: channel, history: history});
-        // try {
-        // if (!client.adapter.rooms.get(data.channelId).has(client.id)) {
-        //     client.join(channel.id);
-        //     this.handleMsg(client, {chanId: channel.id, msg: "HELLO"});
-        // } }
-        // catch {}
+        client.join("channel:" + channel.id);
+        this.server.in("channel:" + channel.id).emit("joined", req.user)
+        return {channel: channel, history: history};
     }
 
-    @SubscribeMessage('create')
-    async createChannel(@Req() req, @ConnectedSocket() client : Socket, @MessageBody() data : {name: string, visibility: ChannelVisibility}) {
+    async create(@Req() req, @ConnectedSocket() client : Socket, @MessageBody() data : {name: string, password: string, visibility: ChannelVisibility}) {
       try {
         const channel = await this.chatService.createChannel(data.name, req.user, data.visibility);
         this.chatService.joinChannel(req.user, channel.id, ChannelMemberRole.ADMIN);

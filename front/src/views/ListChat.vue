@@ -4,7 +4,7 @@
             <form id="form-channel" class="flex flex-col gap-3" @submit.prevent="create">
                 <div class="text-xl text-left font-bold form-title">New channel</div>
                 <mod-input ref="name" name="name" type="text" placeholder="#-chan-name" v-model="formCreate.name">Name</mod-input>
-                <mod-input name="password" type="password" placeholder="Optional">Password</mod-input>
+                <mod-input ref="password" name="password" type="password" placeholder="Optional" v-model="formCreate.password">Password</mod-input>
                 <switch-button @change="switchVisibility" name="visibility">Private</switch-button>
                 <button-link type="submit" >Create</button-link>
             </form>
@@ -45,6 +45,7 @@ export default defineComponent ({
             listChannel: [] as Channel[],
             formCreate: {
                 name: "",
+                password: "",
                 visibility: "public"
             }
         }
@@ -75,7 +76,8 @@ export default defineComponent ({
     },
     methods: {
         create(): void {
-            this.socket.emit("create", this.formCreate)
+            // this.socket.emit("create", this.formCreate)
+            API.post('chat/create', this.formCreate)
 		},
         switchVisibility(): void {
             let visibility =  this.formCreate.visibility

@@ -11,7 +11,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { Channel } from '@/interfaces/Channel';
-// import { API } from '@/scripts/auth';
+import { API } from '@/scripts/auth';
 import { chatSocket } from '@/socket'
 
 export default defineComponent({
@@ -24,18 +24,18 @@ export default defineComponent({
 		}
 	},
 	methods: {
-		join(): void {
-			this.socket.emit('join', {
-                channelId: this.channel?.id,
-                password: ""
-            });
-		},
-		// join() {
-		// 	API.post("chat/join", {
-		// 		channelID: this.channel?.id,
-		// 		password: ""
-		// 	})
-		// }
+		// join(): void {
+		// 	this.socket.emit('join', {
+        //         channelId: this.channel?.id,
+        //         password: ""
+        //     });
+		// },
+		join() {
+			API.post("chat/join", {
+				channelID: this.channel?.id,
+				password: ""
+			})
+		}
 	}
 })
 </script>
