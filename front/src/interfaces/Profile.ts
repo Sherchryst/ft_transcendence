@@ -26,5 +26,6 @@ export interface User {
 	twofa?: boolean,
 	twofaSecret?: string,
 	newUser: boolean,
-	avatarPath: string
+	avatarPath: string,
+	status: string
 }
