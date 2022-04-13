@@ -1,23 +1,35 @@
 <template>
 	<div class="level py-4">
 		<div class="level-bar relative shadow-xl">
-			<div class="progress" v-bind:style = "{'width':percent+'%'}"></div>
+			<div class="progress" v-bind:style = "{'width': pourcent+'%'}"></div>
 			<div class="level-number left absolute left-4">{{level}}</div>
-			<div class="level-number absolute right-4">{{nextLevel}}</div>
+			<div class="level-number absolute right-4">{{level + 1}}</div>
 		</div>
 	</div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { computed, defineComponent } from 'vue';
 
 export default defineComponent({
-  props: {
-	percent: Number,
-	level: Number,
-	nextLevel: Number
-  }
-})
+	props: {
+		xp: Number,
+	},
+	computed: {
+		level: function () {
+			let expe : number = (this.xp ? this.xp : 0);
+			if (expe == 0) return 0;
+			console.log((Math.sqrt(625 + (100 * expe)) - 50) / 50)
+			return parseInt(String((Math.sqrt(625 + (100 * expe)) - 50) / 50));
+		},
+		pourcent: function() {
+			let expe : number = (this.xp ? this.xp : 0);
+			if (expe == 0) return 0;
+			return ((Math.sqrt(625 + (100 * expe)) - 50) / 50 - Math.floor((Math.sqrt(625 + (100 * expe)) - 50) / 50)) * 100;
+		},
+	}
+});
+
 </script>
 
 <style lang="scss" scoped>

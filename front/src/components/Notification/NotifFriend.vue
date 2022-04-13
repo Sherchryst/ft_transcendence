@@ -10,7 +10,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { FriendRequest } from "@/interfaces/Notifiaction";
+import { FriendRequest } from "@/interfaces/Notification";
 import ButtonLink from "../ButtonLink.vue";
 import { API } from "@/scripts/auth";
 

@@ -4,19 +4,19 @@ CE=front
 
 
 all:
-	docker-compose up -d --build
+	docker-compose up -d --build $(C)
 
 build:
-	docker-compose build
+	docker-compose build $(C)
 
 up:
-	docker-compose up -docker
+	docker-compose up -docker $(C)
 
 stop:
-	docker-compose stop
+	docker-compose stop $(C)
 
 rm: stop
-	docker-compose rm -f
+	docker-compose rm -f $(C)
 
 down:
 	docker-compose down

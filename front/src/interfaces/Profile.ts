@@ -8,7 +8,7 @@ export interface Achievement {
 	id: number;
 	name: string;
 	description: string;
-	unlocked_at: string | null;
+	unlocked_at: string;
 }
 export interface Profile {
 	achievements: [],
@@ -17,6 +17,7 @@ export interface Profile {
 }
 
 export interface User {
+	xp: number;
 	id: number,
 	login: string,
 	mmr: number,
