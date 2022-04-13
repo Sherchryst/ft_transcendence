@@ -20,7 +20,7 @@
 			Promute admin
 		</button>
 		<BlockModal ref="modal_block" :user="user"></BlockModal>
-        <ChallengeModal ref="modal_challenge"></ChallengeModal>
+        <ChallengeModal ref="modal_challenge" :target="user.login" ></ChallengeModal>
 	</div>
 </template>
 
@@ -50,7 +50,7 @@ export default defineComponent({
             (this.$refs["modal_block"] as typeof BlockModal).open();
         },
         challenge() {
-            (this.$refs["modal_challenge"] as typeof BlockModal).open()
+            (this.$refs["modal_challenge"] as typeof ChallengeModal).open()
         },
         mute() {
             console.log("mute");

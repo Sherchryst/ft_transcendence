@@ -1,8 +1,8 @@
 <template>
-	<div class="flex flex-col justify-between p-7">
+	<div class="game-panel flex flex-col justify-between p-7">
 		<div>
 			<h4 class="text-3xl font-bold">{{title}}</h4>
-			<slot></slot>
+			<!-- <slot></slot> -->
 		</div>
 		<button-link @click="action" :text="action_name"/>
 	</div>
@@ -31,12 +31,23 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-div {
+.battleground {
+	background: url('../../assets/ranked.jpeg') center;
+}
+.challenge{
+	background: url('../../assets/challenge.jpeg') center;
+}
+.bot{
+	background: url('../../assets/bot.jpeg') center;
+}
+.game-panel {
+	cursor: pointer;
 	background-color: $panel-color;
 	border-radius: 25px;
 	min-height:60vh;
 	h4 {
-		color: $action;
+		color: white;
 	}
+
 }
 </style>

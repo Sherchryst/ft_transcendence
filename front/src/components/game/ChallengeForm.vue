@@ -1,7 +1,7 @@
 <template>
 	<form class="flex flex-col mb-3" @submit.prevent="print">
 		<div v-if="!target" class="flex flex-col-reverse mt-4">
-			<ModInput name="username" placeholder="Username" v-model="formData.username">Username</ModInput>
+			<ModInput name="username" placeholder="Username" v-model="formData.login" class="mobile" required>Username</ModInput>
 		</div>
 		<div v-else>
 			<div class="mod-input input-lock flex flex-col justify-start">
@@ -19,10 +19,11 @@
 				<big-radio-button id="3" @minput="setMap"/>
 			</div>
 		</div>
-		<div class="flex flex-col items-start mt-10">
-			<ModLabel name="bonus">Bonus</ModLabel>
+		<div class="flex flex-col items-start mt-10 mb-10">
+			<ModLabel name="bonus">Easy</ModLabel>
 			<switch-button @change="toggleOption" />
 		</div>
+		<ButtonLink >Send</ButtonLink>
 	</form>
 </template>
 
@@ -32,6 +33,8 @@ import SwitchButton from '@/components/SwitchButton.vue'
 import BigRadioButton from '@/components/BigRadioButton.vue'
 import ModInput from '@/components/form/ModInput.vue'
 import ModLabel from '@/components/form/ModLabel.vue'
+import ButtonLink from '@/components/ButtonLink.vue'
+import { gameSocket } from '@/socket'
 
 export default defineComponent({
 	name:'ChallengeForm',
@@ -42,27 +45,28 @@ export default defineComponent({
 		return {
 			userSet: false,
 			formData: {
-				username: "",
-				map: "1",
-				option: false
+				login: "",
+				mapId: 1,
+				level: 1
 			}
 		}
 	},
 	methods: {
 		print(){
 			console.log("FormData", this.formData)
+			gameSocket.emit("invite", this.formData);
 		},
 		toggleOption(){
-			this.formData.option = !this.formData.option 
+			this.formData.level = !(this.formData.level == 1) ? 2 : 1;
 		},
 		setMap(map: string) {
-			this.formData.map = map
+			this.formData.mapId = parseInt(map)
 		}
 	},
-	components: { SwitchButton, BigRadioButton, ModInput, ModLabel},
+	components: { SwitchButton, BigRadioButton, ModInput, ModLabel, ButtonLink},
 	created() {
 		if (this.target)
-			this.formData.username = this.target
+			this.formData.login = this.target
 	}
 })
 </script>
