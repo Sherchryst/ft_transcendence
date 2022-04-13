@@ -229,8 +229,8 @@ export class GameGateway implements OnGatewayConnection {
     board.player[1].user_id = match.player2.id;
     player1_socket.join(`game:${match.id}`);
     player2_socket.join(`game:${match.id}`);
-    // this.statusGateway.sendOwnStatus(player1, "in game", `${match.id}`);
-    // this.statusGateway.sendOwnStatus(player2, "in game", `${match.id}`);
+    this.statusGateway.sendOwnStatus(player1, "in game", `${match.id}`);
+    this.statusGateway.sendOwnStatus(player2, "in game", `${match.id}`);
     this.server.to(`game:${match.id}`).emit("gameStart", match.id);
     console.log("Game : Sending users to game");
     return match;

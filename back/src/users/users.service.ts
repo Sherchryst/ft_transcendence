@@ -33,6 +33,12 @@ export class UsersService {
     await getRepository(UserRelationship).save({
       from: { id: toUserId }, to: { id: fromUserId }, type: UserRelationshipType.FRIEND
     });
+    this.sendNewFriendStatus(fromUserId, toUserId);
+  }
+
+  async sendNewFriendStatus(userId1 : number, userId2 : number) {
+    this.WsClients.get(userId1)?.emit("status", { userId : userId2, status : (this.WsClients.has(userId2)? "online" : "offline"), message : "" });
+    this.WsClients.get(userId2)?.emit("status", { userId : userId1, status : (this.WsClients.has(userId1)? "online" : "offline"), message : "" });
   }
 
   async blockUser(fromUserId: number, toUserId: number) {

@@ -68,18 +68,14 @@ export class StatusGateway implements OnGatewayConnection {
   async sendOwnStatus(userId: number, status : string, message : string) {
     const friends = await this.usersService.getFriends(userId);
     friends.forEach((friend) => {
-      if (this.usersService.WsClients.has(friend.id))
-        this.usersService.WsClients.get(friend.id).emit("status", { userId : userId, status : status, message : message });
+      this.usersService.WsClients.get(friend.id)?.emit("status", { userId : userId, status : status, message : message });
     });
   }
 
   async sendFriendsStatus(socket : Socket, userId : number) {
     const friends = await this.usersService.getFriends(userId);
     friends.forEach((friend) => {
-      if (this.usersService.WsClients.has(friend.id))
-        socket.emit("status", { userId : friend.id, status : "online", message : "" });
-      else
-        socket.emit("status", { userId : friend.id, status : "offline", message : "" });
+        socket.emit("status", { userId : friend.id, status : (this.usersService.WsClients.has(friend.id)? "online" : "offline"), message : "" });
     });
   }
 }
