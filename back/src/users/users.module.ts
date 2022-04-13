@@ -6,6 +6,7 @@ import { User } from './entities/user.entity';
 import { UserAchievement } from './entities/user-achievement.entity';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
+import { StatusGateway } from './users.gateway';
 
 @Module({
   controllers: [UsersController],
@@ -17,7 +18,7 @@ import { UsersService } from './users.service';
   ]),
   forwardRef(() => AuthModule)
 ],
-  providers: [UsersService],
+  providers: [UsersService, StatusGateway],
   exports: [UsersService],
 })
 export class UsersModule {}
