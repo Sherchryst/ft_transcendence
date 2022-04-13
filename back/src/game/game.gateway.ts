@@ -21,7 +21,7 @@ import { MatchInvitation } from "./entities/match-invitation.entity";
 import { StatusGateway } from "src/users/users.gateway";
 
 const interval = 20;
-let pending_player = -1;
+let pending_player: Array<number> = [];
 const boards = new Map<string, Board>();
 const basic_board: Board = {
   ball: {
@@ -105,8 +105,9 @@ export class GameGateway implements OnGatewayConnection {
       let player_id: number;
       this.gameService.WsClients.forEach(async (value, key) => {
         if (value == socket) {
-          if (pending_player == key)
-          pending_player = -1;
+          if (pending_player.includes(key)) {
+            pending_player.splice(pending_player.indexOf(key), 1);
+          }
           boards.forEach((board, match_id) => {
             if (board.player[0].user_socket == value.id) player_id = 0;
             else if (board.player[1].user_socket == value.id) player_id = 1;
@@ -122,7 +123,7 @@ export class GameGateway implements OnGatewayConnection {
             this.server
               .to(`game:${match_id}`)
               .emit("board", this.gameService.updateBall(board));
-            // this.server.socketsLeave(`game:${match_id}`);
+          // this.server.socketsLeave(`game:${match_id}`);
           });
           this.gameService.WsClients.delete(key);
         }
@@ -239,9 +240,28 @@ export class GameGateway implements OnGatewayConnection {
   @SubscribeMessage("matchmaking")
   async handleMatchmaking(@Req() req: any) {
     try {
-      if (pending_player >= 0 && pending_player != req.user.id) {
-        const pendingId = pending_player;
-        pending_player = -1;
+      var player1 : number = -1;
+      var player2 : number;
+
+      if (pending_player.length > 1) {
+        let ingame : Boolean = pending_player.includes(req.user.id)
+        player1 = pending_player.pop();
+        player2 = pending_player.pop();
+        if (!ingame) {
+          pending_player.push(req.user.id);
+        }
+      }
+      else if (!pending_player.length) {
+        pending_player.push(req.user.id);
+      }
+      else if (pending_player.length == 1 && !pending_player.includes(req.user.id)) {
+        player1 = pending_player.pop();
+        player2 = req.user.id;
+      }
+      else {
+        return ;
+      }
+      if (player1 != -1) {
         const map = await this.matchService.findGameMap(1);
         if (!map) {
           console.log("Game : Error while finding map"); // error
@@ -249,12 +269,12 @@ export class GameGateway implements OnGatewayConnection {
         }
         await this.createMatch(
           map,
-          pendingId,
-          req.user.id,
+          player1,
+          player2,
           MatchType.RANKED,
           2
         );
-      } else pending_player = req.user.id;
+      }
     } catch (e) {
       console.log("Game : Error while creating match", e); // error
     }
@@ -346,10 +366,9 @@ export class GameGateway implements OnGatewayConnection {
   ) {
     try {
       this.gameService.WsClients.forEach((value, key) => {
-        if (value == socket && pending_player == key)
-        {
+        if (value == socket && pending_player.includes(key)) {
           console.log("Game : Player", key, "left matchmaking");
-          pending_player = -1;
+          pending_player.splice(pending_player.indexOf(key), 1);
         }
       });
     } catch (e) {}
