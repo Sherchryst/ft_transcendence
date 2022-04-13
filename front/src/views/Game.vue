@@ -57,9 +57,10 @@
     },
     data() {
       return {
-        evts: [],
+        evts : [],
         login : ["you", "bot"],
         id : 0,
+        gameStart : false,
         map: {
           ballColor : 16562691,
           backgroundColor : 344663,
@@ -77,23 +78,23 @@
           }
         } as Dimensions,
         board : {
-          ball: {
-            x: 50,
-            y: Math.random() * 50 + 25,
-            half_width: 2,
-            dx:  (Math.floor(Math.random() * 2)? -1:1), //random player
-            dy: Math.random() * 1.5 * (Math.floor(Math.random() * 2)? -1:1) }, //random top/bottom
-          player: [{
+          ball : {
+            x : 50,
+            y : Math.random() * 50 + 25,
+            half_width : 2,
+            dx :  (Math.floor(Math.random() * 2)? -1:1), //random player
+            dy : Math.random() * 1.5 * (Math.floor(Math.random() * 2)? -1:1) }, //random top/bottom
+          player : [{
             user_id : "player1",
-            id: 0,
-            y: 50,
-            old_y: 50,
+            id : 0,
+            y : 50,
+            old_y : 50,
             score : 0,
             half_height : 6 },{
             user_id : "player2",
-            id: 1,
-            y: 50,
-            old_y: 50,
+            id : 1,
+            y : 50,
+            old_y : 50,
             score : 0,
             half_height : 6 }],
           dead : false,
@@ -160,11 +161,15 @@
     methods:
     {
       initGame(matchId : string | undefined) {
+        this.gameStart = false;
+        this.board.end = true;
+        window.addEventListener("resize", this.resizeCanvas);
         if (matchId == undefined) {
-          return;
+          this.drawVoid();
         }
         else if (matchId != "bot")
         {
+          this.drawVoid();
           gameSocket.emit('connection', matchId);
           gameSocket.on("gameMap", (data : {
             map: GameMap,
@@ -176,10 +181,10 @@
             this.login = { ...this.login, ...data.login };
             console.log(" logins :", this.login);
             this.id = data.id;
-            console.log(" id :", this.id);
+            this.gameStart = true;
             this.resizeCanvas();
+            console.log(" id :", this.id);
             // this.drawBackground();
-            window.addEventListener("resize", this.resizeCanvas);
             document.addEventListener("mousemove", this.moveRackets);
             // console.log(setuped, 'socket connected');
           });
@@ -191,11 +196,11 @@
         else
         {
           console.log("bot");
+          this.gameStart = true;
+          this.resizeCanvas();
           // this.reset(true);
           // this.drawBackground();
-          this.resizeCanvas();
           console.log(this.game_ctx);
-          window.addEventListener("resize", this.resizeCanvas);
           document.addEventListener("mousemove", this.moveRackets);
           // console.log(setuped, 'evts', this.evts);
           this.game_loop();
@@ -256,23 +261,28 @@
       },
       drawBackground()
       {
-        var ctx = this.bg_ctx;
-        const interval = ctx.canvas.height / 10;
-        const line_width = ctx.canvas.width / 80;
-        const starColor = `#${this.map.starsColor.toString(16).padStart(6, '0')}`;
-        const lineColor = `#${this.map.racketColor.toString(16).padStart(6, '0')}`;
-        const bgColor = `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`;
-        ctx.fillStyle = bgColor;
-        // console.log("background color", `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`);
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        // ctx.fillStyle = "white";
-        if (starColor != bgColor)
-          for (let count = 0; count < 300; count++) //stars
-            this.roundStar(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height, Math.random() * ctx.canvas.height / 80, starColor);
-        for (let i = line_width; i < ctx.canvas.width; i+= interval)
-          this.roundRect((ctx.canvas.width- line_width) / 2, i, line_width, interval * 0.65, lineColor, ctx);
+        if (this.gameStart)
+        {
+          var ctx = this.bg_ctx;
+          const interval = ctx.canvas.height / 10;
+          const line_width = ctx.canvas.width / 80;
+          const starColor = `#${this.map.starsColor.toString(16).padStart(6, '0')}`;
+          const lineColor = `#${this.map.racketColor.toString(16).padStart(6, '0')}`;
+          const bgColor = `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`;
+          ctx.fillStyle = bgColor;
+          // console.log("background color", `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`);
+          ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+          // ctx.fillStyle = "white";
+          if (starColor != bgColor)
+            for (let count = 0; count < 300; count++) //stars
+              this.roundStar(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height, Math.random() * ctx.canvas.height / 80, starColor);
+          for (let i = line_width; i < ctx.canvas.width; i+= interval)
+            this.roundRect((ctx.canvas.width- line_width) / 2, i, line_width, interval * 0.65, lineColor, ctx);
+        }
+        else
+          this.drawVoid();
       },
-      drawBall(x : number, y : number, )
+      drawBall(x : number, y : number)
       {
         var ctx = this.game_ctx;
         var h_width = this.board.ball.half_width;
@@ -298,6 +308,17 @@
         // this.roundRect(0, 0, 400, 50, "white");
         // ctx.fillRect(ctx.canvas.height, ctx.canvas.height, -100, -350);
         // this.roundRect(ctx.canvas.height, ctx.canvas.height, -100, -350, "white");
+      },
+      drawVoid()
+      {
+        this.game_ctx.clearRect(0, 0, this.game_ctx.canvas.width, this.game_ctx.canvas.height);
+        var ctx = this.bg_ctx;
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.fillStyle = "white";
+        ctx.font = `${ctx.canvas.height / 10}px courier new`; // absolute size /!\
+        ctx.textAlign = "center";
+        ctx.fillText("No Game To Display", ctx.canvas.width / 2, ctx.canvas.height / 2);
       },
       drawRackets(y1 : number, y2 : number, )
       {
@@ -460,6 +481,7 @@
       },
       async game_loop()
       {
+        this.reset(true);
         while (!this.board.end)
         {
           await this.sleep(20);
@@ -469,6 +491,8 @@
             this.updateBall();
           this.addObjects();
         }
+        if (!this.gameStart)
+          this.drawVoid();
       },
       sleep(ms: number) {
         return new Promise(resolve => setTimeout(resolve, ms));

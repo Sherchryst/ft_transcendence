@@ -355,7 +355,7 @@ export class GameGateway implements OnGatewayConnection {
         socket.join(`game:${id}`);
       }
     } catch (e) {
-      console.log("Game : Error while handling connection"); // error
+      console.log("Game : Match not found"); // error
     }
   }
 
