@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { ChannelInvitation } from "@/interfaces/Notifiaction";
+import { ChannelInvitation } from "@/interfaces/Notification";
 
 export default defineComponent({
 	name: 'NotifChannel',

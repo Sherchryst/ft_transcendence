@@ -1,4 +1,5 @@
 import { Channel } from "./Channel"
+import { GameMap } from "./game/gameMap.interface"
 import { User } from "./Profile"
 
 export interface FriendRequest {
@@ -12,11 +13,19 @@ export interface ChannelInvitation {
 }
 
 export interface GameInvitation {
-	from: User,
-	map: string
+    from: User;
+    to: User;
+    map: GameMap;
+    sentAt: Date;
+    level: number;
 }
+
+export interface GameStart {
+	id: string
+}
+
 export interface Notification {
 	container: string,
-	content: FriendRequest | ChannelInvitation | GameInvitation,
+	content: FriendRequest | ChannelInvitation | GameInvitation | GameStart,
 	date: Date
 }
