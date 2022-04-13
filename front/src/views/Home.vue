@@ -1,20 +1,5 @@
 <template>
   <div class="home flex flex-col justify-arround md:grid md:grid-cols-12 gap-8">
-      <LargePanel>
-            <template v-slot:left>
-                <div class="flex flex-col justify-between p-7 h-full">
-                    <div class="pb-10">
-                        <p class="text-left">Pong is one of the first computer games that ever created, this simple "tennis like" game features two paddles and a ball, the goal is to defeat your opponent ...</p>
-                    </div>
-                    <button-link text="Go faire un PONG" href="http://localhost:8080/#/game-choice"/>
-                </div>
-            </template>
-            <template v-slot:right>
-                <div class=" w-full self-center">
-                    <img class="" src="@/assets/boule.gif" alt="Upon Us">
-                </div>
-            </template>
-      </LargePanel>
       <SquarePanel>
         <div v-for="(match, index) in history" v-bind:key="index">
           <LastGamePanel :match="match"></LastGamePanel>
@@ -36,6 +21,27 @@
             </div>
         </div>
       </SquarePanel>
+      <LargePanel>
+        <div class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12 m-4 gap-4">
+            <FriendCard></FriendCard>
+            <FriendCard></FriendCard>
+            <FriendCard></FriendCard>
+            <FriendCard></FriendCard>
+            <FriendCard></FriendCard>
+            <FriendCard></FriendCard>
+            <FriendCard></FriendCard>
+            <FriendCard></FriendCard>
+            <FriendCard></FriendCard>
+            <FriendCard></FriendCard>
+            <FriendCard></FriendCard>
+            <FriendCard></FriendCard>
+            <FriendCard></FriendCard>
+            <FriendCard></FriendCard>
+            <FriendCard></FriendCard>
+            <FriendCard></FriendCard>
+            <FriendCard></FriendCard>
+        </div>
+      </LargePanel>
   </div>
 </template>
 
@@ -49,15 +55,17 @@ import ButtonLink from '@/components/ButtonLink.vue';
 import LastGamePanel from '@/components/home/LastGamePanel.vue';
 import TopPlayerPanel from '@/components/home/TopPlayerPanel.vue';
 import { API } from '@/scripts/auth';
+import FriendCard from '@/components/home/FriendCard.vue';
 
 export default defineComponent({
     components: {
     SquarePanel,
     LargePanel,
     MainTitle,
-    ButtonLink,
+    // ButtonLink,
     LastGamePanel,
-    TopPlayerPanel
+    TopPlayerPanel,
+    FriendCard
 },
   data() {
     return {
