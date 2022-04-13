@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { Socket } from "socket.io";
 import { Board } from "./interfaces/board.interface";
 import { Racket } from "./interfaces/racket.interface";
 
@@ -7,6 +8,7 @@ const height = 100;
 
 @Injectable()
 export class GameService {
+  WsClients = new Map<number, Socket>();
   racket: Racket = {
     width: 2,
     x: [6, 94],
