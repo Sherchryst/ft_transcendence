@@ -89,7 +89,7 @@ export class GameGateway implements OnGatewayConnection {
       const payload = this.customJwtService.verify(jwt);
       const user = await this.usersService.findOne(payload.sub);
       if (user.twofa && !payload.isSecondFactorAuth) throw new WsException("");
-      // console.log("allo", user.id, socket.id, this.usersService.WsClients)
+      this.gameService.WsClients.set(user.id, socket);
     } catch (reason) {
       // console.log("Game: Unauthorized connection", reason);
       socket.disconnect(false);
@@ -100,10 +100,10 @@ export class GameGateway implements OnGatewayConnection {
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {
     // --> put score of other player to 11 in bd
-    // this.usersService.WsClients.delete(req.user?.id);
+    // this.gameService.WsClients.delete(req.user?.id);
     try {
       let player_id: number;
-      this.usersService.WsClients.forEach(async (value, key) => {
+      this.gameService.WsClients.forEach(async (value, key) => {
         if (value == socket) {
           if (pending_player == key)
           pending_player = -1;
@@ -124,6 +124,7 @@ export class GameGateway implements OnGatewayConnection {
               .emit("board", this.gameService.updateBall(board));
             // this.server.socketsLeave(`game:${match_id}`);
           });
+          this.gameService.WsClients.delete(key);
         }
       });
       console.log("Game : Disconnection from socket");
@@ -175,13 +176,13 @@ export class GameGateway implements OnGatewayConnection {
           map,
           data.level
         );
-        this.usersService.WsClients.get(to_user.id).emit("invited", invitation);
+        this.gameService.WsClients.get(to_user.id).emit("invited", invitation);
         console.log("Game : Invitation sent to", to_user.login);
       } catch (e) {
         console.log("Game : Error while sending invitation"); // error
       }
       // console.log("invitation", invitation)
-      // while(!this.usersService.WsClients.has(to_user.id))
+      // while(!this.gameService.WsClients.has(to_user.id))
       //   await sleep(5000);
     }
   }
@@ -220,21 +221,18 @@ export class GameGateway implements OnGatewayConnection {
       level
     );
     // console.log("Match created : (in create match) ", match.id);
-    const player1_socket = this.usersService.WsClients.get(match.player1.id);
-    const player2_socket = this.usersService.WsClients.get(match.player2.id);
+    const player1_socket = this.gameService.WsClients.get(match.player1.id);
+    const player2_socket = this.gameService.WsClients.get(match.player2.id);
     this.createBoard(match.id, player1_socket.id, player2_socket.id);
     const board = boards.get(`${match.id}`);
     board.player[0].user_id = match.player1.id;
     board.player[1].user_id = match.player2.id;
     player1_socket.join(`game:${match.id}`);
     player2_socket.join(`game:${match.id}`);
-    try {
-      this.statusGateway.sendStatus(player1, "in game", `${match.id}`);
-      this.statusGateway.sendStatus(player2, "in game", `${match.id}`);
-    } catch (e) {
-      console.log("Game : Error while sending status", e);
-    }
-    // this.server.to(`game:${match.id}`).emit("gameStart", match.id);
+    // this.statusGateway.sendOwnStatus(player1, "in game", `${match.id}`);
+    // this.statusGateway.sendOwnStatus(player2, "in game", `${match.id}`);
+    this.server.to(`game:${match.id}`).emit("gameStart", match.id);
+    console.log("Game : Sending users to game");
     return match;
   }
 
@@ -347,7 +345,7 @@ export class GameGateway implements OnGatewayConnection {
     @ConnectedSocket() socket: Socket
   ) {
     try {
-      this.usersService.WsClients.forEach((value, key) => {
+      this.gameService.WsClients.forEach((value, key) => {
         if (value == socket && pending_player == key)
         {
           console.log("Game : Player", key, "left matchmaking");
@@ -450,8 +448,8 @@ export class GameGateway implements OnGatewayConnection {
       );
       this.server.socketsLeave(`game:${id}`);
       boards.delete(`${id}`);
-      this.statusGateway.sendStatus(match.player1.id, "online", "");
-      this.statusGateway.sendStatus(match.player2.id, "online", "");
+      this.statusGateway.sendOwnStatus(match.player1.id, "online", "");
+      this.statusGateway.sendOwnStatus(match.player2.id, "online", "");
       this.updateAchievements(board.player[0].user_id);
       this.updateAchievements(board.player[1].user_id);
   }

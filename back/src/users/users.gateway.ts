@@ -37,10 +37,9 @@ export class StatusGateway implements OnGatewayConnection {
       const payload = this.customJwtService.verify(jwt);
       const user = await this.usersService.findOne(payload.sub);
       if (user.twofa && !payload.isSecondFactorAuth) throw new WsException("");
-      // console.log("allo", user.id, socket.id, this.WsClients)
       this.usersService.WsClients.set(user.id, socket);
-      this.sendStatus(user.id, "online", "");
-      //get friends online TODO ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      this.sendOwnStatus(user.id, "online", "");
+      this.sendFriendsStatus(socket, user.id);
     } catch (reason) {
       // console.log("Status: Unauthorized connection", reason);
       socket.disconnect(false);
@@ -56,7 +55,7 @@ export class StatusGateway implements OnGatewayConnection {
       let player_id: number;
       this.usersService.WsClients.forEach(async (value, key) => {
         if (value == socket) {
-          await this.sendStatus(key, "offline", "");
+          await this.sendOwnStatus(key, "offline", "");
           this.usersService.WsClients.delete(key);
         }
       });
@@ -66,66 +65,21 @@ export class StatusGateway implements OnGatewayConnection {
     }
   }
 
-  async sendStatus(userId: number, status : string, message : string) {
+  async sendOwnStatus(userId: number, status : string, message : string) {
     const friends = await this.usersService.getFriends(userId);
     friends.forEach((friend) => {
       if (this.usersService.WsClients.has(friend.id))
         this.usersService.WsClients.get(friend.id).emit("status", { userId : userId, status : status, message : message });
     });
   }
+
+  async sendFriendsStatus(socket : Socket, userId : number) {
+    const friends = await this.usersService.getFriends(userId);
+    friends.forEach((friend) => {
+      if (this.usersService.WsClients.has(friend.id))
+        socket.emit("status", { userId : friend.id, status : "online", message : "" });
+      else
+        socket.emit("status", { userId : friend.id, status : "offline", message : "" });
+    });
+  }
 }
-// @WebSocketGateway(3002, {path: "/status"})
-// export class UsersGateway implements OnGatewayConnection {
-//     wsClients = new Map<number, any>();
-
-//     constructor(
-//         private readonly customJwtService: CustomJwtService,
-//         private readonly usersService: UsersService) {}
-
-//     async handleConnection(client: any, msg: IncomingMessage) {
-//         try {
-//             const jwt = msg.headers.cookie.slice(4)
-//             const payload = this.customJwtService.verify(jwt)
-//             const user = await this.usersService.findOne(payload.sub)
-//             if (user.twofa && !payload.isSecondFactorAuth)
-//                 throw new WsException("")
-//             client.jwt = jwt;
-//             this.wsClients.set(user.id, client);
-//         }
-//         catch {
-//             client.close(1008, "Unauthorized")
-//             return
-//         }
-//     }
-
-//     private async auth(client: any): Promise<User> {
-//         return this.usersService.findOne(this.customJwtService.verify(client.jwt).sub)
-//     }
-
-//     async handleDisconnect(client: any) {
-//         const user = await this.auth(client);
-//         this.wsClients.delete(user.id)
-//     }
-
-//     @SubscribeMessage('update')
-//     async update(@ConnectedSocket() client, @MessageBody() status: string) {
-//         await this.auth(client);
-//         this.wsClients.forEach((user) => {
-//             if (client !== user)
-//                 user.send(JSON.stringify({ event: 'update', data: status}));
-//         })
-//     }
-
-//     @SubscribeMessage('request')
-//     async request(@ConnectedSocket() client, @MessageBody() targetId: number) {
-//         const user = await this.auth(client);
-//         this.wsClients.get(targetId).send(JSON.stringify({event: 'request', data: user.id}))
-
-//     }
-
-//     @SubscribeMessage('send')
-//     async send(@ConnectedSocket() client, @MessageBody() data: {targetId: number, status: string}) {
-//         await this.auth(client);
-//         this.wsClients.get(data.targetId).send(JSON.stringify({event: 'send', data: {from: data.targetId, status: data.status}}))
-//     }
-// }
