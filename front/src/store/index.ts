@@ -44,27 +44,33 @@ export const store = createStore<State>({
     is2FA(): boolean | undefined {
       const profile : Profile = JSON.parse(localStorage.getItem('user') || '{}')
       return profile?.user?.twofa;
+    },
+    getFriends() : User[]{
+      const profile : Profile = JSON.parse(localStorage.getItem('user') || '{}')
+      return profile?.friends
     }
   },
   mutations: {
     updateStatus(state, status: Status) {
-      const id : number = state.profile.friends.findIndex(friend => friend.id === status.userId)
-      if (id !== -1) {
-        state.profile.friends[id].status = status.status
-        state.profile.friends[id].message = status.message
+        const profile : Profile = JSON.parse(localStorage.getItem('user') || '{}')
+        const id : number = profile.friends.findIndex(friend => friend.id === status.userId)
+      if (id != -1) {
+        profile.friends[id].status = status.status
+        profile.friends[id].message = status.message
+        localStorage.setItem('user', JSON.stringify(profile))
       }
     },
     setProfile(state, _profile) {
       localStorage.setItem("state", Statut.AUTH.toString())
       localStorage.setItem('user', JSON.stringify(_profile))
-      // state.profile = _profile
+      //state.profile = _profile
     },
     SOCKET_ADD_MESSAGE(state, message) {
       state.chatMessages.push(message);
     }
   },
   actions: {
-    handleSatut({commit}, status: Status) {
+    setStatus({commit}, status: Status) {
       commit('updateStatus', status)
     },
     async connection({commit}){

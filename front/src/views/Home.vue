@@ -22,24 +22,10 @@
         </div>
       </SquarePanel>
       <LargePanel>
-        <div class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12 m-4 gap-4">
-            <FriendCard></FriendCard>
-            <FriendCard></FriendCard>
-            <FriendCard></FriendCard>
-            <FriendCard></FriendCard>
-            <FriendCard></FriendCard>
-            <FriendCard></FriendCard>
-            <FriendCard></FriendCard>
-            <FriendCard></FriendCard>
-            <FriendCard></FriendCard>
-            <FriendCard></FriendCard>
-            <FriendCard></FriendCard>
-            <FriendCard></FriendCard>
-            <FriendCard></FriendCard>
-            <FriendCard></FriendCard>
-            <FriendCard></FriendCard>
-            <FriendCard></FriendCard>
-            <FriendCard></FriendCard>
+        <div class="grid grid-cols-2 lg:grid-cols-6 gap-4  p-4">
+            <div class=" friend-card" v-for="(friend, index) in friends" :key="index">
+              <FriendCard :friend="friend"></FriendCard>
+            </div>
         </div>
       </LargePanel>
   </div>
@@ -51,18 +37,18 @@ import { useMeta } from 'vue-meta';
 import SquarePanel from '@/components/home/SquarePanel.vue';
 import LargePanel from '@/components/home/LargePanel.vue';
 import MainTitle from '@/components/MainTitle.vue';
-import ButtonLink from '@/components/ButtonLink.vue';
 import LastGamePanel from '@/components/home/LastGamePanel.vue';
 import TopPlayerPanel from '@/components/home/TopPlayerPanel.vue';
 import { API } from '@/scripts/auth';
 import FriendCard from '@/components/home/FriendCard.vue';
+import {User} from '@/interfaces/Profile';
+import { statusSocket } from '@/socket';
 
 export default defineComponent({
     components: {
     SquarePanel,
     LargePanel,
     MainTitle,
-    // ButtonLink,
     LastGamePanel,
     TopPlayerPanel,
     FriendCard
@@ -72,12 +58,29 @@ export default defineComponent({
       winrate: 0,
       history: [],
       topPlayer: [],
+      friends: [] as User[],
     }
+  },
+  watch: {
+    friends: {
+      handler(newValue: User[]) {
+        this.friends = newValue;
+        console.log('this change')
+      },
+      deep: true,
+    },
   },
   setup () {
     useMeta({ title: 'Home' })
   },
   mounted () {
+    statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
+      setTimeout(() =>{
+        this.friends = this.$store.getters.getFriends
+      }, 100)
+    })
+    this.friends = this.$store.getters.getFriends
+    console.log('friends', this.friends);
     console.log('created', this.$store.getters.getId)
     API.get('users/top-ten').then((res) => {
       this.topPlayer = res.data
