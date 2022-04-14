@@ -8,8 +8,8 @@
             <img v-if="friend.status == 'offline'" class="ring-4 ring-gray-400 ring-opacity-80 image h-15 w-15" :src="'http://localhost:3000/' + friend.avatarPath">
         </div>
         <div class="overflow-clip">
-            <p>{{friend.login.substring(0,9)}}</p>
-            <p class='pt-2 bold font-medium truncate ' style="font-weight: bold;">{{friend.nickname.substring(0,9)}}</p>
+            <p>{{friend.login}}</p>
+            <p class='pt-2 bold font-medium truncate ' style="font-weight: bold;">{{friend.nickname}}</p>
         </div>
     </div>
 </template>
