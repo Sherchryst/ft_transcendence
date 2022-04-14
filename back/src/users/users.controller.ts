@@ -67,13 +67,6 @@ export class UsersController {
       throw new NotFoundException('User not found');
     const achievements = await this.usersService.getUserAchievements(user.id);
     const friends = await this.usersService.getFriends(user.id);
-    /* TODO: Add relationship status with current user
-      - User can be blocked
-      - User can unblock user
-      - User can be friend
-      - User can accept friend request
-      - User can send friend request
-    */
     return JSON.stringify({
       user,
       achievements,
@@ -89,6 +82,16 @@ export class UsersController {
     if (!user)
       throw new NotFoundException('User not found');
     return user.twofa;
+  }
+
+  @Get('relationship-status')
+  async relationshipStatus(@Req() req, @Query('id') id: number) {
+    if (!id)
+      throw new BadRequestException('No id provided');
+    const relation = await this.usersService.getOneRelationship(req.user.id, id);
+    if (!relation)
+      return new NotFoundException('Relation not found');
+    return relation;
   }
 
   @Post('send-friend-request')
