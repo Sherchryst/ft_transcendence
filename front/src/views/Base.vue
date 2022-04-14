@@ -90,6 +90,7 @@ import { Statut } from '@/interfaces/Profile';
 import BadgeNotif from '@/components/Notification/BadgeNotif.vue'; 
 import { Notification, FriendRequest, GameStart, GameInvitation } from "@/interfaces/Notification";
 
+
 export default defineComponent({
 	components: {
 		NavButton,
@@ -116,8 +117,13 @@ export default defineComponent({
 	},
 	mounted() {
 		statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
-			console.log("match status : ", data);
-		});
+			console.log('status data',data);
+			this.$store.dispatch("setStatus", {
+				userId: data.userId,
+				status: data.status,
+				message: data.message
+			})
+		})
 		console.log('avatar', this.$store.state.profile.user.avatarPath)
 		this.getNotif()
 		this.chatSocket
