@@ -1,8 +1,11 @@
 <template>
   <div class="home flex flex-col justify-arround md:grid md:grid-cols-12 gap-8">
-      <SquarePanel>
+      <SquarePanel  v-if="history.length != 0">
         <div v-for="(match, index) in history" v-bind:key="index">
           <LastGamePanel :match="match"></LastGamePanel>
+        </div>
+        <div>
+          <p></p>
         </div>
       </SquarePanel>
       <SquarePanel>
@@ -21,7 +24,7 @@
             </div>
         </div>
       </SquarePanel>
-      <LargePanel>
+      <LargePanel v-if="friends.length != 0">
         <div class="grid grid-cols-2 lg:grid-cols-6 gap-4  p-4">
             <div class=" friend-card" v-for="(friend, index) in friends" :key="index">
               <FriendCard :friend="friend"></FriendCard>
@@ -75,6 +78,7 @@ export default defineComponent({
   },
   mounted () {
     statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
+      data.message = data.message.replace(/<[^>]*>?/gm, '');
       setTimeout(() =>{
         this.friends = this.$store.getters.getFriends
       }, 100)
