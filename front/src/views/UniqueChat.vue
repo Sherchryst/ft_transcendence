@@ -8,7 +8,7 @@
             </div>
             <one-row-form placeholder="Message" @callback="send">
                 <span class="flex flex-row items-center">
-                    <span class="hidden md:flex pl-2 pr-1">Envoyer</span>
+                    <span class="hidden md:flex pl-2 pr-1">Send</span>
                     <SendIcon/>
                 </span>
            </one-row-form>

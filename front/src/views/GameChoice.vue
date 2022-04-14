@@ -1,8 +1,8 @@
 <template>
 	<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-		<game-panel title="Battleground" @action="(evt) => matchmaking()" action_name="Recherche">
+		<game-panel title="Battleground" @action="(evt) => matchmaking()" action_name="Search">
 		</game-panel>
-		<game-panel @action="sendInvite()" title="Challenge" action_name="Défier">
+		<game-panel @action="sendInvite()" title="Challenge" action_name="Invite">
 			<!-- <form action="" class="flex flex-col">
 				<div class="flex flex-col-reverse mt-4">
 					<input class="px-3 py-2" type="text" name="username" id="username">
@@ -22,7 +22,7 @@
 				</div>
 			</form> -->
 		</game-panel>
-		<game-panel title="Entrainement" @action="requestGame" action_name="Lancer">
+		<game-panel title="Training" @action="requestGame" action_name="Run">
 			<!-- <ButtonLink text="Bot game" href= /> -->
 		</game-panel>
 	</div>
@@ -48,7 +48,7 @@ export default defineComponent({
 	},
 	methods: {
 		sendInvite() {
-			gameSocket.emit("invite", { login: "cheat_user", mapId: 3, level: 1 });
+			gameSocket.emit("invite", { nickname: "cheater", mapId: 3, level: 1 });
 		},
 		requestGame() {
 			router.push({ name: "game", params: { match_id: `bot` } })

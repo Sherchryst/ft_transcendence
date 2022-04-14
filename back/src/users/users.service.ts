@@ -82,7 +82,7 @@ export class UsersService {
       try {
         const user = repo.create({
           login: login,
-          nickname: genRanHex(32)
+          nickname: genRanHex(10)
         });
         return await repo.save(user);
       } catch (e) {
@@ -99,6 +99,12 @@ export class UsersService {
   async findByLogin(login: string): Promise<User> {
     return await getRepository(User).findOne({
       where: { login: login }
+    });
+  }
+
+  async findByNickname(nickname: string): Promise<User> {
+    return await getRepository(User).findOne({
+      where: { nickname: nickname }
     });
   }
 
