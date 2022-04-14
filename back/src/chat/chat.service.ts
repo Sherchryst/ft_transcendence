@@ -33,6 +33,14 @@ export class ChatService {
     return invitation;
   }
 
+  async deleteInvitation(channelId: number, fromId: number, toId: number) {
+    await getRepository(ChannelInvitation).delete({
+      channel: {id: channelId}, 
+      to: {id: toId},
+      from: {id: fromId}
+    });
+  }
+
   async createMessage(from: User, content: string): Promise<Message> {
     const msg = getRepository(Message).create({
       from: from,
@@ -57,9 +65,10 @@ export class ChatService {
       user: { id: userId },
       admin: admin,
       type: type,
-      reason: reason,
       expire_at: new Date(new Date().getTime() + duration)
     });
+    if (reason)
+      moderation.reason = reason;
     return await getRepository(ChannelModeration).save(moderation);
   }
 

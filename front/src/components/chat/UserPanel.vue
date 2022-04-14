@@ -17,7 +17,7 @@
 			ban user
 		</button>
 		<button v-if="owner" class="text-left" @click="promute">
-			Promute admin
+			Promote admin
 		</button>
 		<BlockModal ref="modal_block" :user="user"></BlockModal>
         <ChallengeModal ref="modal_challenge" :target="user.login" ></ChallengeModal>
@@ -29,6 +29,7 @@ import { User } from '@/interfaces/Profile';
 import { defineComponent, PropType } from 'vue';
 import BlockModal from '../modal/BlockModal.vue';
 import ChallengeModal from '../modal/ChallengeModal.vue';
+import { API } from '@/scripts/auth';
 
 export default defineComponent({
     name: "Message",
@@ -44,7 +45,12 @@ export default defineComponent({
     },
     methods: {
         requestFriend() {
-            console.log("Friend");
+			API.post('users/send-friend-request', {
+				fromId: this.$store.getters.getId,
+				toId: this.user.id
+			}).then( () => {
+				//this.statut = 'WAIT'
+			})
         },
         block(): void {
             (this.$refs["modal_block"] as typeof BlockModal).open();
@@ -53,10 +59,10 @@ export default defineComponent({
             (this.$refs["modal_challenge"] as typeof ChallengeModal).open()
         },
         mute() {
-            console.log("mute");
+            API.post("chat/moderation", {channelId: this.channelId, toId: this.user.id, reason: null, duration: null, moderation: 'mute'})
         },
         ban() {
-            console.log("ban");
+            API.post("chat/moderation", {channelId: this.channelId, toId: this.user.id, reason: null, duration: null, moderation: 'ban'})
         },
         promute() {
             console.log("promute");
