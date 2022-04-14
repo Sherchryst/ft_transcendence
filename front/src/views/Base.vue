@@ -6,7 +6,7 @@
 					<img class="h-16 w-16" :src="'http://localhost:3000/' + $store.getters.getAvatarPath" alt="profile">
 				</router-link>
 			</div>
-			<one-row-form class="md:hidden mb-6 mobile" placeholder="Recherche">
+			<one-row-form class="md:hidden mb-6 mobile" placeholder="Search">
 				<SearchIcon />
 			</one-row-form>
 			<div class="flex flex-col w-full md:w-min">
@@ -36,11 +36,11 @@
 				</div>
 				<div class="hidden sm:flex flex-row justify-between justify-items-center h-16">
 					<div class="self-center">
-						<ButtonLink @click="logout()" class="btn-neutral" text="Deconnection" />
+						<ButtonLink @click="logout()" class="btn-neutral" text="Disconnect" />
 					</div>
 					<div class="flex flex-row justify-between justify-items-center">
 						<div class="self-center">
-							<one-row-form placeholder="Recherche">
+							<one-row-form placeholder="Search">
 								<SearchIcon />
 							</one-row-form>
 						</div>

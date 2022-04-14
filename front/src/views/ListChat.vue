@@ -43,7 +43,7 @@ export default defineComponent ({
                 console.log("Connected, ", this.socket.id);
             })
             .on("disconnect", (reason) => {
-                console.log("Deconnected", reason);
+                console.log("Disconnected", reason);
             })
             .on("created", (data: {channel: Channel}) => {
                 this.listChannel.push(data.channel)
