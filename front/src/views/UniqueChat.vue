@@ -98,6 +98,9 @@ export default defineComponent({
                 let self = this.nickname == id;
                 this.history.unshift({content: "Bye", from: member, self: self, photo: true});
             })
+            .on('mute', (member) => {/** */})
+            .on('ban', (member) => {/** */})
+            .on('promote', (member) => {/** */})
         ;
 	},
 	methods: {

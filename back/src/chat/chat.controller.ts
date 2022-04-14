@@ -5,6 +5,7 @@ import { UsersService } from 'src/users/users.service';
 import { ChannelMemberRole } from './entities/channel-member.entity';
 import { ChatGateway } from './chat.gateway';
 import { ChannelVisibility } from './entities/channel.entity';
+import { ChannelModerationType } from './entities/channel-moderation.entity';
 
 @Controller('chat')
 @UseGuards(Jwt2faGuard)
@@ -32,12 +33,12 @@ export class ChatController {
   async join(@Req() req, @Body() data: {channelId: number, password: string}) {
       const client = await this.chatGateway.wsClients.get(req.user.id);
       let channel = await this.chatService.findChannel(data.channelId);
-      if (await this.chatService.getChannelMember(channel.id, req.user.id))
-          return
       if (!channel) {
-          console.log("channel", data.channelId)
+          console.log("channel", data, data.channelId)
           throw new NotFoundException("No such channel");
       }
+      if (await this.chatService.getChannelMember(channel.id, req.user.id))
+        return ;
       if (channel.password && channel.password !== data.password && !await this.chatService.isInvited(data.channelId, req.user))
           throw new UnauthorizedException("Wrong Password");
       await this.chatService.joinChannel(req.user, data.channelId, ChannelMemberRole.MEMBER);
@@ -99,5 +100,30 @@ export class ChatController {
       throw new NotFoundException("target doesn't exist");
     console.log("Channel Invitation", invitation)
     this.chatGateway.wsClients.get(invited.id).emit("invited", invitation);
+  }
+
+  @Post('delete-invitation')
+  async delete_invitation(@Body() data: {channelId: number, fromId: number, toId: number}) {
+    this.chatService.deleteInvitation(data.channelId, data.fromId, data.toId);
+  }
+
+  @Post('moderation')
+  async moderation(@Req() req, @Body() data: {channelId: number, toId: number, reason: string, duration: number, moderation: ChannelModerationType}) {
+    const member = await this.chatService.getChannelMember(data.channelId, req.user.id);
+    if (!member || member.role != ChannelMemberRole.ADMIN)
+      throw new UnauthorizedException("you're not an admin");
+    await this.chatService.createChannelModeration(data.channelId, data.toId, req.user, data.moderation, data.reason, data.duration);
+    this.chatGateway.server.to("channel:" + data.channelId).emit(data.moderation, member);
+  }
+
+  @Post('promote')
+  async promote(@Req() req, @Body() data: {channelId: number, targetId: number}) {
+    const channel = await this.chatService.findChannel(data.channelId);
+    if (!channel || channel.owner.id != req.user.id)
+      throw new UnauthorizedException("you're not the owner");
+    let member = await this.chatService.getChannelMember(data.channelId, data.targetId);
+    member.role = ChannelMemberRole.ADMIN;
+    this.chatService.updateMember(member);
+    this.chatGateway.server.to("channel:" + data.channelId).emit("promote", member);
   }
 }
