@@ -134,7 +134,7 @@ export default defineComponent({
                 self: false,
                 photo: true,
             }
-            if (this.nickname == message.from.nickname)
+            if (this.$store.getters.getId == message.from.id)
                 message.self = true
             if (this.history.length && this.history[0].from.id == message.from.id)
                 message.photo = false
