@@ -4,7 +4,7 @@
             <form id="form-channel" class="flex flex-col gap-3" @submit.prevent="create">
                 <div class="text-xl text-left font-bold form-title">New channel</div>
                 <mod-input ref="name" name="name" type="text" placeholder="#-chan-name" v-model="formCreate.name">Name</mod-input>
-                <mod-input name="password" type="password" placeholder="Optional">Password</mod-input>
+                <mod-input ref="password" name="password" type="password" placeholder="Optional" v-model="formCreate.password">Password</mod-input>
                 <switch-button @change="switchVisibility" name="visibility">Private</switch-button>
                 <button-link type="submit" >Create</button-link>
             </form>
@@ -53,6 +53,7 @@ export default defineComponent ({
             listChannel: [] as Channel[],
             formCreate: {
                 name: "",
+                password: "",
                 visibility: "public"
             }
         }
@@ -64,14 +65,17 @@ export default defineComponent ({
     // },
     mounted() {
         this.socket
-            .on("connect", () => {
-                console.log("Connected, ", this.socket.id);
-            })
             .on("disconnect", (reason) => {
                 console.log("Deconnected", reason);
             })
-            .on("created", (data: {channel: Channel}) => {
-                this.listChannel.push(data.channel)
+            .on("created", (data) => {
+                for (let i = 0; i != this.listChannel.length; ++i) {
+                    console.log(this.listChannel[i].id)
+                    if (this.listChannel[i].id == data.channel.id)
+                        return ;
+                }
+                if (data.channel.visibility == 'public')
+                    this.listChannel.push(data.channel);
             })
         ;
         API.get('chat/list').then((response) => {
@@ -83,7 +87,12 @@ export default defineComponent ({
     },
     methods: {
         create(): void {
-            this.socket.emit("create", this.formCreate)
+            API.post('chat/create', this.formCreate).then((response) => {
+                for (let i = 0; i != this.listChannel.length; ++i)
+                    if (this.listChannel[i].id == response.data.id)
+                        return ;
+                this.listChannel.push(response.data);
+            }).catch((error) => {console.log(error)})
 		},
         switchVisibility(): void {
             let visibility =  this.formCreate.visibility

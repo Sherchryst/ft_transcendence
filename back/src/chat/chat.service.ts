@@ -11,11 +11,12 @@ import { Message } from './entities/message.entity';
 
 @Injectable()
 export class ChatService {
-  async createChannel(name: string, owner: User, visibility: ChannelVisibility): Promise<Channel> {
+  async createChannel(name: string, owner: User, password: string, visibility: ChannelVisibility): Promise<Channel> {
     const channel = getRepository(Channel).create({
       name: name,
       owner: owner,
-      visibility: visibility
+      visibility: visibility,
+      password: password
     });
     await getRepository(Channel).save(channel);
     return channel;
@@ -71,6 +72,8 @@ export class ChatService {
   }
 
   async deleteChannel(channelId: number) {
+    await getRepository(ChannelInvitation).delete({channel: {id: channelId}});
+    await getRepository(ChannelMessage).delete({channel: {id: channelId}});
     await getRepository(Channel).delete({ id: channelId });
   }
 

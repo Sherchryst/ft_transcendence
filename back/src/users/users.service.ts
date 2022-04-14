@@ -75,6 +75,12 @@ export class UsersService {
     return await getRepository(User).find();
   }
 
+  async findByNick(nick: string): Promise<User> {
+    return await getRepository(User).findOne({
+      where: {nickname: nick}
+    })
+  }
+
   async findByLogin(login: string): Promise<User> {
     return await getRepository(User).findOne({
       where: { login: login }

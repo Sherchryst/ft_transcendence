@@ -14,9 +14,10 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import { Channel } from '@/interfaces/Channel';
-import ChannelModal from '@/components/modal/ChannelModal.vue'
-// import { API } from '@/scripts/auth';
-import { chatSocket } from '@/socket'
+import { API } from '@/scripts/auth';
+import ChannelModal from '@/components/modal/ChannelModal.vue';
+import { chatSocket } from '@/socket';
+import router from '@/router';
 
 export default defineComponent({
 	props: {
@@ -33,26 +34,19 @@ export default defineComponent({
 		}
 	},
 	methods: {
-		join(): void {
-			if (this.channel.password){
-				this.open()
-			}
-			else {
-				this.socket.emit('join', {
-					channelId: this.channel?.id,
-					password: ""
-				});
-			}
-		},
 		open() : void {
 			(this.$refs[this.index] as typeof ChannelModal).open()
 		},
-		// join() {
-		// 	API.post("chat/join", {
-		// 		channelID: this.channel?.id,
-		// 		password: ""
-		// 	})
-		// }
+		join() {
+			if (this.channel.password){
+				this.open()
+			}
+			API.post("chat/join", {
+				channelId: this.channel?.id,
+				password: ""
+			}).then((res)=>{console.log(res)}).catch((error) => {console.log(error)})
+			router.push({ name: 'unique-chat', params: { id: this.channel?.id }});
+		}
 	},
 	components: {ChannelModal, }
 })

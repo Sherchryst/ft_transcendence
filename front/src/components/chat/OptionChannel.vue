@@ -51,6 +51,8 @@ import SendIcon from '@/assets/icon/send.svg';
 import PasswordModal from '@/components/modal/PasswordModal.vue'
 import { chatSocket } from "@/socket";
 import { Channel } from "@/interfaces/Channel";
+import {API} from '@/scripts/auth.ts';
+import router from '@/router';
 
 export default defineComponent({
     name: "OptionChannelPanel",
@@ -64,10 +66,12 @@ export default defineComponent({
 	},
     methods: {
         leave_channel(): void {
-			this.socket.emit('leave', this.channel?.id);
+            API.post('chat/leave', {channelId: this.channel?.id}).then((response) => {
+                router.push({name: 'chat'});
+            }).catch((error) => {console.log(error)})
 		},
         invitation(nickname: string) {
-			console.log("INVITATION", nickname)
+			API.post('chat/invite', {channelId: this.channel?.id, invitedNick: nickname})
 		},
 		openPassword() : void {
 			(this.$refs['password_block'] as typeof PasswordModal).open()

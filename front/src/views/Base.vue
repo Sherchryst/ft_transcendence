@@ -119,7 +119,7 @@ export default defineComponent({
 		this.getNotif()
 		this.chatSocket
 			.on('message', (data: {channelMessage: SocketMessage}) => {
-				if (data.channelMessage.message.from.login != this.$store.getters.getLogin)
+				if (data.channelMessage.message.from.id != this.$store.getters.getId)
 					this.channelMessage.push(data.channelMessage)
 			})
 		this.gameSocket
