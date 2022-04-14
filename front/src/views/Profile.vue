@@ -53,7 +53,7 @@
 		<div class="col-span-12 lg:col-span-8 2xl:col-span-7 flex flex-col">
 			<ProfilePanel>
 				<template v-slot:title>
-					<TitlePanel title="Historique des matchs"> <Scrool/> </TitlePanel>
+					<TitlePanel title="Match History"> <Scrool/> </TitlePanel>
 				</template>
 				<template v-slot:body>
 					<div class="overflow-auto max-h-64" >
