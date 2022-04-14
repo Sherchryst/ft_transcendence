@@ -12,7 +12,7 @@
 				<LevelBar :percent="68" :level="8" :nextLevel="9"></LevelBar>
 			</div>
 			<div class="mb-12">
-				<ButtonLink v-if="this.username == this.selfLogin" class="flex justify-center w-full" text="Edit Profile"></ButtonLink>
+				<ButtonLink v-if="username == selfLogin" class="flex justify-center w-full" text="Edit Profile"></ButtonLink>
 				<div v-else class="flex flex-col gap-y-4">
 					<Transition mode="out-in" name="btn">
 						<button-link v-if="statut == 'NONE'" class="flex justify-center w-full" text="Ask a friend" @click="friendRequest"></button-link>
@@ -94,22 +94,7 @@
 				</template>
 			</ProfilePanel>
 		</div>
-		<Modal ref="modal_block" id="modal-block-user" @close="showModal = false">
-			<template v-slot:title>
-				Block User
-			</template>
-			You will block the user <span class="font-bold">{{ this.username }}</span>. No more of his messages will appear. You could always unblock it later on this page.
-			<template v-slot:footer>
-				<div class="flex flex-col lg:flex-row gap-4 lg:justify-end">
-					<ButtonLink @click="block" class="btn-danger">
-						Block
-					</ButtonLink>
-					<ButtonLink class="btn-neutral" @click="closeModal">
-						Cancel
-					</ButtonLink>
-				</div>
-			</template>
-		</Modal>
+		<BlockModal ref="modal_block" :user="profile?.user" ></BlockModal>
 	</div>
 </template>
 
@@ -124,33 +109,33 @@ import LargerCard from '@/components/profile/LargerCard.vue';
 import TitlePanel from '@/components/profile/TitlePanel.vue';
 import ButtonLink from '@/components/ButtonLink.vue';
 import MainTitle from '@/components/MainTitle.vue';
-import Modal from '@/components/Modal.vue';
 import Scrool from '@/assets/icon/list-game.svg';
 import Trophy from '@/assets/icon/achievement.svg';
 import {defineComponent, watch, computed} from 'vue';
-import { API } from '@/scripts/auth.ts';
+import { API } from '@/scripts/auth';
 import { Profile } from '@/interfaces/Profile';
 import { useStore } from 'vuex'
-import { key } from '@/store/index.ts'
+import { key } from '@/store/index'
 import router from '@/router';
+import BlockModal from '@/components/modal/BlockModal.vue';
 
 
 export default defineComponent({
 	name: "Profile",
 	components: {
-		ProfilePicture,
-		MainTitle,
-		LevelBar,
-		ButtonLink,
-		LittleCard,
-		TitlePanel,
-		MatchesHistory,
-		Scrool,
-		Trophy,
-		ProfilePanel,
-		LargerCard,
-		Modal
-	},
+    ProfilePicture,
+    MainTitle,
+    LevelBar,
+    ButtonLink,
+    LittleCard,
+    TitlePanel,
+    MatchesHistory,
+    Scrool,
+    Trophy,
+    ProfilePanel,
+    LargerCard,
+    BlockModal
+},
 	props:
 	{
 		username: { type: String, required: true}
@@ -182,14 +167,14 @@ export default defineComponent({
 				this.profile = res.data;
 				// Change statut
 			}).catch(() => {
-				router.push({name: 'not-found'})
+				router.push({name: 'not-found', replace: true })
 			})
 		},
 		openModal() : void {
-			(this.$refs['modal_block'] as typeof Modal).open()
+			(this.$refs['modal_block'] as typeof BlockModal).open()
 		},
 		closeModal() : void {
-			(this.$refs['modal_block'] as typeof Modal).close()
+			(this.$refs['modal_block'] as typeof BlockModal).close()
 		},
 		friendRequest() : void {
 			API.post('users/send-friend-request', {

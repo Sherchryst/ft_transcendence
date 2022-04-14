@@ -1,5 +1,5 @@
 <template>
-    <div class="grid-cols-1 md:grid grid-cols-3 gap-4 span-4">
+    <div class="grid-cols-1 md:grid grid-cols-3 gap-16 span-4">
         <div class=" mb-5">
             <form id="form-channel" class="flex flex-col gap-3" @submit.prevent="create">
                 <div class="text-xl text-left font-bold form-title">New channel</div>
@@ -9,7 +9,13 @@
                 <button-link type="submit" >Create</button-link>
             </form>
         </div>
-        <div class="col-span-2" :key="listChannel">
+        <div class="col-span-2 flex flex-col gap-4 w-3/4">
+            <title-count :lenght="0">
+                <h3 class="form-title font-bold text-2xl text-left">Your channels</h3>
+            </title-count>
+            <title-count :lenght="listChannel.length">
+                <h3 class="form-title font-bold text-2xl text-left">public channels</h3>
+            </title-count>
             <channel-view v-for="chan in listChannel" :key="chan.id" :channel="chan"/>
         </div>
     </div>
@@ -17,14 +23,15 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { API } from '@/scripts/auth.ts';
+import { API } from '@/scripts/auth';
 import { useMeta } from 'vue-meta'
 import ChannelView from '@/components/chat/ChannelView.vue'
-import { chatSocket } from '@/socket.ts'
+import { chatSocket } from '@/socket'
 import { Channel } from '@/interfaces/Channel'
 import SwitchButton from '../components/SwitchButton.vue'
 import ModInput from '@/components/form/ModInput.vue';
 import ButtonLink from '@/components/ButtonLink.vue';
+import TitleCount from '@/components/common/TitleCount.vue'
 
 export default defineComponent ({
     components: {
@@ -32,6 +39,7 @@ export default defineComponent ({
     SwitchButton,
     ModInput,
     ButtonLink,
+    TitleCount
 },
     beforeRouteLeave(to, from, next) {
         next()
@@ -57,14 +65,17 @@ export default defineComponent ({
     // },
     mounted() {
         this.socket
-            .on("connect", () => {
-                console.log("Connected, ", this.socket.id);
-            })
             .on("disconnect", (reason) => {
                 console.log("Deconnected", reason);
             })
-            .on("created", (data: {channel: Channel}) => {
-                this.listChannel.push(data.channel)
+            .on("created", (data) => {
+                for (let i = 0; i != this.listChannel.length; ++i) {
+                    console.log(this.listChannel[i].id)
+                    if (this.listChannel[i].id == data.channel.id)
+                        return ;
+                }
+                if (data.channel.visibility == 'public')
+                    this.listChannel.push(data.channel);
             })
         ;
         API.get('chat/list').then((response) => {
@@ -76,12 +87,15 @@ export default defineComponent ({
     },
     methods: {
         create(): void {
-            // this.socket.emit("create", this.formCreate)
-            API.post('chat/create', this.formCreate)
+            API.post('chat/create', this.formCreate).then((response) => {
+                for (let i = 0; i != this.listChannel.length; ++i)
+                    if (this.listChannel[i].id == response.data.id)
+                        return ;
+                this.listChannel.push(response.data);
+            }).catch((error) => {console.log(error)})
 		},
         switchVisibility(): void {
             let visibility =  this.formCreate.visibility
-            console.log("SWITCH")
             this.formCreate.visibility =  visibility == "public" ? "private" : "public"
             console.log(this.formCreate.visibility)
         }

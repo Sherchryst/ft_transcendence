@@ -1,82 +1,46 @@
 <template>
-    <chat-wrapper hasConv>
-        <!-- <div class="col-span-8 conversation flex flex-col justify-between px-7 py-5"> -->
-			<div class="flex flex-row justify-between items-center">
-				<div>Channel Name</div>
-				<div class="flex flex-row">
-					<button v-s-dropdown-toggle:info>
-						<info-icon class="h-10"></info-icon>
-					</button>
-					<s-dropdown name="info" align="left">
-						<InfoPanel></InfoPanel>
-					</s-dropdown>
-					<button v-s-dropdown-toggle:option-channel>
-						<option-icon class="h-10"></option-icon>
-					</button>
-                    <s-dropdown name="option-channel" align="left">
-						<OptionChannel :channel="channel"></OptionChannel>
-					</s-dropdown>
-				</div>
-			</div>
-            <div id="chat" class="flex-auto flex flex-col-reverse mb-5 overflow-x-auto" :key="history">
-                <message :self="message.self" v-for="message in history" :key="message">
-                    {{message.content}}
-                </message>
-            </div>
-            <one-row-form placeholder="Message" @callback="send">
-                <span class="flex flex-row items-center">
-                    <span class="hidden md:flex pl-2 pr-1">Send</span>
-                    <SendIcon/>
-                </span>
-           </one-row-form>
-      <!-- </div> -->
-    </chat-wrapper>
-  <!-- </div> -->
+    <ChatViewWrapper @callback="send">
+        <template v-slot:title>#-{{channel.name}}</template>
+        <template v-slot:info>
+            <InfoPanel></InfoPanel>
+        </template>
+        <template v-slot:option>
+            <OptionChannel :channel="channel"></OptionChannel>
+        </template>
+        <template v-if="history.length" v-slot:messages>
+            <message v-for="message in history" :key="message" :message="message" :channelId="parseInt(id)">
+                {{message.content}}
+            </message>
+        </template>
+    </ChatViewWrapper>
 </template>
-
-<style lang="scss" scoped>
-    #chat{
-        // background: #E2E3F2;
-        // border-radius: 25px;
-        // height: 77vh;
-    }
-</style>
 
 <script lang="ts">
 
-import { defineComponent, PropType, computed, watch } from 'vue';
+import { defineComponent, computed, watch, provide } from 'vue';
 import Message from '@/components/chat/Message.vue'
-import OneRowForm from '@/components/OneRowForm.vue'
-import SendIcon from '@/assets/icon/send.svg';
-import ChatWrapper from '@/components/chat/ChatWrapper.vue'
 import { useMeta } from 'vue-meta'
 import { useStore } from 'vuex'
 import { key } from '@/store'
-import { Message_t, ServerMessage } from '@/interfaces/Message'
-import { Channel } from '@/interfaces/Channel';
+import { Message_t, ServerMessage } from '@/interfaces/Message';
+import { Channel, ChannelMember_t } from '@/interfaces/Channel';
 import { chatSocket } from '@/socket'
-import InfoIcon from '@/assets/icon/info.svg'
-import OptionIcon from '@/assets/icon/option.svg'
 import InfoPanel from '@/components/chat/InfoPanel.vue';
 import OptionChannel from '../components/chat/OptionChannel.vue';
+import ChatViewWrapper from '@/components/chat/ChatViewWrapper.vue';
+import { API } from '@/scripts/auth.ts';
+import router from '@/router';
 
 export default defineComponent({
     components: {
     Message,
-    SendIcon,
-    ChatWrapper,
-    OneRowForm,
-    InfoIcon,
-    OptionIcon,
     InfoPanel,
-    OptionChannel
+    OptionChannel,
+    ChatViewWrapper
 },
     props : {
         id: {type: String, required: true},
         name: {type : String}
-    },
-    beforeRouteLeave(to, from, next) {
-        next()
     },
     setup () {
         useMeta({ title: 'Chat' })
@@ -90,70 +54,87 @@ export default defineComponent({
         return {
             socket : chatSocket,
             history: [] as Message_t[],
-            msg: "",
             channel: {} as Channel,
+            members: [] as ChannelMember_t[],
+        }
+    },
+    computed: {
+        owner() :boolean {
+            return (this.channel.owner?.id == this.$store.getters.getId)
         }
     },
     created(): void {
 		watch(
 			() => this.$route.params.id,
 			(newId) => {
-				if(newId) {
-					this.join(parseInt(newId[0]))
-				}
+				if(newId)
+					this.getChannelInfo(parseInt(String(newId)));
 			}
 		)
 	},
 	mounted() {
-        this.join(parseInt(this.id))
+        this.getChannelInfo(parseInt(this.id))
         this.socket
             .on('connect', () => {
                 console.log('connected', this.socket.id)
-            })
-            .on('joined', (data) => {
-                console.log('joined')
-                this.channel = data.channel
-                this.history = []
-                for (let i = 0; i < data.history.length; i++)
-                    this.recv(data.history[i])
             })
             .on('message', (data) => {
                 if (data.channelMessage.channel.id == this.id)
                     this.recv(data.channelMessage.message)
                 this.readMessage(parseInt(this.id))
             })
+            .on('joined', (data) => {
+                this.members.push(data);
+                this.history.unshift({content: "Hello", from: data, self: false, photo: true});
+            })
+            .on('left', (id) => {
+                let member = {} as ChannelMember_t;
+                for (let i = 0; i != this.members.length; ++i)
+                    if (this.members[i].id == id) {
+                        member = this.members[i];
+                        this.members.splice(i);
+                        break ;
+                    }
+                let self = this.nickname == id;
+                this.history.unshift({content: "Bye", from: member, self: self, photo: true});
+            })
         ;
 	},
-    updated() {
-        console.log('update')
-    },
 	methods: {
         readMessage(chanId: number){
             this.$emit('read-message', chanId);
         },
         send(message: string): void {
-            console.log("message : ", message)
 			this.socket.emit('message', {
                 chanId: parseInt(this.id),
                 msg : message
             });
 		},
-
-		join(chanId: number): void {
-			this.socket.emit('join', {
-                channelId: chanId,
-                password: ""
-            });
-            this.readMessage(chanId)
+		getChannelInfo(chanId: number): void {
+            console.log(chanId);
+			API.get('chat/channel-info', {params: {channelId: chanId}}).then((response) => {
+            this.channel = response.data.channel
+            this.history = []
+            for (let i = 0; i < response.data.history.length; ++i)
+                this.recv(response.data.history[i])
+            for (let i = 0; i < response.data.members.length; ++i)
+                this.members.push(response.data.members[i]);
+            }).catch((error) => {
+                console.log(error);
+            })
+            this.readMessage(chanId);
 		},
         recv(data: ServerMessage ): void {
             let message: Message_t = {
                 content: data.content,
-                from: data.from.nickname,
-                self: false
+                from: data.from,
+                self: false,
+                photo: true,
             }
-            if (this.nickname == message.from)
+            if (this.nickname == message.from.nickname)
                 message.self = true
+            if (this.history.length && this.history[0].from.id == message.from.id)
+                message.photo = false
             this.history.unshift(message)
         }
 	}

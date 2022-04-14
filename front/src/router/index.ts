@@ -43,7 +43,7 @@ const routes: Array<RouteRecordRaw> = [
           component: Chat,
         },
         {
-          path: ':id',
+          path: 'channel/:id',
           name: 'unique-chat',
           component: UniqueChat,
           props: true,

@@ -1,6 +1,18 @@
 <template>
-<div class="flex flex-col gap-4">
-	<button @click="leave_channel" class="text-left">
+<div class="opt flex flex-col gap-4">
+	<p class="opt-title">Admin</p>
+	<button @click="openPassword" class="text-left">
+		Set password
+	</button>
+	<PasswordModal ref="password_block" ></PasswordModal>
+	<button class="text-left">
+		Modify password
+	</button>
+	<button class="opt-danger text-left">
+		Remove password
+	</button>
+	<p class="opt-title">Option</p>
+	<button @click="leave_channel" class="opt-danger text-left">
 		Leave channel
 	</button>
 	<div>
@@ -12,21 +24,35 @@
 			</span>
 		</OneRowForm>
 	</div>
-	<!-- <form>
-		<ModInput name="invition" placeholder="Nickname" class="mobile">Invitation</ModInput>
-		<button type="submit">
-			Send
-		</button>
-	</form> -->
 </div>
 </template>
+
+<style lang="scss" scoped>
+.opt{
+	button {
+		color: $action;
+		&.opt-danger{
+			color: $defeat-color;
+		}
+
+	}
+	&-title{
+		color: $dark-font;
+		@apply font-bold;
+	}
+}
+
+</style>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import OneRowForm from "../OneRowForm.vue";
 import SendIcon from '@/assets/icon/send.svg';
+import PasswordModal from '@/components/modal/PasswordModal.vue'
 import { chatSocket } from "@/socket";
 import { Channel } from "@/interfaces/Channel";
+import {API} from '@/scripts/auth.ts';
+import router from '@/router';
 
 export default defineComponent({
     name: "OptionChannelPanel",
@@ -40,12 +66,17 @@ export default defineComponent({
 	},
     methods: {
         leave_channel(): void {
-			this.socket.emit('leave', this.channel?.id);
+            API.post('chat/leave', {channelId: this.channel?.id}).then((response) => {
+                router.push({name: 'chat'});
+            }).catch((error) => {console.log(error)})
 		},
         invitation(nickname: string) {
-			console.log("INVITATION", nickname)
-		}
+			API.post('chat/invite', {channelId: this.channel?.id, invitedNick: nickname})
+		},
+		openPassword() : void {
+			(this.$refs['password_block'] as typeof PasswordModal).open()
+		},
     },
-    components: { OneRowForm, SendIcon }
+    components: { OneRowForm, SendIcon, PasswordModal }
 })
 </script>

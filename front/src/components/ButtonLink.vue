@@ -1,7 +1,7 @@
 <template>
 	<router-link v-if="route" :to="{name: route}" class="btn px-7 py-3 pb-2">{{ text }}</router-link>
 	<a v-else-if="text" :href="href" class="btn px-7 py-3 pb-2">{{ text }}</a>
-	<button v-else class="btn px-7 py-3 pb-2">
+	<button v-else class="btn px-7 py-2 pb-1">
 		<slot></slot>
 	</button>
 </template>
