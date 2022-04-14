@@ -31,6 +31,7 @@ export default defineComponent({
 				fromId: this.user.id,
 				toId: this.$store.getters.getId
 			}).then( () => {
+				this.$store.dispatch("connection");
 				this.close()
 			})
 		},
