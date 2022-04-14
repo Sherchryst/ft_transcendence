@@ -159,14 +159,18 @@ export class GameGateway implements OnGatewayConnection {
   @SubscribeMessage("invite")
   async handleInvite(
     @Req() req: any,
-    @MessageBody() data: { login: string; mapId: number; level: number }
+    @MessageBody() data: { nickname: string; mapId: number; level: number }
   ) {
-    const to_user = await this.usersService.findByLogin(data.login);
-    if (to_user == null) console.log("Game : User not found");
-    // error
-    else if (data.login == req.user.login)
-      console.log("Game : You can't invite yourself");
-    // error
+    var to_user = await this.usersService.findByNickname(data.nickname);
+    if (to_user == null) {
+    //   to_user = await this.usersService.findByLogin(data.nickname);
+    // }
+    // if (to_user == null) {
+      console.log("Game : User not found"); // error
+    }
+    else if (data.nickname == req.user.nickname) {
+      console.log("Game : You can't invite yourself"); // error
+    }
     else {
       try {
         const map = await this.matchService.findGameMap(data.mapId);
@@ -177,7 +181,7 @@ export class GameGateway implements OnGatewayConnection {
           data.level
         );
         this.gameService.WsClients.get(to_user.id).emit("invited", invitation);
-        console.log("Game : Invitation sent to", to_user.login);
+        console.log("Game : Invitation sent to", to_user.nickname);
       } catch (e) {
         console.log("Game : Error while sending invitation"); // error
       }
@@ -325,6 +329,7 @@ export class GameGateway implements OnGatewayConnection {
         id: player_id,
         map: match.map,
         login: [match.player1.login, match.player2.login],
+        nickname: [match.player1.nickname, match.player2.nickname],
       });
       if (player_id < 2) {
         board.ready++;

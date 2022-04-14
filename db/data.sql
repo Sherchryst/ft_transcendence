@@ -15,9 +15,9 @@ INSERT INTO "user_achievement" ("user_id", "achievement_id") VALUES
 (3, 2), (3, 3);
 
 INSERT INTO "user_relationship" VALUES
-('friend', 1, 3),
-('friend', 3, 1),
-('block', 1, 2);
+('friend', 1, 2),
+('friend', 2, 1),
+('block', 1, 3);
 
 INSERT INTO "game_map" ("ball_color", "background_color", "stars_color", "racket_color") VALUES
 (CAST(x'fcba03' AS int), CAST(x'0' AS int), CAST(x'0' AS int), CAST(x'ffffff' AS int));

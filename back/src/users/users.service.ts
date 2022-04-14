@@ -102,6 +102,12 @@ export class UsersService {
     });
   }
 
+  async findByNickname(nickname: string): Promise<User> {
+    return await getRepository(User).findOne({
+      where: { nickname: nickname }
+    });
+  }
+
   async findOne(userId: number): Promise<User> {
     return await getRepository(User).findOne(userId);
   }

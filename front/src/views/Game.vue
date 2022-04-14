@@ -59,6 +59,7 @@
       return {
         evts : [],
         login : ["you", "bot"],
+        nickname : ["coucoulalifeblablabloubadabdarrr", "coucoulalifeblablabloubadabda"],
         id : 0,
         gameStart : false,
         map: {
@@ -174,12 +175,15 @@
           gameSocket.on("gameMap", (data : {
             map: GameMap,
             login : string[],
+            nickname : string[],
             id : number
           }) => {
             this.map = { ...this.map, ...data.map };
             console.log(" my map :", this.map);
             this.login = { ...this.login, ...data.login };
             console.log(" logins :", this.login);
+            this.nickname = { ...this.nickname, ...data.nickname };
+            console.log(" nicknames :", this.nickname);
             this.id = data.id;
             this.gameStart = true;
             this.resizeCanvas();
@@ -335,24 +339,31 @@
       {
         var ctx = this.game_ctx;
         ctx.fillStyle = "white";
-        ctx.font = `${ctx.canvas.height / 10}px courier new`;
-        ctx.textAlign = "right";
-        ctx.fillText((this.board.player[0].score).toString(), ctx.canvas.width / 2 - ctx.canvas.width / 20, ctx.canvas.height / 10);
-        ctx.textAlign = "left";
-        ctx.fillText((this.board.player[1].score).toString(), ctx.canvas.width / 2 + ctx.canvas.width / 20, ctx.canvas.height / 10);
         ctx.font = `${ctx.canvas.height / 15}px courier new`;
         ctx.textAlign = "right";
-        ctx.fillText(this.login[1], ctx.canvas.width - ctx.canvas.width / 22, ctx.canvas.height / 10);
+        ctx.fillText((this.board.player[0].score).toString(), ctx.canvas.width / 2 - ctx.canvas.width / 30, ctx.canvas.height / 15);
         ctx.textAlign = "left";
-        ctx.fillText(this.login[0], ctx.canvas.width / 22, ctx.canvas.height / 10);
+        ctx.fillText((this.board.player[1].score).toString(), ctx.canvas.width / 2 + ctx.canvas.width / 30, ctx.canvas.height / 15);
+        ctx.font = `${ctx.canvas.height / 25}px courier new`;
+        ctx.textAlign = "right";
+        ctx.fillText(this.login[1], ctx.canvas.width - ctx.canvas.width / 15, ctx.canvas.height / 10);
+        ctx.textAlign = "left";
+        ctx.fillText(this.login[0], ctx.canvas.width / 15, ctx.canvas.height / 10);
+        ctx.font = `${ctx.canvas.height / 45}px courier new`;
+        ctx.textAlign = "right";
+        ctx.fillText(this.nickname[1], ctx.canvas.width - ctx.canvas.width / 15, ctx.canvas.height / 20);
+        ctx.textAlign = "left";
+        ctx.fillText(this.nickname[0], ctx.canvas.width / 15, ctx.canvas.height / 20);
       },
       drawWinner(winner : number)
       {
         var ctx = this.game_ctx;
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         ctx.fillStyle = "white";
-        ctx.font = `${ctx.canvas.height / 10}px courier new`; // absolute size /!\
+        ctx.font = `${ctx.canvas.height / 15}px courier new`; // absolute size /!\
         ctx.textAlign = "center";
-        ctx.fillText(this.login[winner] + " wins", ctx.canvas.width / 2, ctx.canvas.height / 2);
+        ctx.fillText(this.nickname[winner], ctx.canvas.width / 2, ctx.canvas.height / 2 - ctx.canvas.height / 10);
+        ctx.fillText("wins", ctx.canvas.width / 2, ctx.canvas.height / 2 + ctx.canvas.height / 10);
       },
       addObjects()
       {
