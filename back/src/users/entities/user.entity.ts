@@ -11,7 +11,7 @@ export class User {
   @Column({ length: 32, unique: true })
   login: string;
 
-  @Column({ length: 32, unique: true })
+  @Column({ length: 10, unique: true })
   nickname: string;
 
   @Column({ default: 0 })
