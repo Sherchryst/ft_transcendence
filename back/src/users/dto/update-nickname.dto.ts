@@ -5,7 +5,7 @@ export class UpdateNicknameDto {
   id: number;
 
   @IsNotEmpty()
-  @MaxLength(32)
+  @MaxLength(10)
   @Matches('^(?!anon-).*$', '', { message: 'nickname cannot start with "anon-"' })
   @Matches('^[a-zA-Z0-9\-_]+$', '',
   { message: 'nickname can contain only alphanumeric characters, dashes and underscores' })
