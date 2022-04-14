@@ -217,7 +217,7 @@ export default defineComponent({
 			() => this.$route.params.username,
 			(newUsername) => {
 				if(newUsername){
-					this.getUser(newUsername)
+					this.getUser(newUsername.toString())
 				}
 			}
 		)
