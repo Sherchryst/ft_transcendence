@@ -38,4 +38,8 @@ export class TwoFactorService {
     this.usersService.set2fa(user.id, true);
   }
 
+  public turnOff2fa(user: User) {
+    this.usersService.set2fa(user.id, false);
+  }
+
 }

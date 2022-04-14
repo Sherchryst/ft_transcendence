@@ -105,10 +105,13 @@ export default defineComponent({
             this.$emit('read-message', chanId);
         },
         send(message: string): void {
-			this.socket.emit('message', {
-                chanId: parseInt(this.id),
-                msg : message
-            });
+            console.log("message : ", message)
+            if (message != "") {
+                this.socket.emit('message', {
+                    chanId: parseInt(this.id),
+                    msg : message
+                });
+            }
 		},
 		getChannelInfo(chanId: number): void {
             console.log(chanId);

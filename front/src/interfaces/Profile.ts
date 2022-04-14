@@ -1,3 +1,15 @@
+export enum Statut {
+	NOTLOGIN,
+	TWOFA,
+	AUTH
+  }
+
+export interface Achievement {
+	id: number;
+	name: string;
+	description: string;
+	unlocked_at: string;
+}
 export interface Profile {
 	achievements: [],
 	friends: [],
@@ -5,6 +17,7 @@ export interface Profile {
 }
 
 export interface User {
+	xp: number;
 	id: number,
 	login: string,
 	mmr: number,
@@ -12,5 +25,6 @@ export interface User {
 	role: string,
 	twofa?: boolean,
 	twofaSecret?: string,
-	newUser: boolean
+	newUser: boolean,
+	avatarPath: string
 }

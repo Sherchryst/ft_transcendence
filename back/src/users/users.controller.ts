@@ -65,14 +65,8 @@ export class UsersController {
       throw new BadRequestException('No id nor login provided');
     if (!user)
       throw new NotFoundException('User not found');
-    /*
-    * TODO: Add requests for achievements
-    */
-    const achievements = await this.usersService.getUserAchievements(id);
-    /*
-    * TODO: Add requests for friends
-    */
-    const friends = await this.usersService.getFriends(id);
+    const achievements = await this.usersService.getUserAchievements(user.id);
+    const friends = await this.usersService.getFriends(user.id);
     /* TODO: Add relationship status with current user
       - User can be blocked
       - User can unblock user
@@ -87,6 +81,16 @@ export class UsersController {
     });
   }
 
+  @Get('is-2fa-enabled')
+  async is2faEnabled(@Query('id') id: number) {
+    if (!id)
+      throw new BadRequestException('No id provided');
+    const user = await this.usersService.findOne(id);
+    if (!user)
+      throw new NotFoundException('User not found');
+    return user.twofa;
+  }
+
   @Post('send-friend-request')
   async sendFriendRequest(@Body() dto: { fromId: number, toId: number }) {
     try {
@@ -96,6 +100,11 @@ export class UsersController {
     } catch (error) {
       throw new UnauthorizedException();
     }
+  }
+
+  @Get('top-ten')
+  async topTen() {
+    return JSON.stringify(await this.usersService.topTen());
   }
 
   @Post('unblock-user')

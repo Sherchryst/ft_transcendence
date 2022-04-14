@@ -9,9 +9,11 @@ import ListChat from '@/views/ListChat.vue'
 import Profile from '@/views/Profile.vue'
 import Register from '@/views/Register.vue'
 import GameChoice from '@/views/GameChoice.vue'
+import EditProfile from '@/views/EditProfile.vue'
 import Game from '@/views/Game.vue'
 import NotFound from '@/views/NotFound.vue'
 import { useCookies } from "vue3-cookies";
+import { Statut } from '@/interfaces/Profile'
 
 const { cookies } = useCookies();
 
@@ -56,10 +58,15 @@ const routes: Array<RouteRecordRaw> = [
       component: ListChat
     },
     {
-      path: 'profile/:username',
+      path: 'profile/view/:username',
       name: 'profile',
       props: true,
       component: Profile
+    },
+    {
+      path: 'profile/edit',
+      name: 'edit-profile',
+      component: EditProfile
     },
     {
       path: "game/:match_id",
@@ -96,9 +103,12 @@ const router = createRouter({
 })
 
 router.beforeEach((to, form, next) => {
-  // console.log("STORE", store.getters)
-  if (to.name != 'login' && !cookies.isKey('jwt'))
-    next({ name: 'login' })
+  if (
+    to.name != 'login' && 
+    (!cookies.isKey('jwt') || (localStorage.getItem('state') && localStorage.getItem('state') == Statut.TWOFA.toString()))
+    ){
+      next({ name: 'login' })
+  }
   else if (to.name != 'register' && cookies.isKey('jwt') && localStorage.getItem('user')) {
     const profile = JSON.parse(localStorage.getItem('user') || '{}' )
     if (profile?.user?.newUser)
@@ -106,9 +116,12 @@ router.beforeEach((to, form, next) => {
     else
       next()
   }
-  else {
-      next()
+  else if (to.name != 'login' && !localStorage.getItem('user')) {
+    localStorage.setItem('state', Statut.NOTLOGIN.toString())
+    next({ name: 'login' })
   }
+  else
+    next()
 })
 
 export default router

@@ -31,9 +31,9 @@
 
 <script lang="ts">
 import GamePanel from '@/components/GamePanel.vue';
-import BigRadioButton from '@/components/BigRadioButton.vue';
+// import BigRadioButton from '@/components/BigRadioButton.vue';
 import { defineComponent } from 'vue';
-import { gameSocket } from '@/socket';
+import { gameSocket, statusSocket } from '@/socket';
 import router from '@/router';
 import ChallengeForm from '@/components/chat/game/ChallengeForm.vue';
 
@@ -43,26 +43,22 @@ export default defineComponent({
     ChallengeForm
 },
 	mounted() {
-		gameSocket.on("invited", (data : any) => {
-			gameSocket.emit("acceptInvit", data);
-			console.log("accepted invite : ", data);
+			statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
+			console.log("match status : ", data);
 		});
-		gameSocket.on("gameStart", (data: any) => {
-				router.push({ name: "game", params: { match_id: data }})
-		})
 	},
 	beforeUnmount() {
-      gameSocket.off("invited");
-      gameSocket.off("gameStart");
-      // const removed = document.removeEventListener("mousemove", this.moveRackets);
-      console.log("before destroy in gamechoice");
-    },
+		//   gameSocket.off("invited");
+		//   gameSocket.off("gameStart");
+		// const removed = document.removeEventListener("mousemove", this.moveRackets);
+		console.log("before destroy in gamechoice");
+	},
 	methods: {
 		sendInvite() {
-			gameSocket.emit("invite", { login : "cheat_user", mapId : 2, level : 1});
+			gameSocket.emit("invite", { login: "cheat_user", mapId: 3, level: 1 });
 		},
 		requestGame() {
-			router.push({ name: "game", params: { match_id: `bot` }})
+			router.push({ name: "game", params: { match_id: `bot` } })
 			console.log("BOT");
 		},
 		matchmaking() {
@@ -75,10 +71,14 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 form {
-	span, input[type=text] ~ label{
-		color: $panel--dk-color;;
+
+	span,
+	input[type=text]~label {
+		color: $panel--dk-color;
+		;
 	}
-	input[type=text]{
+
+	input[type=text] {
 		border-radius: 10px;
 	}
 }
