@@ -58,7 +58,9 @@
     data() {
       return {
         evts : [],
-        login : ["you", "bot"],
+        login : ["", ""],
+        nickname : ["you", "bot"],
+        move : ("ontouchstart" in window) ? "touchmove" : "mousemove",
         id : 0,
         gameStart : false,
         map: {
@@ -126,7 +128,7 @@
               gameSocket.off("board");
               gameSocket.off("gameMap");
             }
-            document.removeEventListener("mousemove", this.moveRackets);
+            document.removeEventListener(this.move, this.moveRackets);
             window.removeEventListener("resize", this.resizeCanvas);
           }
           if (newId) {
@@ -155,7 +157,7 @@
         gameSocket.off("board");
         gameSocket.off("gameMap");
       }
-      document.removeEventListener("mousemove", this.moveRackets);
+      document.removeEventListener(this.move, this.moveRackets);
       window.removeEventListener("resize", this.resizeCanvas);
     },
     methods:
@@ -185,7 +187,7 @@
             this.resizeCanvas();
             console.log(" id :", this.id);
             // this.drawBackground();
-            document.addEventListener("mousemove", this.moveRackets);
+            document.addEventListener(this.move, this.moveRackets);
             // console.log(setuped, 'socket connected');
           });
           gameSocket.on("board", (data : Board) => {
@@ -201,7 +203,7 @@
           // this.reset(true);
           // this.drawBackground();
           console.log(this.game_ctx);
-          document.addEventListener("mousemove", this.moveRackets);
+          document.addEventListener(this.move, this.moveRackets);
           // console.log(setuped, 'evts', this.evts);
           this.game_loop();
         }
@@ -337,14 +339,9 @@
         ctx.fillStyle = "white";
         ctx.font = `${ctx.canvas.height / 10}px courier new`;
         ctx.textAlign = "right";
-        ctx.fillText((this.board.player[0].score).toString(), ctx.canvas.width / 2 - ctx.canvas.width / 20, ctx.canvas.height / 10);
+        ctx.fillText((this.board.player[0].score).toString(), ctx.canvas.width / 2 - ctx.canvas.width / 30, ctx.canvas.height / 10);
         ctx.textAlign = "left";
-        ctx.fillText((this.board.player[1].score).toString(), ctx.canvas.width / 2 + ctx.canvas.width / 20, ctx.canvas.height / 10);
-        ctx.font = `${ctx.canvas.height / 15}px courier new`;
-        ctx.textAlign = "right";
-        ctx.fillText(this.login[1], ctx.canvas.width - ctx.canvas.width / 22, ctx.canvas.height / 10);
-        ctx.textAlign = "left";
-        ctx.fillText(this.login[0], ctx.canvas.width / 22, ctx.canvas.height / 10);
+        ctx.fillText((this.board.player[1].score).toString(), ctx.canvas.width / 2 + ctx.canvas.width / 30, ctx.canvas.height / 10);
       },
       drawWinner(winner : number)
       {
@@ -370,11 +367,13 @@
         this.drawRackets(this.board.player[0].y, this.board.player[1].y);
         this.drawScore();
       },
-      moveRackets(evt : MouseEvent)
+      moveRackets(evt : any)
       {
         // console.log("Evt: ", evt);
         if (this.id > 1)
           return ;
+        if (this.move == "touchmove")
+          evt = evt.touches[0];
         let rect : DOMRect = this.game_ctx.canvas.getBoundingClientRect();
         // console.log("id :", this.id, this.match_id);
         if (this.$props.match_id != "bot")
