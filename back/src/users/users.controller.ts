@@ -86,6 +86,16 @@ export class UsersController {
     return user.twofa;
   }
 
+  @Get('relationship-status')
+  async relationshipStatus(@Req() req, @Query('id') id: number) {
+    if (!id)
+      throw new BadRequestException('No id provided');
+    const relation = await this.usersService.getOneRelationship(req.user.id, id);
+    if (!relation)
+      return new NotFoundException('Relation not found');
+    return relation;
+  }
+
   @Post('send-friend-request')
   async sendFriendRequest(@Body() dto: { fromId: number, toId: number }) {
     try {

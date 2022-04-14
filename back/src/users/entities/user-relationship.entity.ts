@@ -18,4 +18,7 @@ export class UserRelationship {
 
   @Column({ type: 'enum', enum: UserRelationshipType })
   type: UserRelationshipType;
+
+  @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP' })
+  created_at: Date;
 }

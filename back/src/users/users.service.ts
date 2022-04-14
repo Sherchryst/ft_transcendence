@@ -127,6 +127,13 @@ export class UsersService {
     }).then(relations => relations.map(r => r.from));
   }
 
+  async getOneRelationship(fromUserId: number, toUserId: number): Promise<UserRelationship> {
+    return await getRepository(UserRelationship).findOne({
+      relations: ['from', 'to'],
+      where: { from: { id: fromUserId }, to: { id: toUserId } }
+    });
+  }
+
   async getUserAchievements(userId: number): Promise<any[]> {
     return await getManager().query(
       'SELECT a.id, a.name, a.description, ua.unlocked_at ' +
