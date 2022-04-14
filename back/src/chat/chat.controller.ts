@@ -10,7 +10,6 @@ export class ChatController {
 
   @Get('list')
     async list() {
-      const stuff = JSON.stringify(await this.chatService.listChannels());
-      return stuff
+      return await this.chatService.listChannels();
     }
 }
