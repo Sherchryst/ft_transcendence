@@ -41,6 +41,13 @@ export class ChatService {
     });
   }
 
+  async getInvitations(userId: number): Promise<ChannelInvitation[]> {
+    return await getRepository(ChannelInvitation).find({
+      relations: ['channel', 'to', 'from'],
+      where: { to: { id: userId } }
+    });
+  }
+
   async createMessage(from: User, content: string): Promise<Message> {
     const msg = getRepository(Message).create({
       from: from,

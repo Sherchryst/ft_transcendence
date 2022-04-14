@@ -170,6 +170,16 @@ export default defineComponent({
 				});
 				console.log("len", this.notifications.length)
 			})
+			API.get('chat/invite-list', {
+				params: {
+					id: this.$store.getters.getId
+				}
+			}).then( (response) => {
+				console.log("data")
+				response.data.forEach( (element: ChannelInvitation) => {
+					this.addChannelInivtation(element)
+				})
+			})
 		},
 		addFriendRequest(data: FriendRequest): void {
 			let friendRequest =  { nickname: data.nickname, id: data.id} as FriendRequest

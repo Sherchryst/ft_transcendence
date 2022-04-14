@@ -107,6 +107,11 @@ export class ChatController {
     this.chatService.deleteInvitation(data.channelId, data.fromId, data.toId);
   }
 
+  @Get('invite-list')
+  async invite_list(@Req() req) {
+    return await this.chatService.getInvitations(req.user.id);
+  }
+
   @Post('moderation')
   async moderation(@Req() req, @Body() data: {channelId: number, toId: number, reason: string, duration: number, moderation: ChannelModerationType}) {
     const member = await this.chatService.getChannelMember(data.channelId, req.user.id);
