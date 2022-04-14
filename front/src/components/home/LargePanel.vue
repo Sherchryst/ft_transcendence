@@ -1,13 +1,6 @@
 <template>
-    <div class="md:col-span-10 panel col-start-1">
-        <div class="flex flex-col-reverse justify-center md:grid md:grid-cols-5 justify-between h-full ">
-            <div class="md:col-span-2">
-                <slot name="left"></slot>
-            </div>
-            <div class="flex content-center md:col-span-3 h-auto panel-dk h-full">
-                <slot name="right"></slot>
-            </div>
-        </div>
+    <div class="md:col-span-7 panel col-start-1 max-h-80 overflow-auto">
+        <slot></slot>
     </div>
 </template>
 
@@ -24,4 +17,24 @@ export default defineComponent({
   background-color: $panel--dk-color;
   border-radius: 25px;
 }
+
+ /* Firefox */
+  * {
+    scrollbar-width: auto;
+    scrollbar-color: #5d6880 #ffffff;
+  }
+
+  /* Chrome, Edge, and Safari */
+  *::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: #5d6880;
+    border-radius: 10px;
+  }
 </style>

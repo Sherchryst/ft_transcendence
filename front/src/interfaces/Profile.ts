@@ -4,6 +4,12 @@ export enum Statut {
 	AUTH
   }
 
+export interface Status{
+	message: string,
+	status: string,
+	userId: number
+}
+
 export interface Achievement {
 	id: number;
 	name: string;
@@ -12,7 +18,7 @@ export interface Achievement {
 }
 export interface Profile {
 	achievements: [],
-	friends: [],
+	friends: User [],
 	user: User
 }
 
@@ -26,5 +32,7 @@ export interface User {
 	twofa?: boolean,
 	twofaSecret?: string,
 	newUser: boolean,
-	avatarPath: string
+	avatarPath: string,
+	status: string,
+	message: string
 }
