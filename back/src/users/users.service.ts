@@ -82,7 +82,7 @@ export class UsersService {
       try {
         const user = repo.create({
           login: login,
-          nickname: genRanHex(32)
+          nickname: genRanHex(10)
         });
         return await repo.save(user);
       } catch (e) {
