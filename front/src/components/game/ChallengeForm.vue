@@ -14,9 +14,9 @@
 		<div class="flex flex-col items-start mt-10">
 			<ModLabel name="map">Map</ModLabel>
 			<div class="grid grid-cols-2 2xl:grid-cols-3 gap-4 w-full">
-				<big-radio-button id="1" checked  @minput="setMap"/>
-				<big-radio-button id="2" @minput="setMap"/>
-				<big-radio-button id="3" @minput="setMap"/>
+				<big-radio-button class="map-1" id="1" checked  @minput="setMap"/>
+				<big-radio-button class="map-2" id="2" @minput="setMap"/>
+				<big-radio-button class="map-3" id="3" @minput="setMap"/>
 			</div>
 		</div>
 		<div class="flex flex-col items-start mt-10 mb-10">
