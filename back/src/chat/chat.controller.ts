@@ -40,7 +40,7 @@ export class ChatController {
       }
       if (channel.password && channel.password !== data.password && !await this.chatService.isInvited(data.channelId, req.user))
           throw new UnauthorizedException("Wrong Password");
-      this.chatService.joinChannel(req.user, data.channelId, ChannelMemberRole.MEMBER);
+      await this.chatService.joinChannel(req.user, data.channelId, ChannelMemberRole.MEMBER);
       client.join("channel:" + channel.id);
       this.chatGateway.server.in("channel:" + channel.id).emit("joined", req.user)
   }
@@ -66,7 +66,7 @@ export class ChatController {
     await this.chatService.leaveChannel(req.user, data.channelId);
     const members = await this.chatService.getChannelMembers(data.channelId);
     if (members.length == 0)
-      this.chatService.deleteChannel(data.channelId);
+      await this.chatService.deleteChannel(data.channelId);
     this.chatGateway.server.in("channel:" + data.channelId).emit("left", req.user.id);
     client.leave("channel:" + data.channelId);
   }
@@ -87,16 +87,17 @@ export class ChatController {
 
   @Post('invite')
   async invite(@Req() req, @Body() data: {channelId: number, invitedNick: string}) {
-    const sender = this.chatService.getChannelMember(data.channelId, req.user.id);
+    const sender = await this.chatService.getChannelMember(data.channelId, req.user.id);
     if (!sender)
         throw new UnauthorizedException("you're not a channel member");
     const invited = await this.userService.findByNick(data.invitedNick);
     if (!invited)
       throw new NotFoundException("No such Nick");
-    const invitation = this.chatService.createInvitation(data.channelId, req.user, invited.id);
+    const invitation = await this.chatService.createInvitation(data.channelId, req.user, invited.id);
+    invitation.channel = await this.chatService.findChannel(invitation.channel.id);
     if (!invitation)
       throw new NotFoundException("target doesn't exist");
-    this.chatGateway.wsClients.get(invited.id).send(invitation);
+    console.log("Channel Invitation", invitation)
+    this.chatGateway.wsClients.get(invited.id).emit("invited", invitation);
   }
-
 }

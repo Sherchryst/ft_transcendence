@@ -10,6 +10,7 @@ export interface FriendRequest {
 export interface ChannelInvitation {
 	from: User,
 	channel: Channel
+	sent_at: Date;
 }
 
 export interface GameInvitation {

@@ -88,7 +88,7 @@ import { chatSocket, gameSocket } from '@/socket'
 import NotifPanel from '@/components/Notification/NotifPanel.vue';
 import { Statut } from '@/interfaces/Profile';
 import BadgeNotif from '@/components/Notification/BadgeNotif.vue'; 
-import { Notification, FriendRequest, GameStart, GameInvitation } from "@/interfaces/Notification";
+import { Notification, FriendRequest, GameStart, GameInvitation, ChannelInvitation } from "@/interfaces/Notification";
 
 export default defineComponent({
 	components: {
@@ -121,6 +121,10 @@ export default defineComponent({
 			.on('message', (data: {channelMessage: SocketMessage}) => {
 				if (data.channelMessage.message.from.id != this.$store.getters.getId)
 					this.channelMessage.push(data.channelMessage)
+			})
+			.on('invited', (data: ChannelInvitation) => {
+				console.log('invite', data)
+				this.addChannelInivtation(data);
 			})
 		this.gameSocket
 			.on('invited', (data: GameInvitation) => {
@@ -182,6 +186,13 @@ export default defineComponent({
 				content: data,
 				date: new Date(data.sentAt)
 			} as Notification)
+		},
+		addChannelInivtation(data: ChannelInvitation){
+			this.notifications.push({
+				container: 'NotifChannel',
+				content: data,
+				date: new Date(data.sent_at)
+			})
 		},
 		addGameStart(data: string): void {
 			let gameStart = JSON.parse(data) as GameStart

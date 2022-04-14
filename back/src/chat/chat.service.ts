@@ -26,7 +26,8 @@ export class ChatService {
     const invitation = getRepository(ChannelInvitation).create({
       channel: { id: channelId },
       from: from,
-      to: { id: toUserId }
+      to: { id: toUserId },
+      sent_at: new Date()
     });
     await getRepository(ChannelInvitation).save(invitation);
     return invitation;

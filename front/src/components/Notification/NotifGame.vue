@@ -39,13 +39,6 @@ export default defineComponent({
 		close(){
 			this.$emit("close", this.invitation)
 		}
-		// 		gameSocket.on("invited", (data : string) => {
-		// 	gameSocket.emit("acceptInvit", data); // TODO: ask for confirmation
-		// 	console.log("accepted invite : ", data);
-		// });
-		// gameSocket.on("gameStart", (data: string) => {
-		// 		router.push({ name: "game", params: { match_id: data }})
-		// })
 	},
 	computed: {
 		invitation(): GameInvitation {
@@ -55,7 +48,6 @@ export default defineComponent({
 			return this.data.from.login;
 		},
 		mapName(): string {
-			// return this.data.map.name;
 			return ("Centurion")
 		},
 	},
