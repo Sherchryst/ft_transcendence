@@ -12,7 +12,7 @@
 	- An unique identifier for the user which is independant from 42.
 - login: VARCHAR(32) UNIQUE
 	- The login of the user retrieved from the 42 intranet.
-- nickname: VARCHAR(32) UNIQUE
+- nickname: VARCHAR(10) UNIQUE
 	- The user should be able to choose a unique name that will be displayed on the website.
 - xp: INT NOT NULL DEFAULT 0
 	- The experience points of the user.

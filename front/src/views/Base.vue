@@ -116,6 +116,12 @@ export default defineComponent({
 		}
 	},
 	mounted() {
+		gameSocket.on("error", (err : string) => {
+			console.log("Game error :", err);
+		})
+		gameSocket.on("warning", (err : string) => {
+			console.log("Game warning :", err);
+		})
 		statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
 			console.log('status data',data);
 			this.$store.dispatch("setStatus", {
