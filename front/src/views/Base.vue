@@ -25,36 +25,35 @@
 			</div>
 		</nav>
 		<div class="flex flex-col col-span-12 lg:col-start-2 lg:col-span-11 px-4 lg:px-16">
-			<div class="lg:pt-10 lg:h-36 ">
-				<div class="flex flex-row justify-between lg:hidden mobile-dropdown mt-3 mb-10">
-					<div class="">
-						<Logo />
-					</div>
-					<button @click="toggle_nav()" class="mobile-dropdown-toggle w-10" aria-hidden="true">
-						<MenuIcon />
-					</button>
-				</div>
-				<div class="hidden lg:flex flex-row justify-between justify-items-center h-16">
-					<div class="self-center">
+			<div class="lg:pt-10 lg:h-36 my-5 lg:my-0">
+				<div class="flex flex-row justify-between h-16">
+					<div class="hidden lg:flex self-center">
 						<ButtonLink @click="logout()" class="btn-neutral" text="Disconnect" />
 					</div>
-					<div class="flex flex-row justify-between justify-items-center">
-						<div class="self-center">
-							<one-row-form placeholder="Search">
-								<SearchIcon />
-							</one-row-form>
+					<div class="flex flex-row justify-between w-full lg:w-min">
+						<div class="hidden lg:flex flex-row justify-between justify-items-center">
+							<div class="self-center">
+								<one-row-form placeholder="Search">
+									<SearchIcon />
+								</one-row-form>
+							</div>
 						</div>
-						<div class="self-center flex mx-7">
+						<div class="flex flex-row items-center lg:mx-5">
 							<button v-s-dropdown-toggle:notification>
 								<NotifIcon class="h-12 w-12" />
 							</button>
 							<BadgeNotif :number="notifications.length"></BadgeNotif>
-							<s-dropdown name="notification" align="left">
+							<s-dropdown name="notification" align="left" position="bottom">
 								<NotifPanel :notifications="notifications" @close="removeNotif"/>
 							</s-dropdown>
 						</div>
 						<div class="">
 							<Logo />
+						</div>
+						<div class="flex flex-row justify-between lg:hidden mobile-dropdown mt-3 mb-10">
+							<button @click="toggle_nav()" class="mobile-dropdown-toggle w-10" aria-hidden="true">
+								<MenuIcon />
+							</button>
 						</div>
 					</div>
 				</div>
