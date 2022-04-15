@@ -1,12 +1,12 @@
 <template>
 	<div id="base" class="grid grid-cols-12 min-h-screen">
 		<nav id="nav" class="flex flex-col md:items-center md:fixed h-full w-full md:w-28 pt-24 md:pt-0 dropdown-link-container">
-			<div class="mb-5 md:mb-0 md:mt-10 md:h-36">
+			<div class="mb-5 md:mb-0 md:pt-10 md:h-36">
 				<router-link :to="{name: 'profile', params: {username: whoiam}}">
-					<img class="h-16 w-16" src="../assets/blank-avatar.jpg" alt="profile">
+					<img class="h-16 w-16" :src="'http://localhost:3000/' + $store.getters.getAvatarPath" alt="profile">
 				</router-link>
 			</div>
-			<one-row-form class="md:hidden mb-6 mobile" placeholder="Recherche">
+			<one-row-form class="md:hidden mb-6 mobile" placeholder="Search">
 				<SearchIcon />
 			</one-row-form>
 			<div class="flex flex-col w-full md:w-min">
@@ -19,13 +19,13 @@
 				<nav-button text="Channels" route="channel">
 					<GroupIcon />
 				</nav-button>
-				<nav-button text="Chat" route="chat" class="chat-link" :notification="this.newMessage">
+				<nav-button text="Chat" route="chat" class="chat-link" :notification="newMessage">
 					<ChatIcon />
 				</nav-button>
 			</div>
 		</nav>
 		<div class="flex flex-col col-span-12 md:col-start-2 md:col-span-11 px-4 md:px-16">
-			<div class="md:mt-10 md:h-36 ">
+			<div class="md:pt-10 md:h-36 ">
 				<div class="flex flex-row justify-between md:hidden mobile-dropdown mt-3 mb-10">
 					<div class="">
 						<Logo />
@@ -36,20 +36,21 @@
 				</div>
 				<div class="hidden sm:flex flex-row justify-between justify-items-center h-16">
 					<div class="self-center">
-						<ButtonLink @click="logout()" class="btn-neutral" text="Deconnection" />
+						<ButtonLink @click="logout()" class="btn-neutral" text="Disconnect" />
 					</div>
 					<div class="flex flex-row justify-between justify-items-center">
 						<div class="self-center">
-							<one-row-form placeholder="Recherche">
+							<one-row-form placeholder="Search">
 								<SearchIcon />
 							</one-row-form>
 						</div>
-						<div class="self-center mx-7">
-							<button v-s-dropdown-toggle:some-dropdown>
+						<div class="self-center flex mx-7">
+							<button v-s-dropdown-toggle:notification>
 								<NotifIcon class="h-12 w-12" />
 							</button>
-							<s-dropdown name="some-dropdown" align="left">
-								<NotifPanel/>
+							<BadgeNotif :number="notifications.length"></BadgeNotif>
+							<s-dropdown name="notification" align="left">
+								<NotifPanel :notifications="notifications" @close="removeNotif"/>
 							</s-dropdown>
 						</div>
 						<div class="">
@@ -58,7 +59,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="pb-6">
+			<div class="">
 				<router-view @read-message="removeMessageFrom"/>
 			</div>
 		</div>
@@ -79,12 +80,16 @@ import MenuIcon from '@/assets/icon/menu.svg'
 import NotifIcon from '@/assets/icon/notification.svg';
 import Logo from '@/assets/ApongUs.svg';
 import { useStore } from 'vuex'
-import { key } from '@/store/index.ts'
-import { API } from '@/scripts/auth.ts';
+import { key } from '@/store/index'
+import { API } from '@/scripts/auth';
 import router from '@/router';
 import { SocketMessage } from '@/interfaces/Message';
-import { chatSocket } from '@/socket.ts'
+import { chatSocket, gameSocket, statusSocket } from '@/socket'
 import NotifPanel from '@/components/Notification/NotifPanel.vue';
+import { Statut } from '@/interfaces/Profile';
+import BadgeNotif from '@/components/Notification/BadgeNotif.vue'; 
+import { Notification, FriendRequest, GameStart, GameInvitation, ChannelInvitation } from "@/interfaces/Notification";
+import { useToast } from "vue-toastification";
 
 export default defineComponent({
 	components: {
@@ -100,18 +105,52 @@ export default defineComponent({
 		Logo,
 		NotifIcon,
 		NotifPanel,
+		BadgeNotif
 	},
 	data() {
 		return {
-			socket : chatSocket,
-			channelMessage: [] as SocketMessage[]
+			chatSocket : chatSocket,
+			gameSocket : gameSocket,
+			channelMessage: [] as SocketMessage[],
+			notifications: [] as Notification[]
 		}
 	},
 	mounted() {
-		this.socket
+		const toast = useToast();
+		gameSocket.on("error", (err : string) => {
+			toast.error(err);
+			// console.log("Game error :", err);
+		})
+		gameSocket.on("warning", (err : string) => {
+			toast.warning(err);
+			// console.log("Game warning :", err);
+		})
+		statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
+			console.log('status data',data);
+			this.$store.dispatch("setStatus", {
+				userId: data.userId,
+				status: data.status,
+				message: data.message
+			})
+		})
+		console.log('avatar', this.$store.state.profile.user.avatarPath)
+		this.getNotif()
+		this.chatSocket
 			.on('message', (data: {channelMessage: SocketMessage}) => {
-				if (data.channelMessage.message.from.login != this.$store.getters.getLogin)
+				if (data.channelMessage.message.from.id != this.$store.getters.getId)
 					this.channelMessage.push(data.channelMessage)
+			})
+			.on('invited', (data: ChannelInvitation) => {
+				console.log('invite', data)
+				this.addChannelInivtation(data);
+			})
+		this.gameSocket
+			.on('invited', (data: GameInvitation) => {
+				this.addGameInvitation(data)
+			})
+			.on('gameStart', (data: number) => {
+				toast.info("Transfered to game");
+				router.push({name: 'game', params: {match_id: data}})
 			})
 	},
 	methods: {
@@ -122,10 +161,11 @@ export default defineComponent({
 				navElement.classList.toggle("dropdown-opened");
 		},
 		logout(): void {
-			API.post('auth/logout')
-			sessionStorage.clear()
-			localStorage.removeItem('user')
-			router.push({name: "login"})
+			API.post('auth/logout').then( () => {
+				localStorage.setItem("state", Statut.NOTLOGIN.toString())
+				localStorage.removeItem('user')
+				router.push({name: "login"})
+			})
 		},
 		removeMessageFrom(id: number)
 		{
@@ -136,6 +176,67 @@ export default defineComponent({
 					i--; 
 				}
 			}
+		},
+		getNotif(): void {
+			API.get("/users/get-friend-requests", {
+				params: {
+					id: this.$store.getters.getId
+				}
+			}).then( (response) => {
+				response.data.forEach( (element: FriendRequest) => {
+					this.addFriendRequest(element)
+				});
+				console.log("len", this.notifications.length)
+			})
+			API.get('chat/invite-list', {
+				params: {
+					id: this.$store.getters.getId
+				}
+			}).then( (response) => {
+				console.log("data")
+				response.data.forEach( (element: ChannelInvitation) => {
+					this.addChannelInivtation(element)
+				})
+			})
+		},
+		addFriendRequest(data: FriendRequest): void {
+			let friendRequest =  { nickname: data.nickname, id: data.id} as FriendRequest
+			let dateEvent = new Date()
+			this.notifications.push({
+				container: 'NotifFriend',
+				content: friendRequest,
+				date: dateEvent
+			} as Notification)
+		},
+		addGameInvitation(data: GameInvitation): void {
+			this.notifications.push({
+				container: 'NotifGame',
+				content: data,
+				date: new Date(data.sentAt)
+			} as Notification)
+		},
+		addChannelInivtation(data: ChannelInvitation){
+			this.notifications.push({
+				container: 'NotifChannel',
+				content: data,
+				date: new Date(data.sent_at)
+			})
+		},
+		addGameStart(data: string): void {
+			let gameStart = JSON.parse(data) as GameStart
+			let dateEvent = new Date()
+			this.notifications.push({
+				container: 'NotifGameStart',
+				content: gameStart,
+				date: dateEvent
+			} as Notification)
+		},
+		removeNotif(data: any): void {
+			let index = this.notifications.findIndex( (notif) => {
+				return (notif.content == data)
+			})
+			console.log("index", index)
+			this.notifications.splice(index)
 		}
 	},
 	computed: {

@@ -13,7 +13,8 @@ import SDropdown from "@storinka/dropdown";
 import 'vue-toastification/dist/index.css';
 
 const optionsToast: PluginOptions = {
-    position: POSITION.TOP_CENTER
+    position: POSITION.TOP_CENTER,
+	maxToasts: 5,
 };
 
 createApp(App)

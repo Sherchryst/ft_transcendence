@@ -3,12 +3,6 @@ import { Exclude } from 'class-transformer';
 import { UserAchievement } from './user-achievement.entity';
 import { UserRelationship } from './user-relationship.entity';
 
-export enum UserRole {
-  ADMIN = 'admin',
-  BANNED = 'banned',
-  USER = 'user'
-}
-
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -17,14 +11,11 @@ export class User {
   @Column({ length: 32, unique: true })
   login: string;
 
-  @Column({ length: 32, unique: true })
+  @Column({ length: 10, unique: true })
   nickname: string;
 
-  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
-  role: UserRole;
-
   @Column({ default: 0 })
-  mmr: number;
+  xp: number;
 
   @Column({ length: 32, default: '' })
   @Exclude()

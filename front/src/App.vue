@@ -2,7 +2,6 @@
   <div id="container" class="min-h-screen">
     <metainfo>
       <template v-slot:title="{ content }">{{ content ? `${content} | ApongUs` : `ApongUs` }}</template>
-      <!-- <title>testlol</title> -->
     </metainfo>
     <router-view/>
   </div>
@@ -28,18 +27,11 @@
     box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
 }
 
-// #nav {
-//   padding: 30px;
-// }
-
-// #nav a {
-//   font-weight: bold;
-//   color: #2c3e50;
-// }
-
-// #nav a.router-link-exact-active {
-//   color: #42b983;
-// }
+button {
+  svg{
+    fill: $action
+  }
+}
 
 </style>
 

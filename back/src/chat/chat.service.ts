@@ -11,11 +11,12 @@ import { Message } from './entities/message.entity';
 
 @Injectable()
 export class ChatService {
-  async createChannel(name: string, owner: User, visibility: ChannelVisibility): Promise<Channel> {
+  async createChannel(name: string, owner: User, password: string, visibility: ChannelVisibility): Promise<Channel> {
     const channel = getRepository(Channel).create({
       name: name,
       owner: owner,
-      visibility: visibility
+      visibility: visibility,
+      password: password
     });
     await getRepository(Channel).save(channel);
     return channel;
@@ -25,10 +26,26 @@ export class ChatService {
     const invitation = getRepository(ChannelInvitation).create({
       channel: { id: channelId },
       from: from,
-      to: { id: toUserId }
+      to: { id: toUserId },
+      sent_at: new Date()
     });
     await getRepository(ChannelInvitation).save(invitation);
     return invitation;
+  }
+
+  async deleteInvitation(channelId: number, fromId: number, toId: number) {
+    await getRepository(ChannelInvitation).delete({
+      channel: {id: channelId}, 
+      to: {id: toId},
+      from: {id: fromId}
+    });
+  }
+
+  async getInvitations(userId: number): Promise<ChannelInvitation[]> {
+    return await getRepository(ChannelInvitation).find({
+      relations: ['channel', 'to', 'from'],
+      where: { to: { id: userId } }
+    });
   }
 
   async createMessage(from: User, content: string): Promise<Message> {
@@ -55,9 +72,10 @@ export class ChatService {
       user: { id: userId },
       admin: admin,
       type: type,
-      reason: reason,
       expire_at: new Date(new Date().getTime() + duration)
     });
+    if (reason)
+      moderation.reason = reason;
     return await getRepository(ChannelModeration).save(moderation);
   }
 
@@ -71,6 +89,8 @@ export class ChatService {
   }
 
   async deleteChannel(channelId: number) {
+    await getRepository(ChannelInvitation).delete({channel: {id: channelId}});
+    await getRepository(ChannelMessage).delete({channel: {id: channelId}});
     await getRepository(Channel).delete({ id: channelId });
   }
 

@@ -1,10 +1,12 @@
-import { BadRequestException, Body, ConflictException, Controller, Get, NotFoundException, Post, Query, Req, ServiceUnavailableException, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, ClassSerializerInterceptor, ConflictException, Controller, Get, NotFoundException, Post, Query, Req, ServiceUnavailableException, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
 import { UsersService } from './users.service';
 import * as PostgresError from '@fiveem/postgres-error-codes'
 import * as sharp from 'sharp';
 import { UpdateNicknameDto } from './dto/update-nickname.dto';
+import { instanceToPlain } from 'class-transformer';
+import { User } from './entities/user.entity';
 
 export const imageFilter: any = (req: any, file: { mimetype: string, size: number }, callback: (arg0: any, arg1: boolean) => void): any =>
 {
@@ -18,6 +20,7 @@ export const imageFilter: any = (req: any, file: { mimetype: string, size: numbe
 
 @Controller('users')
 @UseGuards(Jwt2faGuard)
+@UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
@@ -46,7 +49,6 @@ export class UsersController {
     return JSON.stringify(requests.map(({ id, nickname }) => ({ id, nickname })));
   }
 
-
   @Get('profile')
   async profile(@Req() req) {
     const achievements = await this.usersService.getUserAchievements(req.user.id);
@@ -56,7 +58,7 @@ export class UsersController {
 
   @Get('get-profile')
   async getProfile(@Query('id') id: number, @Query('login') login: string) {
-    let user;
+    let user : User;
     if (id)
       user = await this.usersService.findOne(id);
     else if (login)
@@ -65,26 +67,33 @@ export class UsersController {
       throw new BadRequestException('No id nor login provided');
     if (!user)
       throw new NotFoundException('User not found');
-    /*
-    * TODO: Add requests for achievements
-    */
-    const achievements = await this.usersService.getUserAchievements(id);
-    /*
-    * TODO: Add requests for friends
-    */
-    const friends = await this.usersService.getFriends(id);
-    /* TODO: Add relationship status with current user
-      - User can be blocked
-      - User can unblock user
-      - User can be friend
-      - User can accept friend request
-      - User can send friend request
-    */
+    const achievements = await this.usersService.getUserAchievements(user.id);
+    const friends = await this.usersService.getFriends(user.id);
     return JSON.stringify({
-      user,
+      user: instanceToPlain(user),
       achievements,
       friends: friends.map(({ id, nickname }) => ({ id, nickname }))
     });
+  }
+
+  @Get('is-2fa-enabled')
+  async is2faEnabled(@Query('id') id: number) {
+    if (!id)
+      throw new BadRequestException('No id provided');
+    const user = await this.usersService.findOne(id);
+    if (!user)
+      throw new NotFoundException('User not found');
+    return user.twofa;
+  }
+
+  @Get('relationship-status')
+  async relationshipStatus(@Req() req : any, @Query('id') id: number) {
+    if (!id)
+      throw new BadRequestException('No id provided');
+    const relation = await this.usersService.getOneRelationship(req.user.id, id);
+    if (!relation)
+      return new NotFoundException('Relation not found');
+    return relation;
   }
 
   @Post('send-friend-request')
@@ -96,6 +105,11 @@ export class UsersController {
     } catch (error) {
       throw new UnauthorizedException();
     }
+  }
+
+  @Get('top-ten')
+  async topTen() {
+    return JSON.stringify(await this.usersService.topTen());
   }
 
   @Post('unblock-user')
