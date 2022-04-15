@@ -149,7 +149,7 @@ export default defineComponent({
 				this.addGameInvitation(data)
 			})
 			.on('gameStart', (data: number) => {
-				console.log("Game starts" ,data)
+				toast.info("Transfered to game");
 				router.push({name: 'game', params: {match_id: data}})
 			})
 	},
