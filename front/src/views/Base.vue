@@ -117,12 +117,6 @@ export default defineComponent({
 			componentKey: 0,
 		}
 	},
-	watch: {
-		avatarPath(newPath: string) {
-			this.avatarPath = newPath;
-			this.componentKey++;
-		}
-	},
 	mounted() {
 		gameSocket.on("error", (err : string) => {
 			console.log("Game error :", err);

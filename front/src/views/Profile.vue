@@ -2,7 +2,7 @@
 	<div class="grid grid-cols-12 lg:gap-x-16 2xl:gap-x-32">
 		<div class="col-span-12 md:col-span-4 flex flex-col max-w-sm">
 			<div class="flex place-content-center mb-4">
-				<ProfilePicture v-if="profile.user != undefined" :avatar="'http://localhost:3000/' + profile.user?.avatarPath"></ProfilePicture>
+				<ProfilePicture v-if="profile.user != undefined" :avatar="'http://localhost:3000/' + AvataPath"></ProfilePicture>
 			</div>
 			<div class="mb-6">
 				<MainTitle class="title-username">{{ profile.user?.nickname }}</MainTitle>
@@ -149,18 +149,20 @@ export default defineComponent({
 			count: 0,
 			winrate: 0,
 			history: [],
-			achievements: [] as Achievement[]
+			achievements: [] as Achievement[],
+			avatarPath: '',
 		}
 	},
 	methods: {
 		async getUser(username: string | string[]): Promise<void> {
-			await API.get<Profile>('users/get-profile', {
+			const res = await API.get<Profile>('users/get-profile', {
 				params: {
 					id: null,
 					login: username
 				}
 			})
 			.then(async (res) => {
+				console.log('Profile', res.data)
 				this.achievements = res.data.achievements
 				this.profile = res.data;
 				await API.get('match/match-count', {
@@ -239,6 +241,14 @@ export default defineComponent({
 	mounted(): void {
 		this.getUser(this.username);
 	},
+	computed: {
+		AvataPath() : string {
+		if(this.profile.user?.id === this.$store.getters.getId)
+			return this.$store.getters.getAvatarPath
+		else
+			return this.profile.user?.avatarPath
+		}
+	}
 })
 </script>
 
