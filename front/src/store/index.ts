@@ -51,6 +51,12 @@ export const store = createStore<State>({
     }
   },
   mutations: {
+    updateProfilePicture(state, _profile: Profile) {
+      const profile : Profile = JSON.parse(localStorage.getItem('user') || '{}');
+      profile.user.avatarPath = _profile.user.avatarPath;
+      console.log(profile.user.avatarPath)
+      localStorage.setItem('user', JSON.stringify(profile));
+    },
     updateStatus(state, status: Status) {
         const profile : Profile = JSON.parse(localStorage.getItem('user') || '{}')
         const id : number = profile.friends.findIndex(friend => friend.id === status.userId)
@@ -70,6 +76,10 @@ export const store = createStore<State>({
     }
   },
   actions: {
+    async updateProfilePicture({ commit }) {
+      const response = await API.get('users/profile');
+      commit("updateProfilePicture", response.data);
+    },
     setStatus({commit}, status: Status) {
       commit('updateStatus', status)
     },

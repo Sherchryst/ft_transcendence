@@ -6,6 +6,7 @@ import * as PostgresError from '@fiveem/postgres-error-codes'
 import * as sharp from 'sharp';
 import { UpdateNicknameDto } from './dto/update-nickname.dto';
 import { instanceToPlain } from 'class-transformer';
+import { StatusGateway } from './users.gateway';
 
 export const imageFilter: any = (req: any, file: { mimetype: string, size: number }, callback: (arg0: any, arg1: boolean) => void): any =>
 {
@@ -21,14 +22,16 @@ export const imageFilter: any = (req: any, file: { mimetype: string, size: numbe
 @UseGuards(Jwt2faGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(private usersService: UsersService, private statusGateway : StatusGateway) {}
 
   @Post('accept-friend-request')
-  async acceptFriendRequest(@Body() dto: { fromId: number, toId: number }) {
-    const r = await this.usersService.hasSentFriendRequest(dto.fromId, dto.toId);
+  async acceptFriendRequest(@Req() req : any, @Body() dto: {toId: number }) {
+    const r = await this.usersService.hasSentFriendRequest(req.user.id, dto.toId);
     if (!r)
       throw new UnauthorizedException('User has not sent friend request');
-    await this.usersService.acceptFriendRequest(dto.fromId, dto.toId);
+    this.usersService.WsClients.get(req.user.id).emit('new_friend', dto.toId);
+    this.usersService.WsClients.get(dto.toId).emit('new_friend', req.user.id);
+    await this.usersService.acceptFriendRequest(req.user.id, dto.toId);
   }
 
   @Post('block-user')
@@ -105,6 +108,7 @@ export class UsersController {
     } catch (error) {
       throw new UnauthorizedException();
     }
+    this.usersService.WsClients.get(dto.toId).emit('friend_request', dto.fromId);
   }
 
   @Get('top-ten')
@@ -125,6 +129,7 @@ export class UsersController {
   async updateNickname(@Body() dto: UpdateNicknameDto) {
     try {
       await this.usersService.updateNickname(dto.id, dto.nickname);
+      this.usersService.WsClients.get(dto.id).emit('update_user', dto.id);
     } catch (error) {
       if (error.code === PostgresError.PG_UNIQUE_VIOLATION)
         throw new ConflictException('Nickname already taken');
@@ -143,5 +148,6 @@ export class UsersController {
     let buffer = await sharp(file.buffer)
     .resize(400, 400).toFormat('jpeg').jpeg({ quality: 90 }).toBuffer();
     await this.usersService.updateAvatar(user.id, buffer);
+    this.usersService.WsClients.get(user.id).emit('update_user', user.id);
   }
 }

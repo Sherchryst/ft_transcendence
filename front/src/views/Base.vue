@@ -1,9 +1,9 @@
 <template>
 	<div id="base" class="grid grid-cols-12 min-h-screen">
 		<nav id="nav" class="flex flex-col md:items-center md:fixed h-full w-full md:w-28 pt-24 md:pt-0 dropdown-link-container">
-			<div class="mb-5 md:mb-0 md:pt-10 md:h-36">
+			<div class="mb-5 md:mb-0 md:pt-10 md:h-36" :key="componentKey">
 				<router-link :to="{name: 'profile', params: {username: whoiam}}">
-					<img class="h-16 w-16" :src="'http://localhost:3000/' + $store.getters.getAvatarPath" alt="profile">
+					<img class="h-16 w-16" :src="'http://localhost:3000/' + avatarPath" alt="profile">
 				</router-link>
 			</div>
 			<one-row-form class="md:hidden mb-6 mobile" placeholder="Search">
@@ -112,7 +112,15 @@ export default defineComponent({
 			chatSocket : chatSocket,
 			gameSocket : gameSocket,
 			channelMessage: [] as SocketMessage[],
-			notifications: [] as Notification[]
+			notifications: [] as Notification[],
+			avatarPath: '',
+			componentKey: 0,
+		}
+	},
+	watch: {
+		avatarPath(newPath: string) {
+			this.avatarPath = newPath;
+			this.componentKey++;
 		}
 	},
 	mounted() {
@@ -122,6 +130,14 @@ export default defineComponent({
 		gameSocket.on("warning", (err : string) => {
 			console.log("Game warning :", err);
 		})
+		statusSocket.on("update_user", (id : number)=> {
+			this.avatarPath = this.$store.getters.getAvatarPath;
+			this.componentKey++;
+		})
+		statusSocket.on("new_friend", (data : number) => {
+			console.log('NEW FRIEND IN YOUR LIFE bitch', data);
+			this.$store.dispatch('connection')
+		})
 		statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
 			console.log('status data',data);
 			this.$store.dispatch("setStatus", {
@@ -130,7 +146,7 @@ export default defineComponent({
 				message: data.message
 			})
 		})
-		console.log('avatar', this.$store.state.profile.user.avatarPath)
+		this.avatarPath = this.$store.getters.getAvatarPath;
 		this.getNotif()
 		this.chatSocket
 			.on('message', (data: {channelMessage: SocketMessage}) => {

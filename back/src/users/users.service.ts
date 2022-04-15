@@ -34,6 +34,8 @@ export class UsersService {
     await getRepository(UserRelationship).save({
       from: { id: toUserId }, to: { id: fromUserId }, type: UserRelationshipType.FRIEND
     });
+    this.WsClients.get(fromUserId).emit('update_user', fromUserId);
+    this.WsClients.get(toUserId).emit('update_user', toUserId);
     this.sendNewFriendStatus(fromUserId, toUserId);
   }
 
