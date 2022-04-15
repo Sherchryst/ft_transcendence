@@ -1,6 +1,6 @@
 <template>
 	<div class="grid grid-cols-12 place-content-center h-screen">
-		<div class="col-span-12 mx-3 lg:mx-0 lg:col-span-4 lg:col-start-2 flex flex-col justify-between r-panel px-6 lg:px-28 py-10 lg:py-36">
+		<div class="col-span-12 md:col-span-10 md:col-start-2 mx-3 lg:mx-0 lg:col-span-5 xl:col-span-4 lg:col-start-2 xl:col-start-2 flex flex-col justify-between r-panel px-6 lg:px-20 2xl:px-28 py-10 lg:py-28">
 			<slot></slot>
 		</div>
 	</div>
