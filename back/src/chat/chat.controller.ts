@@ -141,6 +141,7 @@ export class ChatController {
     if (!channel || channel.owner.id != req.user.id)
       throw new UnauthorizedException("you're not the owner");
     channel.password = data.password;
+    channel.isPasswordSet = channel.password != null;
     this.chatService.updateChannel(channel);
     this.chatGateway.server.to("channel:" + data.channelId).emit("set-password", channel.password);
   }

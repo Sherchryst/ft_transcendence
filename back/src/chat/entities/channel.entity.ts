@@ -26,6 +26,9 @@ export class Channel {
   @Exclude()
   password!: string;
 
+  @Column({ nullable: false, default: false })
+  isPasswordSet: boolean;
+
   doesPasswordMatch(plainPassword: string): boolean {
     return sha('sha256').update(plainPassword).digest('hex') === this.password;
   }
