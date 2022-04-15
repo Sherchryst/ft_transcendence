@@ -13,7 +13,7 @@ API.interceptors.response.use(
 		return (response);
 	},
 	(error) => {
-		toast.error("Error: " + error.response.data?.message || "An error occured")
+		toast.error(error.response.data?.message || "An error occured")
 		return Promise.reject(error);
 	}
 )

@@ -1,14 +1,14 @@
-import { Channel } from "./Channel"
-import { User } from "./Profile"
+import { Channel, ChannelMember_t } from "./Channel"
 
 export interface Message_t {
-	from: string,
+	from: ChannelMember_t
 	content: string
-	self?: boolean
+	self: boolean
+	photo: boolean
 }
 
 export interface ServerMessage {
-	from: User,
+	from: ChannelMember_t
 	content: string
 }
 

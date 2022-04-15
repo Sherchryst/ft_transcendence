@@ -6,7 +6,7 @@
       <div class="text-left">
           <p v-if="isChannel" class="username text-lg">#-{{this.title}}</p>
           <p v-else class="username text-lg">{{this.title}}</p>
-          <p class="last-message font-thin text-xs">last message</p>
+          <!-- <p class="last-message font-thin text-xs">last message</p> -->
       </div>
     </router-link>
 </template>

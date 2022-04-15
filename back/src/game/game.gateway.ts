@@ -183,6 +183,7 @@ export class GameGateway implements OnGatewayConnection {
           map,
           data.level
         );
+        console.log("Game Invitation", invitation)
         this.gameService.WsClients.get(to_user.id).emit("invited", invitation);
         console.log("Game : Invitation sent to", to_user.nickname);
       } catch (e) {

@@ -1,8 +1,11 @@
 <template>
-	<label>
-		<input type="checkbox" @change="onSwitch($event)">
+<div class="flex flex-col">
+	<span class="mb-2 text-left label"><slot></slot></span>
+	<label :name="name" class="mod-switch">
+		<input :name="name" type="checkbox" @change="onSwitch($event)">
 		<span class="slider"></span>
 	</label>
+</div>
 </template>
 
 <script lang="ts">
@@ -10,6 +13,9 @@ import { defineComponent } from "vue";
 
 export default defineComponent({
     name: "SwitchButton",
+	props: {
+		name: { type: String, default: "check" }
+	},
 	data() {
 		return {
 			checked: false,
@@ -26,8 +32,8 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
-label {
+<style lang="scss">
+.mod-switch {
 	position: relative;
 	display: inline-block;
 	width: 60px;
