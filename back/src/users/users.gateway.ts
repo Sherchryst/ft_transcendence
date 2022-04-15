@@ -74,8 +74,13 @@ export class StatusGateway implements OnGatewayConnection {
 
   async sendFriendsStatus(socket : Socket, userId : number) {
     const friends = await this.usersService.getFriends(userId);
-    friends.forEach((friend) => {
+    friends.forEach(async(friend) => {
+      const match = await this.usersService.inMatch(friend.id);
+      if (match) {
+        socket.emit("status", { userId : friend.id, status : "in game", message : `${match.id}` });
+      } else {
         socket.emit("status", { userId : friend.id, status : (this.usersService.WsClients.has(friend.id)? "online" : "offline"), message : "" });
+      }
     });
   }
 }

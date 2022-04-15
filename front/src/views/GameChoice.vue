@@ -3,10 +3,10 @@
 		<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
 			<game-panel title="Battleground" @click="(evt) => matchmaking()" action_name="Search" class="battleground">
 			</game-panel>
-			<game-panel @click="sendInvite()" title="Challenge" action_name="Defy" class="challenge">
+			<game-panel @click="sendInvite()" title="Challenge" action_name="Invite" class="challenge">
 				<!-- <challenge-form></challenge-form> -->
 			</game-panel>
-			<game-panel title="Training" @click="requestGame" action_name="Launch" class="bot">
+			<game-panel title="Training" @click="requestGame" action_name="Run" class="bot">
 				<!-- <ButtonLink text="Bot game" href= /> -->
 			</game-panel>
 		</div>

@@ -66,7 +66,7 @@ export default defineComponent ({
     mounted() {
         this.socket
             .on("disconnect", (reason) => {
-                console.log("Deconnected", reason);
+                console.log("Disconnected", reason);
             })
             .on("created", (data) => {
                 for (let i = 0; i != this.listChannel.length; ++i) {

@@ -57,9 +57,12 @@
     },
     data() {
       return {
-        evts: [],
-        login : ["you", "bot"],
+        evts : [],
+        login : ["", ""],
+        nickname : ["you", "bot"],
+        move : ("ontouchstart" in window) ? "touchmove" : "mousemove",
         id : 0,
+        gameStart : false,
         map: {
           ballColor : 16562691,
           backgroundColor : 344663,
@@ -77,23 +80,23 @@
           }
         } as Dimensions,
         board : {
-          ball: {
-            x: 50,
-            y: Math.random() * 50 + 25,
-            half_width: 2,
-            dx:  (Math.floor(Math.random() * 2)? -1:1), //random player
-            dy: Math.random() * 1.5 * (Math.floor(Math.random() * 2)? -1:1) }, //random top/bottom
-          player: [{
+          ball : {
+            x : 50,
+            y : Math.random() * 50 + 25,
+            half_width : 2,
+            dx :  (Math.floor(Math.random() * 2)? -1:1), //random player
+            dy : Math.random() * 1.5 * (Math.floor(Math.random() * 2)? -1:1) }, //random top/bottom
+          player : [{
             user_id : "player1",
-            id: 0,
-            y: 50,
-            old_y: 50,
+            id : 0,
+            y : 50,
+            old_y : 50,
             score : 0,
             half_height : 6 },{
             user_id : "player2",
-            id: 1,
-            y: 50,
-            old_y: 50,
+            id : 1,
+            y : 50,
+            old_y : 50,
             score : 0,
             half_height : 6 }],
           dead : false,
@@ -125,7 +128,7 @@
               gameSocket.off("board");
               gameSocket.off("gameMap");
             }
-            document.removeEventListener("mousemove", this.moveRackets);
+            document.removeEventListener(this.move, this.moveRackets);
             window.removeEventListener("resize", this.resizeCanvas);
           }
           if (newId) {
@@ -154,33 +157,40 @@
         gameSocket.off("board");
         gameSocket.off("gameMap");
       }
-      document.removeEventListener("mousemove", this.moveRackets);
+      document.removeEventListener(this.move, this.moveRackets);
       window.removeEventListener("resize", this.resizeCanvas);
     },
     methods:
     {
       initGame(matchId : string | undefined) {
+        this.gameStart = false;
+        this.board.end = true;
+        window.addEventListener("resize", this.resizeCanvas);
         if (matchId == undefined) {
-          return;
+          this.drawVoid();
         }
         else if (matchId != "bot")
         {
+          this.drawVoid();
           gameSocket.emit('connection', matchId);
           gameSocket.on("gameMap", (data : {
             map: GameMap,
             login : string[],
+            nickname : string[],
             id : number
           }) => {
             this.map = { ...this.map, ...data.map };
             console.log(" my map :", this.map);
             this.login = { ...this.login, ...data.login };
             console.log(" logins :", this.login);
+            this.nickname = { ...this.nickname, ...data.nickname };
+            console.log(" nicknames :", this.nickname);
             this.id = data.id;
-            console.log(" id :", this.id);
+            this.gameStart = true;
             this.resizeCanvas();
+            console.log(" id :", this.id);
             // this.drawBackground();
-            window.addEventListener("resize", this.resizeCanvas);
-            document.addEventListener("mousemove", this.moveRackets);
+            document.addEventListener(this.move, this.moveRackets);
             // console.log(setuped, 'socket connected');
           });
           gameSocket.on("board", (data : Board) => {
@@ -191,12 +201,12 @@
         else
         {
           console.log("bot");
+          this.gameStart = true;
+          this.resizeCanvas();
           // this.reset(true);
           // this.drawBackground();
-          this.resizeCanvas();
           console.log(this.game_ctx);
-          window.addEventListener("resize", this.resizeCanvas);
-          document.addEventListener("mousemove", this.moveRackets);
+          document.addEventListener(this.move, this.moveRackets);
           // console.log(setuped, 'evts', this.evts);
           this.game_loop();
         }
@@ -256,23 +266,29 @@
       },
       drawBackground()
       {
-        var ctx = this.bg_ctx;
-        const interval = ctx.canvas.height / 10;
-        const line_width = ctx.canvas.width / 80;
-        const starColor = `#${this.map.starsColor.toString(16).padStart(6, '0')}`;
-        const lineColor = `#${this.map.racketColor.toString(16).padStart(6, '0')}`;
-        const bgColor = `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`;
-        ctx.fillStyle = bgColor;
-        // console.log("background color", `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`);
-        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        // ctx.fillStyle = "white";
-        if (starColor != bgColor)
-          for (let count = 0; count < 300; count++) //stars
-            this.roundStar(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height, Math.random() * ctx.canvas.height / 80, starColor);
-        for (let i = line_width; i < ctx.canvas.width; i+= interval)
-          this.roundRect((ctx.canvas.width- line_width) / 2, i, line_width, interval * 0.65, lineColor, ctx);
+        if (this.gameStart)
+        {
+          var ctx = this.bg_ctx;
+          const interval = ctx.canvas.height / 10;
+          const line_width = ctx.canvas.width / 80;
+          const starColor = `#${this.map.starsColor.toString(16).padStart(6, '0')}`;
+          const lineColor = `#${this.map.racketColor.toString(16).padStart(6, '0')}`;
+          const bgColor = `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`;
+          ctx.fillStyle = bgColor;
+          // console.log("background color", `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`);
+          ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+          // ctx.fillStyle = "white";
+          if (starColor != bgColor)
+            for (let count = 0; count < 300; count++) //stars
+              this.roundStar(Math.random() * ctx.canvas.width, Math.random() * ctx.canvas.height, Math.random() * ctx.canvas.height / 80, starColor);
+          for (let i = line_width; i < ctx.canvas.width; i+= interval)
+            this.roundRect((ctx.canvas.width- line_width) / 2, i, line_width, interval * 0.65, lineColor, ctx);
+          this.drawNames();
+        }
+        else
+          this.drawVoid();
       },
-      drawBall(x : number, y : number, )
+      drawBall(x : number, y : number)
       {
         var ctx = this.game_ctx;
         var h_width = this.board.ball.half_width;
@@ -299,6 +315,17 @@
         // ctx.fillRect(ctx.canvas.height, ctx.canvas.height, -100, -350);
         // this.roundRect(ctx.canvas.height, ctx.canvas.height, -100, -350, "white");
       },
+      drawVoid()
+      {
+        this.game_ctx.clearRect(0, 0, this.game_ctx.canvas.width, this.game_ctx.canvas.height);
+        var ctx = this.bg_ctx;
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        ctx.fillStyle = "white";
+        ctx.font = `${ctx.canvas.height / 10}px courier new`; // absolute size /!\
+        ctx.textAlign = "center";
+        ctx.fillText("No Game To Display", ctx.canvas.width / 2, ctx.canvas.height / 2);
+      },
       drawRackets(y1 : number, y2 : number, )
       {
         var ctx = this.game_ctx;
@@ -310,28 +337,44 @@
         this.roundRect(this.dim.racket.x[1] * this.dimX, (y2 - this.board.player[1].half_height) * this.dimY,
           this.dim.racket.width * this.dimX, this.board.player[1].half_height * 2 * this.dimY, rColor, ctx);
       },
+      drawNames()
+      {
+        var ctx = this.bg_ctx;
+        ctx.fillStyle = "white";
+        ctx.font = `${ctx.canvas.height / 20}px courier new`;
+        ctx.textAlign = "right";
+        ctx.fillText(this.nickname[1], ctx.canvas.width - ctx.canvas.width / 15, ctx.canvas.height / 10);
+        ctx.textAlign = "left";
+        ctx.fillText(this.nickname[0], ctx.canvas.width / 15, ctx.canvas.height / 10);
+        ctx.font = `${ctx.canvas.height / 35}px courier new`;
+        ctx.textAlign = "right";
+        ctx.fillText(this.login[1], ctx.canvas.width - ctx.canvas.width / 15, ctx.canvas.height / 20);
+        ctx.textAlign = "left";
+        ctx.fillText(this.login[0], ctx.canvas.width / 15, ctx.canvas.height / 20);
+      },
       drawScore()
       {
         var ctx = this.game_ctx;
         ctx.fillStyle = "white";
         ctx.font = `${ctx.canvas.height / 10}px courier new`;
         ctx.textAlign = "right";
-        ctx.fillText((this.board.player[0].score).toString(), ctx.canvas.width / 2 - ctx.canvas.width / 20, ctx.canvas.height / 10);
+        ctx.fillText((this.board.player[0].score).toString(), ctx.canvas.width / 2 - ctx.canvas.width / 30, ctx.canvas.height / 10);
         ctx.textAlign = "left";
-        ctx.fillText((this.board.player[1].score).toString(), ctx.canvas.width / 2 + ctx.canvas.width / 20, ctx.canvas.height / 10);
-        ctx.font = `${ctx.canvas.height / 15}px courier new`;
-        ctx.textAlign = "right";
-        ctx.fillText(this.login[1], ctx.canvas.width - ctx.canvas.width / 22, ctx.canvas.height / 10);
-        ctx.textAlign = "left";
-        ctx.fillText(this.login[0], ctx.canvas.width / 22, ctx.canvas.height / 10);
+        ctx.fillText((this.board.player[1].score).toString(), ctx.canvas.width / 2 + ctx.canvas.width / 30, ctx.canvas.height / 10);
       },
       drawWinner(winner : number)
       {
         var ctx = this.game_ctx;
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        this.bg_ctx.fillStyle = `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`;
+        this.bg_ctx.fillRect(0, 0, this.bg_ctx.canvas.width, this.bg_ctx.canvas.height);
         ctx.fillStyle = "white";
-        ctx.font = `${ctx.canvas.height / 10}px courier new`; // absolute size /!\
+        this.drawNames();
+        this.drawScore();
+        ctx.font = `${ctx.canvas.height / 20}px courier new`; // absolute size /!\
         ctx.textAlign = "center";
-        ctx.fillText(this.login[winner] + " wins", ctx.canvas.width / 2, ctx.canvas.height / 2);
+        ctx.fillText(this.nickname[winner], ctx.canvas.width / 2, ctx.canvas.height / 2 - ctx.canvas.height / 20);
+        ctx.fillText("wins", ctx.canvas.width / 2, ctx.canvas.height / 2 + ctx.canvas.height / 20);
       },
       addObjects()
       {
@@ -349,11 +392,13 @@
         this.drawRackets(this.board.player[0].y, this.board.player[1].y);
         this.drawScore();
       },
-      moveRackets(evt : MouseEvent)
+      moveRackets(evt : any)
       {
         // console.log("Evt: ", evt);
         if (this.id > 1)
           return ;
+        if (this.move == "touchmove")
+          evt = evt.touches[0];
         let rect : DOMRect = this.game_ctx.canvas.getBoundingClientRect();
         // console.log("id :", this.id, this.match_id);
         if (this.$props.match_id != "bot")
@@ -460,6 +505,7 @@
       },
       async game_loop()
       {
+        this.reset(true);
         while (!this.board.end)
         {
           await this.sleep(20);
@@ -469,6 +515,8 @@
             this.updateBall();
           this.addObjects();
         }
+        if (!this.gameStart)
+          this.drawVoid();
       },
       sleep(ms: number) {
         return new Promise(resolve => setTimeout(resolve, ms));

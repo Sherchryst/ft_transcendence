@@ -1,23 +1,11 @@
 <template>
   <div class="home flex flex-col justify-arround md:grid md:grid-cols-12 gap-8">
-      <LargePanel>
-            <template v-slot:left>
-                <div class="flex flex-col justify-between p-7 h-full">
-                    <div class="pb-10">
-                        <p class="text-left">Pong is one of the first computer games that ever created, this simple "tennis like" game features two paddles and a ball, the goal is to defeat your opponent ...</p>
-                    </div>
-                    <button-link text="Go faire un PONG" href="http://localhost:8080/#/game-choice"/>
-                </div>
-            </template>
-            <template v-slot:right>
-                <div class=" w-full self-center">
-                    <img class="" src="@/assets/boule.gif" alt="Upon Us">
-                </div>
-            </template>
-      </LargePanel>
-      <SquarePanel>
+      <SquarePanel  v-if="history.length != 0">
         <div v-for="(match, index) in history" v-bind:key="index">
           <LastGamePanel :match="match"></LastGamePanel>
+        </div>
+        <div>
+          <p></p>
         </div>
       </SquarePanel>
       <SquarePanel>
@@ -36,6 +24,13 @@
             </div>
         </div>
       </SquarePanel>
+      <LargePanel v-if="friends.length != 0">
+        <div class="grid grid-cols-2 lg:grid-cols-6 gap-4  p-4">
+            <div class=" friend-card" v-for="(friend, index) in friends" :key="index">
+              <FriendCard :friend="friend"></FriendCard>
+            </div>
+        </div>
+      </LargePanel>
   </div>
 </template>
 
@@ -45,31 +40,51 @@ import { useMeta } from 'vue-meta';
 import SquarePanel from '@/components/home/SquarePanel.vue';
 import LargePanel from '@/components/home/LargePanel.vue';
 import MainTitle from '@/components/MainTitle.vue';
-import ButtonLink from '@/components/ButtonLink.vue';
 import LastGamePanel from '@/components/home/LastGamePanel.vue';
 import TopPlayerPanel from '@/components/home/TopPlayerPanel.vue';
 import { API } from '@/scripts/auth';
+import FriendCard from '@/components/home/FriendCard.vue';
+import {User} from '@/interfaces/Profile';
+import { statusSocket } from '@/socket';
 
 export default defineComponent({
     components: {
     SquarePanel,
     LargePanel,
     MainTitle,
-    ButtonLink,
     LastGamePanel,
-    TopPlayerPanel
+    TopPlayerPanel,
+    FriendCard
 },
   data() {
     return {
       winrate: 0,
       history: [],
       topPlayer: [],
+      friends: [] as User[],
     }
+  },
+  watch: {
+    friends: {
+      handler(newValue: User[]) {
+        this.friends = newValue;
+        console.log('this change')
+      },
+      deep: true,
+    },
   },
   setup () {
     useMeta({ title: 'Home' })
   },
   mounted () {
+    statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
+      data.message = data.message.replace(/<[^>]*>?/gm, '');
+      setTimeout(() =>{
+        this.friends = this.$store.getters.getFriends
+      }, 100)
+    })
+    this.friends = this.$store.getters.getFriends
+    console.log('friends', this.friends);
     console.log('created', this.$store.getters.getId)
     API.get('users/top-ten').then((res) => {
       this.topPlayer = res.data

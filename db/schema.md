@@ -12,7 +12,7 @@
 	- An unique identifier for the user which is independant from 42.
 - login: VARCHAR(32) UNIQUE
 	- The login of the user retrieved from the 42 intranet.
-- nickname: VARCHAR(32) UNIQUE
+- nickname: VARCHAR(10) UNIQUE
 	- The user should be able to choose a unique name that will be displayed on the website.
 - xp: INT NOT NULL DEFAULT 0
 	- The experience points of the user.
@@ -24,7 +24,7 @@
 - avatar_path: VARCHAR(64) NOT NULL DEFAULT `avatars/default.jpg`
 	- The path to the avatar of the user.
 
-### - user_relationship(<ins>*from_id*, *to_id*</ins>, type)
+### - user_relationship(<ins>*from_id*, *to_id*</ins>, type, created_at)
 
 - from_id: INT
 	- The id of the first user.
@@ -38,6 +38,8 @@
 	- `friend`: The two users are friends.
 		- This relation is symmetric, it implies that the second user is also a friend of the first user.
 	- `pending`: The first user sent a friend request to the second user.
+- created_at: TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+	- The date of the creation of the relation.
 
 ### - achievement(<ins>id</ins>, name, description)
 

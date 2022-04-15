@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards, UnauthorizedException, HttpException, ForbiddenException, NotFoundException, Query, UseFilters, ConflictException } from '@nestjs/common';
+import { ClassSerializerInterceptor, Body, Controller, Get, Post, Req, UseGuards, UnauthorizedException, ForbiddenException, NotFoundException, Query, UseInterceptors, ConflictException } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
 import { UsersService } from 'src/users/users.service';
@@ -9,6 +9,7 @@ import { ChannelModerationType } from './entities/channel-moderation.entity';
 
 @Controller('chat')
 @UseGuards(Jwt2faGuard)
+@UseInterceptors(ClassSerializerInterceptor)
 export class ChatController {
   constructor(
     private chatService: ChatService,
@@ -18,8 +19,7 @@ export class ChatController {
 
   @Get('list')
     async list() {
-      const stuff = JSON.stringify(await this.chatService.listChannels());
-      return stuff
+      return await this.chatService.listChannels();
     }
 
   @Get('join-list')
