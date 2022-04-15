@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-12">
 			<game-panel title="Battleground" @click="(evt) => matchmaking()" action_name="Search" class="battleground">
 			</game-panel>
 			<game-panel @click="sendInvite()" title="Challenge" action_name="Invite" class="challenge">

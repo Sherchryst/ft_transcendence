@@ -1,5 +1,5 @@
 <template>
-    <div class="grid-cols-1 md:grid grid-cols-3 gap-16 span-4">
+    <div class="grid-cols-1 md:grid grid-cols-3 gap-3 lg:gap-16 span-4">
         <div class=" mb-5">
             <form id="form-channel" class="flex flex-col gap-3" @submit.prevent="create">
                 <div class="text-xl text-left font-bold form-title">New channel</div>
@@ -9,7 +9,7 @@
                 <button-link type="submit" >Create</button-link>
             </form>
         </div>
-        <div class="col-span-2 flex flex-col gap-4 w-3/4">
+        <div class="col-span-2 flex flex-col gap-4 lg:w-3/4">
             <title-count :lenght="0">
                 <h3 class="form-title font-bold text-2xl text-left">Your channels</h3>
             </title-count>

@@ -3,7 +3,7 @@
 		<div class="mb-20 text-left">
 			<main-title class="pb-5">Apong Us</main-title>
 			<h2 class="font-sans font-bold text-3xl pb-5"></h2>
-			<p style="text-align: justify;">Welcome to Apong Us, a very exclusive website for students of 42. This website was made by asoursou, mbrunel, mchardin, roalvare and sgah. You will play one of the most iconic games of the last century. I hope you're glad to have access to this amazing experience and that you will enjoy the journey. </p>
+			<p>Welcome to Apong Us, a very exclusive website for students of 42. This website was made by asoursou, mbrunel, mchardin, roalvare and sgah. You will play one of the most iconic games of the last century. I hope you're glad to have access to this amazing experience and that you will enjoy the journey. </p>
 		</div>
 		<div v-if="!twofa" class="flex flex-col">
 			<ButtonLink text="Connect" href="http://localhost:3000/auth/login42" />
