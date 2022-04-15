@@ -1,8 +1,6 @@
 import {
     ConnectedSocket,
-    MessageBody,
     OnGatewayConnection,
-    SubscribeMessage,
     WebSocketGateway,
     WebSocketServer,
     WsException,
@@ -38,8 +36,8 @@ export class StatusGateway implements OnGatewayConnection {
       const user = await this.usersService.findOne(payload.sub);
       if (user.twofa && !payload.isSecondFactorAuth) throw new WsException("");
       this.usersService.WsClients.set(user.id, socket);
-      this.sendOwnStatus(user.id, "online", "");
-      this.sendFriendsStatus(socket, user.id);
+      this.usersService.sendOwnStatus(user.id, "online", "");
+      this.usersService.sendFriendsStatus(socket, user.id);
     } catch (reason) {
       // console.log("Status: Unauthorized connection", reason);
       socket.disconnect(false);
@@ -55,7 +53,7 @@ export class StatusGateway implements OnGatewayConnection {
       let player_id: number;
       this.usersService.WsClients.forEach(async (value, key) => {
         if (value == socket) {
-          await this.sendOwnStatus(key, "offline", "");
+          await this.usersService.sendOwnStatus(key, "offline", "");
           this.usersService.WsClients.delete(key);
         }
       });
@@ -63,24 +61,5 @@ export class StatusGateway implements OnGatewayConnection {
     } catch (e) {
       console.log("Status : Error while disconnecting");
     }
-  }
-
-  async sendOwnStatus(userId: number, status : string, message : string) {
-    const friends = await this.usersService.getFriends(userId);
-    friends.forEach((friend) => {
-      this.usersService.WsClients.get(friend.id)?.emit("status", { userId : userId, status : status, message : message });
-    });
-  }
-
-  async sendFriendsStatus(socket : Socket, userId : number) {
-    const friends = await this.usersService.getFriends(userId);
-    friends.forEach(async(friend) => {
-      const match = await this.usersService.inMatch(friend.id);
-      if (match) {
-        socket.emit("status", { userId : friend.id, status : "in game", message : `${match.id}` });
-      } else {
-        socket.emit("status", { userId : friend.id, status : (this.usersService.WsClients.has(friend.id)? "online" : "offline"), message : "" });
-      }
-    });
   }
 }
