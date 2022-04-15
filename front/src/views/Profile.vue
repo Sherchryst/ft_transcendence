@@ -15,13 +15,13 @@
 				<ButtonLink v-if="username == selfLogin" route="edit-profile" class="flex justify-center w-full"  text="Edit Profile"></ButtonLink>
 				<div v-else class="flex flex-col gap-y-4">
 					<Transition mode="out-in" name="btn">
-						<button-link v-if="statut == 'NONE'" class="flex justify-center w-full" text="Ask a friend" @click="friendRequest"></button-link>
-						<button-link v-else-if="RelationshipType == 'pending'" class="btn-used flex justify-center w-full" text="Friend request send"></button-link>
-						<ButtonLink v-else-if="RelationshipType == 'block'" class="flex justify-center w-full" text="Unblock User" @click="unblock"></ButtonLink>
+						<button-link v-if="relashionshipStatus.type == undefined" class="flex justify-center w-full" text="Ask a friend" @click="friendRequest"></button-link>
+						<button-link v-else-if="relashionshipStatus.type == 'pending'" class="btn-used flex justify-center w-full" text="Friend request send"></button-link>
+						<ButtonLink v-else-if="relashionshipStatus.type == 'block'" class="flex justify-center w-full" text="Unblock User" @click="unblock"></ButtonLink>
 					</Transition>
 					<Transition mode="out-in" name="btn">
-						<ButtonLink v-if="statut == 'NONE'" class="flex justify-center w-full btn-neutral" text="Block User" @click="openModal"></ButtonLink>
-						<ButtonLink v-else-if="RelationshipType == 'block'" class="flex justify-center w-full btn-inactive" text="This User is block"></ButtonLink>
+						<ButtonLink v-if="relashionshipStatus.type != 'block'" class="flex justify-center w-full btn-neutral" text="Block User" @click="openModal"></ButtonLink>
+						<ButtonLink v-else-if="relashionshipStatus.type == 'block'" class="flex justify-center w-full btn-inactive" text="This User is block"></ButtonLink>
 					</Transition>
 				</div>
 			</div>
@@ -91,12 +91,17 @@ import Trophy from '@/assets/icon/achievement.svg';
 import {defineComponent, watch, computed} from 'vue';
 import { API } from '@/scripts/auth';
 import BlockModal from '@/components/modal/BlockModal.vue';
-import { Achievement, Profile, UserRelationship, UserRelationshipType } from '@/interfaces/Profile';
+import { Achievement, Profile, UserRelationship} from '@/interfaces/Profile';
 import { useStore } from 'vuex'
 import { key } from '@/store/index'
 import router from '@/router';
 import Achievements from '@/components/profile/Achievements.vue';
 
+export enum UserRelationshipType {
+	BLOCK = 'block',
+	FRIEND = 'friend',
+	PENDING = 'pending'
+  }
 
 export default defineComponent({
 	name: "Profile",
@@ -130,13 +135,13 @@ export default defineComponent({
 		return {
 			profile: {} as Profile,
 			showModal: false,
-			statut: "NONE",
 			count: 0,
 			winrate: 0,
 			history: [],
 			achievements: [] as Achievement[],
 			avatarPath: '',
 			relashionshipStatus: {} as UserRelationship,
+			status: ''
 		}
 	},
 	methods: {
@@ -151,20 +156,19 @@ export default defineComponent({
 				console.log('Profile', res.data)
 				this.achievements = res.data.achievements
 				this.profile = res.data;
-				if (this.profile.user.id == this.$store.getters.getId) 
-					this.statut = 'SELF'
-				else
+				if (this.profile.user.id != this.$store.getters.getId)
 					await API.get<UserRelationship>('users/relationship-status', {
 						params: {
 							id: this.profile.user.id
 						}
 					})
 					.then(res => {
-						console.log('Relationship', res.data)
-						this.relashionshipStatus.type = res.data.type
+						this.relashionshipStatus = res.data
+						console.log('Relationship',this.relashionshipStatus.type)
+						
 					})
 					.catch(err => {
-						console.log('eRREUR',err)
+						console.log(err)
 					})
 				await API.get('match/match-count', {
 					params: {
@@ -209,7 +213,6 @@ export default defineComponent({
 				fromId: this.$store.getters.getId,
 				toId: this.profile.user?.id
 			}).then( () => {
-				this.statut = 'WAIT';
 				this.relashionshipStatus.type = UserRelationshipType.PENDING;
 			})
 		},
@@ -218,7 +221,6 @@ export default defineComponent({
 				fromId: this.$store.getters.getId,
 				toId: this.profile.user?.id
 			}).then( () => {
-				this.statut = 'BLOCK';
 				this.relashionshipStatus.type = UserRelationshipType.BLOCK;
 				this.closeModal()
 			})
@@ -227,8 +229,17 @@ export default defineComponent({
 			await API.post('users/unblock-user', {
 				fromId: this.$store.getters.getId,
 				toId: this.profile.user?.id
-			}).then( () => {
-				this.statut = 'NONE'
+			}).then( async () => {
+				await API.get<UserRelationship>('users/relationship-status', {
+						params: {
+							id: this.profile.user.id
+						}
+					})
+					.then(res => {
+						this.relashionshipStatus = res.data
+						console.log('Relationship',this.relashionshipStatus)
+						
+					})
 			})
 		},
 	},
@@ -240,6 +251,7 @@ export default defineComponent({
 					this.getUser(newUsername.toString())
 				}
 			}
+
 		)
 	},
 	mounted(): void {
@@ -251,10 +263,6 @@ export default defineComponent({
 			return this.$store.getters.getAvatarPath
 		else
 			return this.profile.user?.avatarPath
-		},
-		RelationshipType() : UserRelationshipType {
-			console.log('RelationshipType', this.relashionshipStatus)
-			return this.relashionshipStatus.type
 		},
 	}
 })

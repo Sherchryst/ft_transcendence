@@ -127,12 +127,8 @@ export default defineComponent({
 			toast.warning(err);
 			// console.log("Game warning :", err);
 		})
-		statusSocket.on("update_user", (id : number)=> {
-			this.avatarPath = this.$store.getters.getAvatarPath;
-			this.componentKey++;
-		})
-		statusSocket.on("new_friend", (data : number) => {
-			console.log('NEW FRIEND IN YOUR LIFE bitch', data);
+		statusSocket.on("new_friend", (id : number) => {
+			console.log('NEW FRIEND IN YOUR LIFE bitch', id);
 			this.$store.dispatch('connection')
 		})
 		statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
