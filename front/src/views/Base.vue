@@ -89,7 +89,7 @@ import NotifPanel from '@/components/Notification/NotifPanel.vue';
 import { Statut } from '@/interfaces/Profile';
 import BadgeNotif from '@/components/Notification/BadgeNotif.vue'; 
 import { Notification, FriendRequest, GameStart, GameInvitation, ChannelInvitation } from "@/interfaces/Notification";
-
+import { useToast } from "vue-toastification";
 
 export default defineComponent({
 	components: {
@@ -116,11 +116,14 @@ export default defineComponent({
 		}
 	},
 	mounted() {
+		const toast = useToast();
 		gameSocket.on("error", (err : string) => {
-			console.log("Game error :", err);
+			toast.error(err);
+			// console.log("Game error :", err);
 		})
 		gameSocket.on("warning", (err : string) => {
-			console.log("Game warning :", err);
+			toast.warning(err);
+			// console.log("Game warning :", err);
 		})
 		statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
 			console.log('status data',data);
