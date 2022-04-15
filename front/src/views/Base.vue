@@ -2,24 +2,24 @@
 	<div id="base" class="grid grid-cols-12 min-h-screen">
 		<nav id="nav" class="flex flex-col lg:items-center lg:fixed h-full w-full lg:w-28 pt-24 lg:pt-0 dropdown-link-container">
 			<div class="mb-5 lg:mb-0 lg:pt-10 lg:h-36">
-				<router-link :to="{name: 'profile', params: {username: whoiam}}">
-					<img class="h-16 w-16" :src="'http://localhost:3000/' + $store.getters.getAvatarPath" alt="profile">
-				</router-link>
+				<nav-button text="Profile" :route="{name: 'profile', params: {username: whoiam}}">
+					<CrewMateIcon/>
+				</nav-button>
 			</div>
 			<one-row-form class="lg:hidden mb-6 mobile" placeholder="Search">
 				<SearchIcon />
 			</one-row-form>
 			<div class="flex flex-col w-full lg:w-min">
-				<nav-button text="Home" route="home">
+				<nav-button text="Home" :route="{name: 'home'}">
 					<HomeIcon />
 				</nav-button>
-				<nav-button text="Game" route="game-choice">
+				<nav-button text="Game" :route="{name: 'game-choice'}">
 					<GameIcon />
 				</nav-button>
-				<nav-button text="Channels" route="channel">
+				<nav-button text="Channels" :route="{name: 'channel'}">
 					<GroupIcon />
 				</nav-button>
-				<nav-button text="Chat" route="chat" class="chat-link" :notification="newMessage">
+				<nav-button text="Chat" :route="{name: 'chat'}" class="chat-link" :notification="newMessage">
 					<ChatIcon />
 				</nav-button>
 			</div>
@@ -78,6 +78,7 @@ import GameIcon from '@/assets/icon/game.svg';
 import SearchIcon from '@/assets/icon/search.svg';
 import MenuIcon from '@/assets/icon/menu.svg'
 import NotifIcon from '@/assets/icon/notification.svg';
+import CrewMateIcon from '@/assets/icon/crewmate.svg'
 import Logo from '@/assets/ApongUs.svg';
 import { useStore } from 'vuex'
 import { key } from '@/store/index'
@@ -104,6 +105,7 @@ export default defineComponent({
 		MenuIcon,
 		Logo,
 		NotifIcon,
+		CrewMateIcon,
 		NotifPanel,
 		BadgeNotif
 	},

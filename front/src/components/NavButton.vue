@@ -1,5 +1,5 @@
 <template>
-	<router-link @click="toggle_nav()" :to="{name: route}" class="flex flex-row items-center nav-link mb-5">
+	<router-link @click="toggle_nav()" :to="route" class="flex flex-row items-center nav-link mb-5">
 		<div class="flex h-14 w-14 md:h-16 md:w-16">
 			<slot></slot>
 		</div>
@@ -22,7 +22,7 @@ export default defineComponent({
     props: {
         text: { type: String, default: "link" },
         notification: { type: Number, default: 0 },
-        route: String,
+        route: Object,
     },
     methods: {
         toggle_nav(): void {
