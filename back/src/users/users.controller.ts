@@ -41,6 +41,11 @@ export class UsersController {
     }
   }
 
+  @Get('block-list')
+  async block_list(@Req() req) {
+    return await this.usersService.getBlockedUsers(req.user.id);
+  }
+
   @Get('get-friend-requests')
   async getFriendRequests(@Query('id') id: number) {
     if (!id)

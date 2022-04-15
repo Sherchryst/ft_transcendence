@@ -86,7 +86,14 @@ export class ChatController {
       throw new UnauthorizedException("you're not a channel member");
     const history = await this.chatService.getChannelMessages(channelId, new Date(), 100);
     const members = await this.chatService.getChannelMembers(channelId);
-    return JSON.stringify({'channel': channel, 'history': history, 'members': members});
+    const block_list = await this.userService.getBlockedUsers(req.user.id);
+    let filtered_history = [];
+    for (let i = 0; i != history.length; ++i) {
+      if (!block_list.find((user) => {return user.id == history[i].from.id}))
+        filtered_history.push(history[i])
+    }
+    console.log("after", filtered_history);
+    return JSON.stringify({'channel': channel, 'history': filtered_history, 'members': members});
   }
 
   @Post('invite')
