@@ -2,10 +2,10 @@
     <div class="message flex"  v-bind:class="[ message.self ? 'flex-row-reverse' : 'flex-row', message.photo ? 'mt-3' : 'mt-2']">
         <div v-if="message.photo">
             <div v-if="!message.self">
-                <button class="flex-shrink-0 h-10 w-10" v-s-dropdown-toggle:message->
+                <button class="flex-shrink-0 h-10 w-10" v-s-dropdown-toggle:[messageId]>
                     <img class="h-10 w-10" src="@/assets/blank-avatar.jpg" alt="">
                 </button>
-                <s-dropdown name="message-" position="top" align="right" :offset="30">
+                <s-dropdown :name="messageId" position="top" align="right" :offset="30">
                     <UserPanel :channelId="channelId" :user="message.from"></UserPanel>
                 </s-dropdown>
             </div>
@@ -31,13 +31,23 @@ import UserPanel from './UserPanel.vue';
 export default defineComponent({
     name: "Message",
     props: {
+        id: { type: Number,  required: true },
         message: { type: Object as PropType<Message_t>, required: true },
         channelId: Number,
+    },
+    computed: {
+        messageId(): string {
+            return('message-' + this.id)
+        },
     },
     data() {
         return {
             channel: {} as Channel
         }
+    },
+    created() {
+        console.log("messageId", this.messageId)
+        console.log("id", this.id)
     },
     components: { UserPanel }
 })
