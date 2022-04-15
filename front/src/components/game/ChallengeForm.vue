@@ -1,7 +1,7 @@
 <template>
 	<form class="flex flex-col mb-3" @submit.prevent="print">
 		<div v-if="!target" class="flex flex-col-reverse mt-4">
-			<ModInput name="username" placeholder="Username" v-model="formData.login" class="mobile" required>Username</ModInput>
+			<ModInput name="username" placeholder="Username" v-model="formData.nickname" class="mobile" required>Username</ModInput>
 		</div>
 		<div v-else>
 			<div class="mod-input input-lock flex flex-col justify-start">
@@ -45,9 +45,9 @@ export default defineComponent({
 		return {
 			userSet: false,
 			formData: {
-				login: "",
+				nickname: "",
 				mapId: 1,
-				level: 1
+				level: 2
 			}
 		}
 	},
@@ -57,7 +57,7 @@ export default defineComponent({
 			gameSocket.emit("invite", this.formData);
 		},
 		toggleOption(){
-			this.formData.level = !(this.formData.level == 1) ? 2 : 1;
+			this.formData.level = (this.formData.level == 2) ? 1 : 2;
 		},
 		setMap(map: string) {
 			this.formData.mapId = parseInt(map)
@@ -66,7 +66,7 @@ export default defineComponent({
 	components: { SwitchButton, BigRadioButton, ModInput, ModLabel, ButtonLink},
 	created() {
 		if (this.target)
-			this.formData.login = this.target
+			this.formData.nickname = this.target
 	}
 })
 </script>
