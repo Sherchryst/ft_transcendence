@@ -8,6 +8,8 @@ import { UpdateNicknameDto } from './dto/update-nickname.dto';
 import { instanceToPlain } from 'class-transformer';
 import { User } from './entities/user.entity';
 import { StatusGateway } from './users.gateway';
+import { RelationIdAttribute } from 'typeorm/query-builder/relation-id/RelationIdAttribute';
+import { UserRelationshipType } from './entities/user-relationship.entity';
 
 export const imageFilter: any = (req: any, file: { mimetype: string, size: number }, callback: (arg0: any, arg1: boolean) => void): any =>
 {
@@ -27,7 +29,9 @@ export class UsersController {
 
   @Post('accept-friend-request')
   async acceptFriendRequest(@Req() req, @Body() dto: { fromId: number }) {
+    console.log(dto)
     const r = await this.usersService.hasSentFriendRequest(dto.fromId, req.user.id);
+    console.log(r);
     if (!r)
       throw new UnauthorizedException('User has not sent friend request');
     await this.usersService.acceptFriendRequest(dto.fromId, req.user.id);
@@ -106,10 +110,13 @@ export class UsersController {
   async sendFriendRequest(@Req() req, @Body() dto: { toId: number }) {
     if (await this.usersService.isBlockedBy(dto.toId, req.user.id))
       throw new UnauthorizedException();
+    const rel = await this.usersService.getOneRelationship(req.user.id, dto.toId);
+    if (rel && (rel.type == UserRelationshipType.FRIEND || rel.type == UserRelationshipType.PENDING))
+      return
     const request = await this.usersService.sendFriendRequest(req.user.id, dto.toId);
     if (!request)
       throw new UnauthorizedException();
-    this.usersService.WsClients.get(dto.toId).emit("friend-request", request);
+    this.usersService.WsClients.get(dto.toId).emit("friend-request", req.user);
   }
 
   @Get('top-ten')

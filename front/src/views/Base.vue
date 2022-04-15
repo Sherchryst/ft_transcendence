@@ -87,7 +87,7 @@ import router from '@/router';
 import { SocketMessage } from '@/interfaces/Message';
 import { chatSocket, gameSocket, statusSocket } from '@/socket'
 import NotifPanel from '@/components/Notification/NotifPanel.vue';
-import { Statut } from '@/interfaces/Profile';
+import { Statut, User } from '@/interfaces/Profile';
 import BadgeNotif from '@/components/Notification/BadgeNotif.vue'; 
 import { Notification, FriendRequest, GameStart, GameInvitation, ChannelInvitation } from "@/interfaces/Notification";
 import { useToast } from "vue-toastification";
@@ -156,8 +156,8 @@ export default defineComponent({
 				router.push({name: 'game', params: {match_id: data}})
 			})
 		this.statusSocket
-			.on('friend-request', (request: FriendRequest) => {
-				this.addFriendRequest(request);
+			.on('friend-request', (user: User) => {
+				this.addFriendRequest(user);
 			})
 	},
 	methods: {
