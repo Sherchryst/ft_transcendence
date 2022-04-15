@@ -17,6 +17,7 @@
 
 <script lang="ts">
 
+import { User } from '@/interfaces/Profile'
 import { defineComponent, computed, watch, provide } from 'vue';
 import Message from '@/components/chat/Message.vue'
 import { useMeta } from 'vue-meta'
@@ -56,6 +57,7 @@ export default defineComponent({
             history: [] as Message_t[],
             channel: {} as Channel,
             members: [] as ChannelMember_t[],
+            blocked_list: [] as User[]
         }
     },
     computed: {
@@ -79,9 +81,12 @@ export default defineComponent({
                 console.log('connected', this.socket.id)
             })
             .on('message', (data) => {
-                if (data.channelMessage.channel.id == this.id)
-                    this.recv(data.channelMessage.message)
-                this.readMessage(parseInt(this.id))
+                if (this.blocked_list.find((user) => {return user.id == data.channelMessage.message.from.id}))
+                    return ;
+                if (data.channelMessage.channel.id == this.id) {
+                    this.recv(data.channelMessage.message);
+                    this.readMessage(parseInt(this.id));
+                }
             })
             .on('joined', (data) => {
                 this.members.push(data);
@@ -102,7 +107,7 @@ export default defineComponent({
             .on('ban', (member) => {/** */})
             .on('promote', (member) => {/** */})
         ;
-	},
+	},  
 	methods: {
         readMessage(chanId: number){
             this.$emit('read-message', chanId);
@@ -125,6 +130,13 @@ export default defineComponent({
                 this.recv(response.data.history[i])
             for (let i = 0; i < response.data.members.length; ++i)
                 this.members.push(response.data.members[i]);
+            }).catch((error) => {
+                console.log(error);
+            })
+            API.get('users/block-list').then((response) => {
+                console.log(response);
+                for (let i = 0; i < response.data.length; ++i)
+                    this.blocked_list.push(response.data[i]);
             }).catch((error) => {
                 console.log(error);
             })
