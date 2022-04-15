@@ -16,17 +16,17 @@
 				<div v-else class="flex flex-col gap-y-4">
 					<Transition mode="out-in" name="btn">
 						<button-link v-if="statut == 'NONE'" class="flex justify-center w-full" text="Ask a friend" @click="friendRequest"></button-link>
-						<button-link v-else-if="statut == 'WAIT'" class="btn-used flex justify-center w-full" text="Friend request send"></button-link>
-						<ButtonLink v-else-if="statut == 'BLOCK'" class="flex justify-center w-full" text="Unblock User" @click="unblock"></ButtonLink>
+						<button-link v-else-if="RelationshipType == 'pending'" class="btn-used flex justify-center w-full" text="Friend request send"></button-link>
+						<ButtonLink v-else-if="RelationshipType == 'block'" class="flex justify-center w-full" text="Unblock User" @click="unblock"></ButtonLink>
 					</Transition>
 					<Transition mode="out-in" name="btn">
 						<ButtonLink v-if="statut == 'NONE'" class="flex justify-center w-full btn-neutral" text="Block User" @click="openModal"></ButtonLink>
-						<ButtonLink v-else-if="statut == 'BLOCK'" class="flex justify-center w-full btn-inactive" text="This User is block"></ButtonLink>
+						<ButtonLink v-else-if="RelationshipType == 'block'" class="flex justify-center w-full btn-inactive" text="This User is block"></ButtonLink>
 					</Transition>
 				</div>
 			</div>
-			<div class="flex flex-rows justify-around md:flex-wrap">
-				<div class="">
+			<div class="grid grid-cols-2 justify-items-stretch gap-16 justify-betweem">
+				<div class="justify-self-end">
 					<LittleCard>
 						<template v-slot:title>
 							<p>Winrate</p>
@@ -36,7 +36,7 @@
 						</template>
 					</LittleCard>
 				</div>
-				<div class="">
+				<div class="justify-self-start">
 					<LittleCard>
 						<template v-slot:title>
 							<p>Played</p>
@@ -91,7 +91,7 @@ import Trophy from '@/assets/icon/achievement.svg';
 import {defineComponent, watch, computed} from 'vue';
 import { API } from '@/scripts/auth';
 import BlockModal from '@/components/modal/BlockModal.vue';
-import { Achievement, Profile } from '@/interfaces/Profile';
+import { Achievement, Profile, UserRelationship, UserRelationshipType } from '@/interfaces/Profile';
 import { useStore } from 'vuex'
 import { key } from '@/store/index'
 import router from '@/router';
@@ -136,6 +136,7 @@ export default defineComponent({
 			history: [],
 			achievements: [] as Achievement[],
 			avatarPath: '',
+			relashionshipStatus: {} as UserRelationship,
 		}
 	},
 	methods: {
@@ -150,6 +151,21 @@ export default defineComponent({
 				console.log('Profile', res.data)
 				this.achievements = res.data.achievements
 				this.profile = res.data;
+				if (this.profile.user.id == this.$store.getters.getId) 
+					this.statut = 'SELF'
+				else
+					await API.get<UserRelationship>('users/relationship-status', {
+						params: {
+							id: this.profile.user.id
+						}
+					})
+					.then(res => {
+						console.log('Relationship', res.data)
+						this.relashionshipStatus.type = res.data.type
+					})
+					.catch(err => {
+						console.log('eRREUR',err)
+					})
 				await API.get('match/match-count', {
 					params: {
 						userId: this.profile.user.id
@@ -188,12 +204,13 @@ export default defineComponent({
 		closeModal() : void {
 			(this.$refs['modal_block'] as typeof BlockModal).close()
 		},
-		async friendRequest() : Promise<void> {
-			await API.post('users/send-friend-request', {
+		friendRequest() : void {
+			API.post('users/send-friend-request', {
 				fromId: this.$store.getters.getId,
 				toId: this.profile.user?.id
 			}).then( () => {
-				this.statut = 'WAIT'
+				this.statut = 'WAIT';
+				this.relashionshipStatus.type = UserRelationshipType.PENDING;
 			})
 		},
 		async block() : Promise<void> {
@@ -201,7 +218,8 @@ export default defineComponent({
 				fromId: this.$store.getters.getId,
 				toId: this.profile.user?.id
 			}).then( () => {
-				this.statut = 'BLOCK'
+				this.statut = 'BLOCK';
+				this.relashionshipStatus.type = UserRelationshipType.BLOCK;
 				this.closeModal()
 			})
 		},
@@ -233,7 +251,11 @@ export default defineComponent({
 			return this.$store.getters.getAvatarPath
 		else
 			return this.profile.user?.avatarPath
-		}
+		},
+		RelationshipType() : UserRelationshipType {
+			console.log('RelationshipType', this.relashionshipStatus)
+			return this.relashionshipStatus.type
+		},
 	}
 })
 </script>
