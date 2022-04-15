@@ -153,17 +153,17 @@ export default defineComponent({
 		}
 	},
 	methods: {
-		getUser(username: string | string[]): void {
-			API.get<Profile>('users/get-profile', {
+		async getUser(username: string | string[]): Promise<void> {
+			await API.get<Profile>('users/get-profile', {
 				params: {
 					id: null,
 					login: username
 				}
 			})
-			.then((res) => {
+			.then(async (res) => {
 				this.achievements = res.data.achievements
 				this.profile = res.data;
-				API.get('match/match-count', {
+				await API.get('match/match-count', {
 					params: {
 						userId: this.profile.user.id
 					}
@@ -172,7 +172,7 @@ export default defineComponent({
 				}).catch((err) => {
 					console.log(err)
 				})
-				API.get('match/get-winrate', {
+				await API.get('match/get-winrate', {
 					params: {
 						userId: this.profile.user.id
 					}
@@ -181,7 +181,7 @@ export default defineComponent({
 				}).catch((err) => {
 					console.log(err)
 				})
-				API.get('match/get-history', {
+				await API.get('match/get-history', {
 					params: {
 						userId: this.profile.user.id,
 						limit: 50
@@ -201,16 +201,16 @@ export default defineComponent({
 		closeModal() : void {
 			(this.$refs['modal_block'] as typeof Modal).close()
 		},
-		friendRequest() : void {
-			API.post('users/send-friend-request', {
+		async friendRequest() : Promise<void> {
+			await API.post('users/send-friend-request', {
 				fromId: this.$store.getters.getId,
 				toId: this.profile.user?.id
 			}).then( () => {
 				this.statut = 'WAIT'
 			})
 		},
-		block() : void {
-			API.post('users/block-user', {
+		async block() : Promise<void> {
+			await API.post('users/block-user', {
 				fromId: this.$store.getters.getId,
 				toId: this.profile.user?.id
 			}).then( () => {
@@ -218,8 +218,8 @@ export default defineComponent({
 				this.closeModal()
 			})
 		},
-		unblock() : void {
-			API.post('users/unblock-user', {
+		async unblock() : Promise<void> {
+			await API.post('users/unblock-user', {
 				fromId: this.$store.getters.getId,
 				toId: this.profile.user?.id
 			}).then( () => {
