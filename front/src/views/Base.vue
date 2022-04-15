@@ -45,11 +45,11 @@
 							</one-row-form>
 						</div>
 						<div class="self-center flex mx-7">
-							<button v-s-dropdown-toggle:some-dropdown>
+							<button v-s-dropdown-toggle:notification>
 								<NotifIcon class="h-12 w-12" />
 							</button>
 							<BadgeNotif :number="notifications.length"></BadgeNotif>
-							<s-dropdown name="some-dropdown" align="left">
+							<s-dropdown name="notification" align="left">
 								<NotifPanel :notifications="notifications" @close="removeNotif"/>
 							</s-dropdown>
 						</div>
@@ -88,7 +88,7 @@ import { chatSocket, gameSocket, statusSocket } from '@/socket'
 import NotifPanel from '@/components/Notification/NotifPanel.vue';
 import { Statut } from '@/interfaces/Profile';
 import BadgeNotif from '@/components/Notification/BadgeNotif.vue'; 
-import { Notification, FriendRequest, GameStart, GameInvitation } from "@/interfaces/Notification";
+import { Notification, FriendRequest, GameStart, GameInvitation, ChannelInvitation } from "@/interfaces/Notification";
 
 
 export default defineComponent({
@@ -144,8 +144,12 @@ export default defineComponent({
 		this.getNotif()
 		this.chatSocket
 			.on('message', (data: {channelMessage: SocketMessage}) => {
-				if (data.channelMessage.message.from.login != this.$store.getters.getLogin)
+				if (data.channelMessage.message.from.id != this.$store.getters.getId)
 					this.channelMessage.push(data.channelMessage)
+			})
+			.on('invited', (data: ChannelInvitation) => {
+				console.log('invite', data)
+				this.addChannelInivtation(data);
 			})
 		this.gameSocket
 			.on('invited', (data: GameInvitation) => {
@@ -191,6 +195,16 @@ export default defineComponent({
 				});
 				console.log("len", this.notifications.length)
 			})
+			API.get('chat/invite-list', {
+				params: {
+					id: this.$store.getters.getId
+				}
+			}).then( (response) => {
+				console.log("data")
+				response.data.forEach( (element: ChannelInvitation) => {
+					this.addChannelInivtation(element)
+				})
+			})
 		},
 		addFriendRequest(data: FriendRequest): void {
 			let friendRequest =  { nickname: data.nickname, id: data.id} as FriendRequest
@@ -207,6 +221,13 @@ export default defineComponent({
 				content: data,
 				date: new Date(data.sentAt)
 			} as Notification)
+		},
+		addChannelInivtation(data: ChannelInvitation){
+			this.notifications.push({
+				container: 'NotifChannel',
+				content: data,
+				date: new Date(data.sent_at)
+			})
 		},
 		addGameStart(data: string): void {
 			let gameStart = JSON.parse(data) as GameStart

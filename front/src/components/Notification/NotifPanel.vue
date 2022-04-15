@@ -5,7 +5,7 @@
 			<router-link to="home">view all</router-link>
 		</div>
 		<div v-if="notifications.length != 0">
-			<NotifCard v-for="notification in notifications" :key="notification.date.toString()" :dateTime="notification.date">
+			<NotifCard v-for="(notification, index) in notifications" :key="index" :dateTime="notification.date">
 				<component :is="notification.container" :data="notification.content" @close="removeNotif"></component>
 			</NotifCard>
 		</div>

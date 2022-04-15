@@ -49,9 +49,9 @@ export default defineComponent({
 				input{
 					transition: all 100ms ease-in;
 					background: $--hover-bg-color;
-					&::placeholder{
-						color: $action;
-				}
+						&::placeholder{
+							color: $action;
+					}
 				}
 			}
 			&:focus-within{

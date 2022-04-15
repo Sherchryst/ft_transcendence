@@ -72,22 +72,7 @@
 				</template>
 			</ProfilePanel>
 		</div>
-		<Modal ref="modal_block" id="modal-block-user" @close="showModal = false">
-			<template v-slot:title>
-				Block User
-			</template>
-			You will block the user <span class="font-bold">{{ username }}</span>. No more of his messages will appear. You could always unblock it later on this page.
-			<template v-slot:footer>
-				<div class="flex flex-col lg:flex-row gap-4 lg:justify-end">
-					<ButtonLink @click="block" class="btn-danger">
-						Block
-					</ButtonLink>
-					<ButtonLink class="btn-neutral" @click="closeModal">
-						Cancel
-					</ButtonLink>
-				</div>
-			</template>
-		</Modal>
+		<BlockModal ref="modal_block" :user="profile?.user" ></BlockModal>
 	</div>
 </template>
 
@@ -101,11 +86,11 @@ import LittleCard from '@/components/profile/LittleCard.vue';
 import TitlePanel from '@/components/profile/TitlePanel.vue';
 import ButtonLink from '@/components/ButtonLink.vue';
 import MainTitle from '@/components/MainTitle.vue';
-import Modal from '@/components/Modal.vue';
 import Scrool from '@/assets/icon/list-game.svg';
 import Trophy from '@/assets/icon/achievement.svg';
 import {defineComponent, watch, computed} from 'vue';
 import { API } from '@/scripts/auth';
+import BlockModal from '@/components/modal/BlockModal.vue';
 import { Achievement, Profile } from '@/interfaces/Profile';
 import { useStore } from 'vuex'
 import { key } from '@/store/index'
@@ -126,7 +111,7 @@ export default defineComponent({
     Scrool,
     Trophy,
     ProfilePanel,
-    Modal,
+    BlockModal,
     Achievements
 },
 	props:
@@ -194,14 +179,14 @@ export default defineComponent({
 					console.log(err)
 				})
 			}).catch(() => {
-				router.push({name: 'not-found'})
+				router.push({name: 'not-found', replace: true })
 			})
 		},
 		openModal() : void {
-			(this.$refs['modal_block'] as typeof Modal).open()
+			(this.$refs['modal_block'] as typeof BlockModal).open()
 		},
 		closeModal() : void {
-			(this.$refs['modal_block'] as typeof Modal).close()
+			(this.$refs['modal_block'] as typeof BlockModal).close()
 		},
 		async friendRequest() : Promise<void> {
 			await API.post('users/send-friend-request', {
@@ -231,10 +216,11 @@ export default defineComponent({
 	},
 	created(): void {
 		watch(
-			() => this.$route.params,
-			(toParams) => {
-				if(toParams.username)
-					this.getUser(toParams.username)
+			() => this.$route.params.username,
+			(newUsername) => {
+				if(newUsername){
+					this.getUser(newUsername.toString())
+				}
 			}
 		)
 	},

@@ -6,8 +6,9 @@
 		<div>
 			lost in space
 		</div>
-		<div class="mt-10">
-			<button-link text="Go to home" route="home"></button-link>
+		<div class="mt-10 flex flex-col gap-4 justify-center self-center w-64">
+			<button-link @click="$router.go(-1)" class="btn-neutral">Go back</button-link>
+			<button-link text="Back to homepage" route="home"></button-link>
 		</div>
 	</div>
 </template>

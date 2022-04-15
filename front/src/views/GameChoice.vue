@@ -1,44 +1,37 @@
 <template>
-	<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-		<game-panel title="Battleground" @action="(evt) => matchmaking()" action_name="Search">
-		</game-panel>
-		<game-panel @action="sendInvite()" title="Challenge" action_name="Invite">
-			<!-- <form action="" class="flex flex-col">
-				<div class="flex flex-col-reverse mt-4">
-					<input class="px-3 py-2" type="text" name="username" id="username">
-					<label class="text-left" for="username">Username</label>
-				</div>
-				<div class="flex flex-col items-start mt-10">
-					<span>Maps</span>
-					<div class="flex flex-row flex-wrap gap-4">
-						<big-radio-button id="map-1" />
-						<big-radio-button id="map-2" />
-						<big-radio-button id="map-3" />
-					</div>
-				</div>
-				<div class="flex flex-col items-start mt-10">
-					<span class="mb-1">Bonus</span>
-					<switch-button />
-				</div>
-			</form> -->
-		</game-panel>
-		<game-panel title="Training" @action="requestGame" action_name="Run">
-			<!-- <ButtonLink text="Bot game" href= /> -->
-		</game-panel>
+	<div>
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+			<game-panel title="Battleground" @click="(evt) => matchmaking()" action_name="Search" class="battleground">
+			</game-panel>
+			<game-panel @click="sendInvite()" title="Challenge" action_name="Invite" class="challenge">
+				<!-- <challenge-form></challenge-form> -->
+			</game-panel>
+			<game-panel title="Training" @click="requestGame" action_name="Run" class="bot">
+				<!-- <ButtonLink text="Bot game" href= /> -->
+			</game-panel>
+		</div>
+		<challenge-modal ref="modal_challenge"></challenge-modal>
 	</div>
 </template>
 
 <script lang="ts">
-import GamePanel from '@/components/GamePanel.vue';
+import GamePanel from '@/components/game/GamePanel.vue';
+// import ChallengeForm from '@/components/chat/game/ChallengeForm.vue';
 // import BigRadioButton from '@/components/BigRadioButton.vue';
 import { defineComponent } from 'vue';
-import { gameSocket } from '@/socket';
+import { gameSocket, statusSocket } from '@/socket';
 import router from '@/router';
+import ChallengeModal from '@/components/modal/ChallengeModal.vue';
 
 export default defineComponent({
 	components: {
-		GamePanel,
-		// BigRadioButton,
+    GamePanel,
+    ChallengeModal
+},
+	mounted() {
+			statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
+			console.log("match status : ", data);
+		});
 	},
 	beforeUnmount() {
 		//   gameSocket.off("invited");
@@ -48,7 +41,8 @@ export default defineComponent({
 	},
 	methods: {
 		sendInvite() {
-			gameSocket.emit("invite", { nickname: "cheater", mapId: 3, level: 1 });
+			(this.$refs["modal_challenge"] as typeof ChallengeModal).open()
+			// gameSocket.emit("invite", { login: "cheat_user", mapId: 3, level: 1 });
 		},
 		requestGame() {
 			router.push({ name: "game", params: { match_id: `bot` } })
