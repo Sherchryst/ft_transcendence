@@ -25,17 +25,17 @@ export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Post('accept-friend-request')
-  async acceptFriendRequest(@Body() dto: { fromId: number, toId: number }) {
-    const r = await this.usersService.hasSentFriendRequest(dto.fromId, dto.toId);
+  async acceptFriendRequest(@Req() req, @Body() dto: { fromId: number }) {
+    const r = await this.usersService.hasSentFriendRequest(dto.fromId, req.user.id);
     if (!r)
       throw new UnauthorizedException('User has not sent friend request');
-    await this.usersService.acceptFriendRequest(dto.fromId, dto.toId);
+    await this.usersService.acceptFriendRequest(dto.fromId, req.user.id);
   }
 
   @Post('block-user')
-  async blockUser(@Body() dto: { fromId: number, toId: number }) {
+  async blockUser(@Req() req, @Body() dto: { toId: number }) {
     try {
-      await this.usersService.blockUser(dto.fromId, dto.toId);
+      await this.usersService.blockUser(req.user.id, dto.toId);
     } catch (error) {
       throw new UnauthorizedException('User is already blocked');
     }
@@ -97,10 +97,10 @@ export class UsersController {
   }
 
   @Post('send-friend-request')
-  async sendFriendRequest(@Body() dto: { fromId: number, toId: number }) {
+  async sendFriendRequest(@Req() req, @Body() dto: { toId: number }) {
     try {
-      if (await this.usersService.isBlockedBy(dto.toId, dto.fromId)
-      || !(await this.usersService.sendFriendRequest(dto.fromId, dto.toId)))
+      if (await this.usersService.isBlockedBy(dto.toId, req.user.id)
+      || !(await this.usersService.sendFriendRequest(req.user.id, dto.toId)))
         throw new UnauthorizedException();
     } catch (error) {
       throw new UnauthorizedException();
@@ -113,9 +113,9 @@ export class UsersController {
   }
 
   @Post('unblock-user')
-  async unblockUser(@Body() dto: { fromId: number, toId: number }) {
+  async unblockUser(@Req() req, @Body() dto: { toId: number }) {
     try {
-      await this.usersService.unblockUser(dto.fromId, dto.toId);
+      await this.usersService.unblockUser(req.user.id, dto.toId);
     } catch (error) {
       throw new UnauthorizedException('User is not blocked');
     }
