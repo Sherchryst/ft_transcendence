@@ -1,27 +1,31 @@
 <template>
-	<div class="flex flex-col gap-4">
-		<router-link :to="{name: 'profile', params: { username: user?.login }}">View profile</router-link>
-		<button class="text-left" @click="challenge">
-			Challenge
-		</button>
-		<button class="text-left" @click="requestFriend">
-			Ask a friend
-		</button>
-		<button class="text-left" @click="block">
-			Block
-		</button>
-		<button class="text-left" @click="mute">
-			mute user
-		</button>
-		<button class="text-left" @click="ban">
-			ban user
-		</button>
-		<button v-if="owner" class="text-left" @click="promute">
-			Promote admin
-		</button>
-		<BlockModal ref="modal_block" :user="user"></BlockModal>
+    <div>
+        <div class="flex flex-col gap-4">
+            <router-link :to="{name: 'profile', params: { username: user?.login }}">View profile</router-link>
+            <button class="text-left" @click="challenge">
+                Challenge
+            </button>
+            <button class="text-left" @click="requestFriend">
+                Ask a friend
+            </button>
+            <button class="text-left" @click="block">
+                Block
+            </button>
+            <button class="text-left" @click="mute">
+                mute user
+            </button>
+            <button class="text-left" @click="ban">
+                ban user
+            </button>
+            <button v-if="owner" class="text-left" @click="promute">
+                Promote admin
+            </button>
+        </div>
+        <BlockModal ref="modal_block" :user="user"></BlockModal>
         <ChallengeModal ref="modal_challenge" :target="user.login" ></ChallengeModal>
-	</div>
+        <AdminModal ref="modal_ban" :channelId="channelId" :toId="user.id" moderation="ban"></AdminModal>
+        <AdminModal ref="modal_mute" :channelId="channelId" :toId="user.id" moderation="mute"></AdminModal>
+    </div>
 </template>
 
 <script lang="ts">
@@ -30,6 +34,7 @@ import { defineComponent, PropType } from 'vue';
 import BlockModal from '../modal/BlockModal.vue';
 import ChallengeModal from '../modal/ChallengeModal.vue';
 import { API } from '@/scripts/auth';
+import AdminModal from '../modal/AdminModal.vue';
 
 export default defineComponent({
     name: "Message",
@@ -59,15 +64,17 @@ export default defineComponent({
             (this.$refs["modal_challenge"] as typeof ChallengeModal).open()
         },
         mute() {
-            API.post("chat/moderation", {channelId: this.channelId, toId: this.user.id, reason: null, duration: null, moderation: 'mute'})
+            (this.$refs["modal_mute"] as typeof AdminModal).open()
+            // API.post("chat/moderation", {channelId: this.channelId, toId: this.user.id, reason: null, duration: null, moderation: 'mute'})
         },
         ban() {
-            API.post("chat/moderation", {channelId: this.channelId, toId: this.user.id, reason: null, duration: null, moderation: 'ban'})
+            (this.$refs["modal_ban"] as typeof AdminModal).open()
+            // API.post("chat/moderation", {channelId: this.channelId, toId: this.user.id, reason: null, duration: null, moderation: 'ban'})
         },
         promute() {
             console.log("promute");
         },
     },
-    components: { BlockModal, ChallengeModal }
+    components: { BlockModal, ChallengeModal, AdminModal }
 })
 </script>

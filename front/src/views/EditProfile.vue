@@ -15,14 +15,13 @@
                     </ChooseAvatar>
                 </div>
                 <div class="flex flex-col title-username self-center mb-6 space-y-4">
-                    <label for="username">Enter username:</label>
-                    <input type="text" class="title-username input" id="username" name="username" v-model="nickname" placeholder="username">
+                    <ModInput name="username" placeholder="Username" v-model="nickname">Username</ModInput>
                 </div>
                 <div v-if="Is2fa" class="mb-8">
                     <button type="button" v-on:click="deactivated_2fa" class="btn px-7 py-3 pb-2"> Deactivated 2fa </button>
                 </div>
-                <div v-else class="mb-8 flex flex-row place-content-center">
-                    <label class="pt-1 title-username" for="2F Authentication">2F Authentication:</label>
+                <div v-else class="mb-8 flex flex-col place-content-center">
+                    <ModLabel name="2F Authentication">2F Authentication</ModLabel>
                     <SwitchButton @onSwitched="inputSwitch($event)"></SwitchButton>
                 </div>
                 <ButtonLink class="flex justify-center w-full" type="submit"> Edit Profile </ButtonLink>
@@ -34,12 +33,13 @@
                     <MainTitle>QR Code</MainTitle>
                 </template>
                 <template v-slot:body>
-                    <div class="flex flex-col justify-evenly place-content-center">
-                    <div class="w-64" >
-                        <img class="w-64 h-64 mb-8" :src="qrcode">
-                        <input v-model="digits" class="mb-10" placeholder="Google authenticator Code">
-                        <button v-on:click="send_digit_code('/turn-on')" class="btn px-7 py-3 pb-2"> Send </button>
-                    </div>
+                    <div class="flex flex-col justify-evenly items-center">
+                        <div class="w-64 felx flex-col c-center">
+                            <img class="w-64 h-64 mb-8 qrcode p-5" :src="qrcode">
+                            <ModInput v-model="digits" class="mb-10" placeholder="Google authenticator Code"></ModInput>
+                            <!-- <input v-model="digits" class="mb-10" placeholder="Google authenticator Code"> -->
+                            <button v-on:click="send_digit_code('/turn-on')" class="btn px-7 py-3 pb-2 w-full"> Send </button>
+                        </div>
                     </div>
                 </template>
             </ProfilePanel>
@@ -57,6 +57,8 @@ import router from "@/router";
 import ProfilePanel from "@/components/profile/ProfilePanel.vue";
 import MainTitle from "@/components/MainTitle.vue";
 import ButtonLink from "@/components/ButtonLink.vue";
+import ModInput from "@/components/form/ModInput.vue";
+import ModLabel from "@/components/form/ModLabel.vue";
 
 export enum State {
   NOTLOGIN,
@@ -72,7 +74,9 @@ export default defineComponent({
     ProfilePicture,
     ProfilePanel,
     MainTitle,
-    ButtonLink
+    ButtonLink,
+    ModInput,
+    ModLabel
 },
     data () {
         return {
@@ -168,6 +172,10 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+.qrcode{
+    background-color: white;
+    border-radius: 50px;
+}
 .frame {
   border: 10px solid ;
   margin: auto;

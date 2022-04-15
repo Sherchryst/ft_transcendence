@@ -1,7 +1,7 @@
 <template>
 	<Modal ref="modal" id="modal-challange" @close="close">
 		<template v-slot:title>
-			<slot>Challange</slot>
+			<slot>Challenge</slot>
 		</template>
 		<ChallengeForm :target="target"></ChallengeForm>
 	</Modal>

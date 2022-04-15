@@ -6,7 +6,7 @@ import * as PostgresError from '@fiveem/postgres-error-codes'
 import * as sharp from 'sharp';
 import { UpdateNicknameDto } from './dto/update-nickname.dto';
 import { instanceToPlain } from 'class-transformer';
-import { StatusGateway } from './users.gateway';
+import { User } from './entities/user.entity';
 
 export const imageFilter: any = (req: any, file: { mimetype: string, size: number }, callback: (arg0: any, arg1: boolean) => void): any =>
 {
@@ -51,7 +51,6 @@ export class UsersController {
     return JSON.stringify(requests.map(({ id, nickname }) => ({ id, nickname })));
   }
 
-
   @Get('profile')
   async profile(@Req() req) {
     const achievements = await this.usersService.getUserAchievements(req.user.id);
@@ -61,7 +60,7 @@ export class UsersController {
 
   @Get('get-profile')
   async getProfile(@Query('id') id: number, @Query('login') login: string) {
-    let user;
+    let user : User;
     if (id)
       user = await this.usersService.findOne(id);
     else if (login)
@@ -90,7 +89,7 @@ export class UsersController {
   }
 
   @Get('relationship-status')
-  async relationshipStatus(@Req() req, @Query('id') id: number) {
+  async relationshipStatus(@Req() req : any, @Query('id') id: number) {
     if (!id)
       throw new BadRequestException('No id provided');
     const relation = await this.usersService.getOneRelationship(req.user.id, id);
