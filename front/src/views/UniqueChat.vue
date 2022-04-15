@@ -8,7 +8,7 @@
             <OptionChannel :channel="channel"></OptionChannel>
         </template>
         <template v-if="history.length" v-slot:messages>
-            <message v-for="message in history" :key="message" :message="message" :channelId="parseInt(id)">
+            <message v-for="(message, index) in history" :key="index" :message="message" :channelId="parseInt(id)" :id="index">
                 {{message.content}}
             </message>
         </template>
@@ -104,9 +104,9 @@ export default defineComponent({
                 let self = this.nickname == id;
                 this.history.unshift({content: "Bye", from: member, self: self, photo: true});
             })
-            .on('mute', (member) => {/** */})
-            .on('ban', (member) => {/** */})
-            .on('promote', (member) => {/** */})
+            // .on('mute', (member) => {/** */})
+            // .on('ban', (member) => {/** */})
+            // .on('promote', (member) => {/** */})
         ;
 	},  
 	methods: {

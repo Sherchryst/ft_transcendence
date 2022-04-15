@@ -113,6 +113,7 @@ export default defineComponent({
 		return {
 			chatSocket : chatSocket,
 			gameSocket : gameSocket,
+			statusSocket : statusSocket,
 			channelMessage: [] as SocketMessage[],
 			notifications: [] as Notification[]
 		}
@@ -153,6 +154,10 @@ export default defineComponent({
 			.on('gameStart', (data: number) => {
 				toast.info("Transfered to game");
 				router.push({name: 'game', params: {match_id: data}})
+			})
+		this.statusSocket
+			.on('friend-request', (request: FriendRequest) => {
+				this.addFriendRequest(request);
 			})
 	},
 	methods: {

@@ -7,6 +7,7 @@ import * as sharp from 'sharp';
 import { UpdateNicknameDto } from './dto/update-nickname.dto';
 import { instanceToPlain } from 'class-transformer';
 import { User } from './entities/user.entity';
+import { StatusGateway } from './users.gateway';
 
 export const imageFilter: any = (req: any, file: { mimetype: string, size: number }, callback: (arg0: any, arg1: boolean) => void): any =>
 {
@@ -103,13 +104,12 @@ export class UsersController {
 
   @Post('send-friend-request')
   async sendFriendRequest(@Req() req, @Body() dto: { toId: number }) {
-    try {
-      if (await this.usersService.isBlockedBy(dto.toId, req.user.id)
-      || !(await this.usersService.sendFriendRequest(req.user.id, dto.toId)))
-        throw new UnauthorizedException();
-    } catch (error) {
+    if (await this.usersService.isBlockedBy(dto.toId, req.user.id))
       throw new UnauthorizedException();
-    }
+    const request = await this.usersService.sendFriendRequest(req.user.id, dto.toId);
+    if (!request)
+      throw new UnauthorizedException();
+    this.usersService.WsClients.get(dto.toId).emit("friend-request", request);
   }
 
   @Get('top-ten')
