@@ -1,15 +1,15 @@
 <template>
 	<div id="base" class="grid grid-cols-12 min-h-screen">
-		<nav id="nav" class="flex flex-col md:items-center md:fixed h-full w-full md:w-28 pt-24 md:pt-0 dropdown-link-container">
-			<div class="mb-5 md:mb-0 md:pt-10 md:h-36">
+		<nav id="nav" class="flex flex-col lg:items-center lg:fixed h-full w-full lg:w-28 pt-24 lg:pt-0 dropdown-link-container">
+			<div class="mb-5 lg:mb-0 lg:pt-10 lg:h-36">
 				<router-link :to="{name: 'profile', params: {username: whoiam}}">
 					<img class="h-16 w-16" :src="'http://localhost:3000/' + $store.getters.getAvatarPath" alt="profile">
 				</router-link>
 			</div>
-			<one-row-form class="md:hidden mb-6 mobile" placeholder="Search">
+			<one-row-form class="lg:hidden mb-6 mobile" placeholder="Search">
 				<SearchIcon />
 			</one-row-form>
-			<div class="flex flex-col w-full md:w-min">
+			<div class="flex flex-col w-full lg:w-min">
 				<nav-button text="Home" route="home">
 					<HomeIcon />
 				</nav-button>
@@ -24,9 +24,9 @@
 				</nav-button>
 			</div>
 		</nav>
-		<div class="flex flex-col col-span-12 md:col-start-2 md:col-span-11 px-4 md:px-16">
-			<div class="md:pt-10 md:h-36 ">
-				<div class="flex flex-row justify-between md:hidden mobile-dropdown mt-3 mb-10">
+		<div class="flex flex-col col-span-12 lg:col-start-2 lg:col-span-11 px-4 lg:px-16">
+			<div class="lg:pt-10 lg:h-36 ">
+				<div class="flex flex-row justify-between lg:hidden mobile-dropdown mt-3 mb-10">
 					<div class="">
 						<Logo />
 					</div>
@@ -34,7 +34,7 @@
 						<MenuIcon />
 					</button>
 				</div>
-				<div class="hidden sm:flex flex-row justify-between justify-items-center h-16">
+				<div class="hidden lg:flex flex-row justify-between justify-items-center h-16">
 					<div class="self-center">
 						<ButtonLink @click="logout()" class="btn-neutral" text="Disconnect" />
 					</div>
@@ -263,7 +263,7 @@ img {
 	}
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
 	nav {
 		&.dropdown{
 			&-link-container{
