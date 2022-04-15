@@ -22,6 +22,7 @@
 				<nav-button text="Chat" :route="{name: 'chat'}" class="chat-link" :notification="newMessage">
 					<ChatIcon />
 				</nav-button>
+				<ButtonLink @click="logout()" class="btn-neutral lg:hidden" text="Disconnect" />
 			</div>
 		</nav>
 		<div class="flex flex-col col-span-12 lg:col-start-2 lg:col-span-11 px-4 lg:px-16">
