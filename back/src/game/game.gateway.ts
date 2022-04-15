@@ -279,14 +279,22 @@ export class GameGateway implements OnGatewayConnection {
   }
 
   @SubscribeMessage("acceptInvit")
-  async handleAcceptInvit(@ConnectedSocket() socket : Socket, @MessageBody() data: MatchInvitation) {
+  async handleAcceptInvit(@ConnectedSocket() socket : Socket, @MessageBody() data: MatchInvitation, @Req() req: any) {
     // console.log("data", data);
+    if (data.to.id != req.user.id) {
+      socket.emit("error", "This invitation is not for you");
+      return;
+    }
     try {
       const matchInvit = await this.matchService.findMatchInvitation(
         data.to.id,
         data.from.id
       );
       if (matchInvit == null) socket.emit("error", "No invitation found");
+      else if (await this.usersService.inMatch(matchInvit.from.id)) {
+        socket.emit("warning", "Sender is already in a game, retry later");
+        socket.emit("invited", data);
+      }
       else {
         const match = await this.createMatch(
           matchInvit.map,
