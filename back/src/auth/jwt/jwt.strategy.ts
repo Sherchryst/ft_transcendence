@@ -29,8 +29,12 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload) {
-    const user = await this.usersService.findOne(Number(payload.sub))
-    return user;
+    try {
+      const user = await this.usersService.findOne(Number(payload.sub))
+      return user;
+    } catch (err) {
+      console.log("Corrupted database");
+    }
   }
 }
 
@@ -45,9 +49,13 @@ export class Jwt2faStrategy extends PassportStrategy(Strategy, 'jwt-2fa') {
   }
 
   async validate(payload: JwtPayload) {
-    const user = await this.usersService.findOne(Number(payload.sub))
-    if (!user.twofa || payload.isSecondFactorAuth) {
-      return user;
+    try {
+      const user = await this.usersService.findOne(Number(payload.sub))
+      if (!user.twofa || payload.isSecondFactorAuth) {
+        return user;
+      }
+    } catch (err) {
+      console.log("Corrupted database");
     }
   }
 }
@@ -63,9 +71,13 @@ export class WsJwt2faStrategy extends PassportStrategy(Strategy, 'ws-jwt-2fa') {
   }
 
   async validate(payload: JwtPayload) {
-    const user = await this.usersService.findOne(Number(payload.sub))
-    if (!user.twofa || payload.isSecondFactorAuth) {
-      return user;
+    try {
+      const user = await this.usersService.findOne(Number(payload.sub))
+      if (!user.twofa || payload.isSecondFactorAuth) {
+        return user;
+      }
+    } catch (err) {
+      console.log("Corrupted database");
     }
   }
 }
