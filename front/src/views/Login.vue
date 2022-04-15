@@ -10,8 +10,10 @@
 			<a class="cheat mt-2" href="http://localhost:3000/auth/cheat_login">cheat login</a>
 		</div>
 		<div v-else>
-			<input v-model="digits" placeholder="Google authenticator Code">
-			<button v-on:click="send_digit_code()">Send</button>
+			<ModInput v-model="digits" class="mb-10 mobile" placeholder="Code">Google authenticator Code</ModInput>
+			<!-- <input v-model="digits" placeholder="Google authenticator Code"> -->
+			<ButtonLink v-on:click="send_digit_code()" class="w-full">Confirm</ButtonLink>
+			<!-- <button v-on:click="send_digit_code()">Send</button> -->
 		</div>
 	</single-card-page>
 </template>
@@ -28,13 +30,15 @@ import { useStore } from 'vuex'
 import { key } from '@/store/index'
 import { API } from '@/scripts/auth';
 import { Statut } from '@/interfaces/Profile';
+import ModInput from '@/components/form/ModInput.vue';
 
 export default defineComponent({
 	components: {
-		ButtonLink,
-		SingleCardPage,
-		MainTitle
-	},
+    ButtonLink,
+    SingleCardPage,
+    MainTitle,
+    ModInput
+},
 	data() {
 		return {
 			twofa: false,

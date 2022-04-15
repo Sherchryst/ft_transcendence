@@ -28,8 +28,9 @@ import { chatSocket } from '@/socket'
 import InfoPanel from '@/components/chat/InfoPanel.vue';
 import OptionChannel from '../components/chat/OptionChannel.vue';
 import ChatViewWrapper from '@/components/chat/ChatViewWrapper.vue';
-import { API } from '@/scripts/auth.ts';
+import { API } from '@/scripts/auth';
 import router from '@/router';
+import { AxiosResponse } from 'axios';
 
 export default defineComponent({
     components: {
@@ -118,15 +119,16 @@ export default defineComponent({
 		},
 		getChannelInfo(chanId: number): void {
             console.log(chanId);
-			API.get('chat/channel-info', {params: {channelId: chanId}}).then((response) => {
-            this.channel = response.data.channel
-            this.history = []
-            for (let i = 0; i < response.data.history.length; ++i)
-                this.recv(response.data.history[i])
-            for (let i = 0; i < response.data.members.length; ++i)
-                this.members.push(response.data.members[i]);
-            }).catch((error) => {
-                console.log(error);
+			API.get('chat/channel-info', {params: {channelId: chanId}})
+            .then((response: AxiosResponse) => {
+                this.channel = response.data.channel
+                this.history = []
+                for (let i = 0; i < response.data.history.length; ++i)
+                    this.recv(response.data.history[i])
+                for (let i = 0; i < response.data.members.length; ++i)
+                    this.members.push(response.data.members[i]);
+            }).catch((error: Error) => {
+                router.push({name: 'not-found', replace: true })
             })
             this.readMessage(chanId);
 		},
