@@ -22,16 +22,14 @@ export const imageFilter: any = (req: any, file: { mimetype: string, size: numbe
 @UseGuards(Jwt2faGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
-  constructor(private usersService: UsersService, private statusGateway : StatusGateway) {}
+  constructor(private usersService: UsersService) {}
 
   @Post('accept-friend-request')
-  async acceptFriendRequest(@Req() req : any, @Body() dto: {toId: number }) {
-    const r = await this.usersService.hasSentFriendRequest(req.user.id, dto.toId);
+  async acceptFriendRequest(@Body() dto: { fromId: number, toId: number }) {
+    const r = await this.usersService.hasSentFriendRequest(dto.fromId, dto.toId);
     if (!r)
       throw new UnauthorizedException('User has not sent friend request');
-    this.usersService.WsClients.get(req.user.id).emit('new_friend', dto.toId);
-    this.usersService.WsClients.get(dto.toId).emit('new_friend', req.user.id);
-    await this.usersService.acceptFriendRequest(req.user.id, dto.toId);
+    await this.usersService.acceptFriendRequest(dto.fromId, dto.toId);
   }
 
   @Post('block-user')
