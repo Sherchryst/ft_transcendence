@@ -8,7 +8,7 @@
             <OptionChannel :channel="channel"></OptionChannel>
         </template>
         <template v-if="history.length" v-slot:messages>
-            <message v-for="message in history" :key="message" :message="message" :channelId="parseInt(id)">
+            <message v-for="(message, index) in history" :key="index" :message="message" :channelId="parseInt(id)" :id="index">
                 {{message.content}}
             </message>
         </template>
@@ -17,6 +17,7 @@
 
 <script lang="ts">
 
+import { User } from '@/interfaces/Profile'
 import { defineComponent, computed, watch, provide } from 'vue';
 import Message from '@/components/chat/Message.vue'
 import { useMeta } from 'vue-meta'
@@ -57,6 +58,7 @@ export default defineComponent({
             history: [] as Message_t[],
             channel: {} as Channel,
             members: [] as ChannelMember_t[],
+            blocked_list: [] as User[]
         }
     },
     computed: {
@@ -80,9 +82,12 @@ export default defineComponent({
                 console.log('connected', this.socket.id)
             })
             .on('message', (data) => {
-                if (data.channelMessage.channel.id == this.id)
-                    this.recv(data.channelMessage.message)
-                this.readMessage(parseInt(this.id))
+                if (this.blocked_list.find((user) => {return user.id == data.channelMessage.message.from.id}))
+                    return ;
+                if (data.channelMessage.channel.id == this.id) {
+                    this.recv(data.channelMessage.message);
+                    this.readMessage(parseInt(this.id));
+                }
             })
             .on('joined', (data) => {
                 this.members.push(data);
@@ -99,11 +104,11 @@ export default defineComponent({
                 let self = this.nickname == id;
                 this.history.unshift({content: "Bye", from: member, self: self, photo: true});
             })
-            .on('mute', (member) => {/** */})
-            .on('ban', (member) => {/** */})
-            .on('promote', (member) => {/** */})
+            // .on('mute', (member) => {/** */})
+            // .on('ban', (member) => {/** */})
+            // .on('promote', (member) => {/** */})
         ;
-	},
+	},  
 	methods: {
         readMessage(chanId: number){
             this.$emit('read-message', chanId);
@@ -129,6 +134,13 @@ export default defineComponent({
                     this.members.push(response.data.members[i]);
             }).catch((error: Error) => {
                 router.push({name: 'not-found', replace: true })
+            })
+            API.get('users/block-list').then((response) => {
+                console.log(response);
+                for (let i = 0; i < response.data.length; ++i)
+                    this.blocked_list.push(response.data[i]);
+            }).catch((error) => {
+                console.log(error);
             })
             this.readMessage(chanId);
 		},

@@ -1,60 +1,60 @@
 <template>
 	<div id="base" class="grid grid-cols-12 min-h-screen">
-		<nav id="nav" class="flex flex-col md:items-center md:fixed h-full w-full md:w-28 pt-24 md:pt-0 dropdown-link-container">
-			<div class="mb-5 md:mb-0 md:pt-10 md:h-36" :key="componentKey">
-				<router-link :to="{name: 'profile', params: {username: whoiam}}">
-					<img class="h-16 w-16" :src="'http://localhost:3000/' + avatarPath" alt="profile">
-				</router-link>
+		<nav id="nav" class="flex flex-col lg:items-center lg:fixed h-full w-full lg:w-28 pt-24 lg:pt-0 dropdown-link-container">
+			<div class="mb-5 lg:mb-0 lg:pt-10 lg:h-36">
+				<nav-button text="Profile" :route="{name: 'profile', params: {username: whoiam}}">
+					<CrewMateIcon/>
+				</nav-button>
 			</div>
-			<one-row-form class="md:hidden mb-6 mobile" placeholder="Search">
+			<one-row-form class="lg:hidden mb-6 mobile" placeholder="Search">
 				<SearchIcon />
 			</one-row-form>
-			<div class="flex flex-col w-full md:w-min">
-				<nav-button text="Home" route="home">
+			<div class="flex flex-col w-full lg:w-min">
+				<nav-button text="Home" :route="{name: 'home'}">
 					<HomeIcon />
 				</nav-button>
-				<nav-button text="Game" route="game-choice">
+				<nav-button text="Game" :route="{name: 'game-choice'}">
 					<GameIcon />
 				</nav-button>
-				<nav-button text="Channels" route="channel">
+				<nav-button text="Channels" :route="{name: 'channel'}">
 					<GroupIcon />
 				</nav-button>
-				<nav-button text="Chat" route="chat" class="chat-link" :notification="newMessage">
+				<nav-button text="Chat" :route="{name: 'chat'}" class="chat-link" :notification="newMessage">
 					<ChatIcon />
 				</nav-button>
+				<ButtonLink @click="logout()" class="btn-neutral lg:hidden" text="Disconnect" />
 			</div>
 		</nav>
-		<div class="flex flex-col col-span-12 md:col-start-2 md:col-span-11 px-4 md:px-16">
-			<div class="md:pt-10 md:h-36 ">
-				<div class="flex flex-row justify-between md:hidden mobile-dropdown mt-3 mb-10">
-					<div class="">
-						<Logo />
-					</div>
-					<button @click="toggle_nav()" class="mobile-dropdown-toggle w-10" aria-hidden="true">
-						<MenuIcon />
-					</button>
-				</div>
-				<div class="hidden sm:flex flex-row justify-between justify-items-center h-16">
-					<div class="self-center">
+		<div class="flex flex-col col-span-12 lg:col-start-2 lg:col-span-11 px-4 lg:px-16">
+			<div class="lg:pt-10 lg:h-36 my-5 lg:my-0">
+				<div class="flex flex-row justify-between h-16">
+					<div class="hidden lg:flex self-center">
 						<ButtonLink @click="logout()" class="btn-neutral" text="Disconnect" />
 					</div>
-					<div class="flex flex-row justify-between justify-items-center">
-						<div class="self-center">
-							<one-row-form placeholder="Search">
-								<SearchIcon />
-							</one-row-form>
+					<div class="flex flex-row justify-between w-full lg:w-min">
+						<div class="hidden lg:flex flex-row justify-between justify-items-center">
+							<div class="self-center">
+								<one-row-form placeholder="Search">
+									<SearchIcon />
+								</one-row-form>
+							</div>
 						</div>
-						<div class="self-center flex mx-7">
+						<div class="flex flex-row items-center lg:mx-5">
 							<button v-s-dropdown-toggle:notification>
 								<NotifIcon class="h-12 w-12" />
 							</button>
 							<BadgeNotif :number="notifications.length"></BadgeNotif>
-							<s-dropdown name="notification" align="left">
+							<s-dropdown name="notification" align="left" position="bottom">
 								<NotifPanel :notifications="notifications" @close="removeNotif"/>
 							</s-dropdown>
 						</div>
 						<div class="">
 							<Logo />
+						</div>
+						<div class="flex flex-row justify-between lg:hidden mobile-dropdown mt-3 mb-10">
+							<button @click="toggle_nav()" class="mobile-dropdown-toggle w-10" aria-hidden="true">
+								<MenuIcon />
+							</button>
 						</div>
 					</div>
 				</div>
@@ -78,6 +78,7 @@ import GameIcon from '@/assets/icon/game.svg';
 import SearchIcon from '@/assets/icon/search.svg';
 import MenuIcon from '@/assets/icon/menu.svg'
 import NotifIcon from '@/assets/icon/notification.svg';
+import CrewMateIcon from '@/assets/icon/crewmate.svg'
 import Logo from '@/assets/ApongUs.svg';
 import { useStore } from 'vuex'
 import { key } from '@/store/index'
@@ -86,7 +87,7 @@ import router from '@/router';
 import { SocketMessage } from '@/interfaces/Message';
 import { chatSocket, gameSocket, statusSocket } from '@/socket'
 import NotifPanel from '@/components/Notification/NotifPanel.vue';
-import { Statut } from '@/interfaces/Profile';
+import { Statut, User } from '@/interfaces/Profile';
 import BadgeNotif from '@/components/Notification/BadgeNotif.vue'; 
 import { Notification, FriendRequest, GameStart, GameInvitation, ChannelInvitation } from "@/interfaces/Notification";
 import { useToast } from "vue-toastification";
@@ -104,6 +105,7 @@ export default defineComponent({
 		MenuIcon,
 		Logo,
 		NotifIcon,
+		CrewMateIcon,
 		NotifPanel,
 		BadgeNotif
 	},
@@ -111,6 +113,7 @@ export default defineComponent({
 		return {
 			chatSocket : chatSocket,
 			gameSocket : gameSocket,
+			statusSocket : statusSocket,
 			channelMessage: [] as SocketMessage[],
 			notifications: [] as Notification[],
 			avatarPath: '',
@@ -157,6 +160,10 @@ export default defineComponent({
 			.on('gameStart', (data: number) => {
 				toast.info("Transfered to game");
 				router.push({name: 'game', params: {match_id: data}})
+			})
+		this.statusSocket
+			.on('friend-request', (user: User) => {
+				this.addFriendRequest(user);
 			})
 	},
 	methods: {
@@ -272,7 +279,7 @@ img {
 	}
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
 	nav {
 		&.dropdown{
 			&-link-container{

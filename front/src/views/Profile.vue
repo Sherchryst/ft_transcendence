@@ -56,9 +56,14 @@
 					<TitlePanel title="Match History"> <Scrool/> </TitlePanel>
 				</template>
 				<template v-slot:body>
-					<div class="overflow-auto max-h-64" >
-						<div v-for="(match, index) in history" :key="index">
-							<MatchesHistory :match="match" :userId="profile.user.id"></MatchesHistory>
+					<div class="overflow-auto h-64" >
+						<div v-if="history.length">
+							<div v-for="(match, index) in history" :key="index">
+								<MatchesHistory :match="match" :userId="profile.user.id"></MatchesHistory>
+							</div>
+						</div>
+						<div v-else class="flex flex-col justify-center text-xl h-64">
+							<div>Empty match history. No match played yet.</div>
 						</div>
 					</div>
 				</template>
