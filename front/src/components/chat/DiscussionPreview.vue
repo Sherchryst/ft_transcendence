@@ -1,30 +1,25 @@
 <template>
-    <router-link :to="{ name: 'unique-chat', params: { id: id }}" class="chat-preview flex flex-row items-center py-3 px-7 my-2">
-      <div v-if="!isChannel" class="mr-5">
-          <img class="h-16 w-16" src="@/assets/blank-avatar.jpg" alt="_profile">
-      </div>
-      <div class="text-left">
-          <p v-if="isChannel" class="username text-lg">#-{{this.title}}</p>
-          <p v-else class="username text-lg">{{this.title}}</p>
-          <!-- <p class="last-message font-thin text-xs">last message</p> -->
-      </div>
+    <router-link :to="route" class="chat-preview flex flex-row items-center py-3 px-7 my-2">
+        <slot name="image"></slot>
+        <div class="text-left">
+            <slot></slot>
+        </div>
     </router-link>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { RouterLink } from 'vue-router';
 
 export default defineComponent({
     name: "DiscussionPreview",
     props: {
-      isChannel: { type: Boolean, default: false },
-      id: { type: [String, Number], require: true },
-      title: { type: String, default: "Title" },
+      route: Object
     }
 })
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .chat-preview{
     transition: background 120ms ease-in;
     cursor: pointer;

@@ -15,11 +15,12 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import ChatViewWrapper from '@/components/chat/ChatViewWrapper.vue';
+import { Message_t } from '@/interfaces/Message';
 
 export default defineComponent({
 	name: 'DirectMessage',
 	props: {
-		id: {type: String, required: true}
+		userId: {type: String, required: true}
 	},
 	data() {
 		return {
