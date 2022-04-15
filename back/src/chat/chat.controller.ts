@@ -6,6 +6,7 @@ import { ChannelMemberRole } from './entities/channel-member.entity';
 import { ChatGateway } from './chat.gateway';
 import { ChannelVisibility } from './entities/channel.entity';
 import { ChannelModerationType } from './entities/channel-moderation.entity';
+import sha from 'sha.js';
 
 @Controller('chat')
 @UseGuards(Jwt2faGuard)
@@ -39,8 +40,10 @@ export class ChatController {
       }
       if (await this.chatService.getChannelMember(channel.id, req.user.id))
         return ;
-      if (channel.password && channel.password !== data.password && !await this.chatService.isInvited(data.channelId, req.user))
-          throw new UnauthorizedException("Wrong Password");
+      if (channel.password
+      && channel.password !== sha('sha256').update(data.password).digest('hex')
+      && !await this.chatService.isInvited(data.channelId, req.user))
+        throw new UnauthorizedException("Wrong Password");
       await this.chatService.joinChannel(req.user, data.channelId, ChannelMemberRole.MEMBER);
       client.join("channel:" + channel.id);
       this.chatGateway.server.in("channel:" + channel.id).emit("joined", req.user)
@@ -130,5 +133,15 @@ export class ChatController {
     member.role = ChannelMemberRole.ADMIN;
     this.chatService.updateMember(member);
     this.chatGateway.server.to("channel:" + data.channelId).emit("promote", member);
+  }
+
+  @Post('set-password')
+  async setPassword(@Req() req, @Body() data: {channelId: number, password: string}) {
+    const channel = await this.chatService.findChannel(data.channelId);
+    if (!channel || channel.owner.id != req.user.id)
+      throw new UnauthorizedException("you're not the owner");
+    channel.password = data.password;
+    this.chatService.updateChannel(channel);
+    this.chatGateway.server.to("channel:" + data.channelId).emit("set-password", channel.password);
   }
 }
