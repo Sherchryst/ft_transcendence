@@ -1,4 +1,4 @@
-import { ClassSerializerInterceptor, Body, Controller, Get, Post, Req, UseGuards, UnauthorizedException, ForbiddenException, NotFoundException, Query, UseInterceptors, ConflictException } from '@nestjs/common';
+import { ClassSerializerInterceptor, Body, Controller, Get, Post, Req, UseGuards, UnauthorizedException, ForbiddenException, NotFoundException, Query, UseInterceptors, ConflictException, BadRequestException } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
 import { UsersService } from 'src/users/users.service';
@@ -124,6 +124,8 @@ export class ChatController {
     const member = await this.chatService.getChannelMember(data.channelId, req.user.id);
     if (!member || member.role != ChannelMemberRole.ADMIN)
       throw new UnauthorizedException("you're not an admin");
+    if (data.duration <= 0)
+      throw new BadRequestException("Wrong durartion");
     await this.chatService.createChannelModeration(data.channelId, data.toId, req.user, data.moderation, data.reason, data.duration);
     this.chatGateway.server.to("channel:" + data.channelId).emit(data.moderation, member);
   }

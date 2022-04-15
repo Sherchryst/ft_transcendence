@@ -50,7 +50,6 @@ export default defineComponent({
 		},
 		matchmaking() {
 			gameSocket.emit("matchmaking");
-			console.log("matchmaking")
 		}
 	}
 })

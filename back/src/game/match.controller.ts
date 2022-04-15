@@ -12,7 +12,7 @@ export class MatchController {
   @Get('get-history')
   async getHistory(@Query('userId') userId: number, @Query('limit') limit: number) {
     const history = await this.matchsService.getHistory(userId, limit);
-    console.log(instanceToPlain(history));
+    // console.log(instanceToPlain(history));
     return history;
   }
 
