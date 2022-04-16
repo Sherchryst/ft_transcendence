@@ -21,7 +21,6 @@
 			<img v-else class="image ml-4 h-14 w-14" :src="'http://localhost:3000/' + match.player1.avatarPath">
 		</div>
 		<div class="col-span-2 md:col-span-1 hidden lg:flex flex-col">
-			<p>Stadium</p>
 			<p>{{date}}</p>
 		</div>
 	</div>
