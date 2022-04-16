@@ -27,7 +27,8 @@ export class UsersController {
 
   @Post('accept-friend-request')
   async acceptFriendRequest(@Req() req, @Body() dto: { fromId: number }) {
-    console.log(dto)
+    if (!dto.fromId)
+      throw new BadRequestException('No fromId provided');
     const r = await this.usersService.hasSentFriendRequest(dto.fromId, req.user.id);
     console.log(r);
     if (!r)
@@ -37,6 +38,8 @@ export class UsersController {
 
   @Post('block-user')
   async blockUser(@Req() req, @Body() dto: { toId: number }) {
+    if (!dto.toId)
+      throw new BadRequestException('No toId provided');
     try {
       await this.usersService.blockUser(req.user.id, dto.toId);
     } catch (error) {
@@ -45,7 +48,7 @@ export class UsersController {
   }
 
   @Get('block-list')
-  async block_list(@Req() req) {
+  async blockList(@Req() req) {
     return await this.usersService.getBlockedUsers(req.user.id);
   }
 
@@ -106,6 +109,8 @@ export class UsersController {
 
   @Post('send-friend-request')
   async sendFriendRequest(@Req() req, @Body() dto: { toId: number }) {
+    if (!dto.toId)
+      throw new BadRequestException('No toId provided');
     if (await this.usersService.isBlockedBy(dto.toId, req.user.id))
       throw new UnauthorizedException();
     const rel = await this.usersService.getOneRelationship(req.user.id, dto.toId);
@@ -124,6 +129,8 @@ export class UsersController {
 
   @Post('unblock-user')
   async unblockUser(@Req() req, @Body() dto: { toId: number }) {
+    if (!dto.toId)
+      throw new BadRequestException('No toId provided');
     try {
       await this.usersService.unblockUser(req.user.id, dto.toId);
     } catch (error) {
@@ -145,10 +152,10 @@ export class UsersController {
 
   @Post('update-avatar')
   @UseInterceptors(FileInterceptor('file', { fileFilter: imageFilter }))
-  async updateAvatar(@UploadedFile() file: Express.Multer.File, @Body() body: { id : number }) {
+  async updateAvatar(@Req() req : any, @UploadedFile() file: Express.Multer.File) {
     if (!file)
       throw new BadRequestException('No file uploaded');
-    const user = await this.usersService.findOne(body.id);
+    const user = await this.usersService.findOne(req.user.id);
     if (!user)
       throw new NotFoundException('User not found');
     let buffer = await sharp(file.buffer)
