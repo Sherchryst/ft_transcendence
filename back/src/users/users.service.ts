@@ -75,6 +75,7 @@ export class UsersService {
     await getRepository(UserRelationship).delete({
       from: { id: toUserId }, to: { id: fromUserId }, type: Not(UserRelationshipType.BLOCK)
     });
+    this.WsClients.get(fromUserId).emit('blocked', toUserId);
   }
 
   async create(login: string): Promise<User> {

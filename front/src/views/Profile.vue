@@ -15,13 +15,13 @@
 				<ButtonLink v-if="username == selfLogin" route="edit-profile" class="flex justify-center w-full"  text="Edit Profile"></ButtonLink>
 				<div v-else class="flex flex-col gap-y-4">
 					<Transition mode="out-in" name="btn">
-						<button-link v-if="relashionshipStatus.type == undefined" class="flex justify-center w-full" text="Ask a friend" @click="friendRequest"></button-link>
-						<button-link v-else-if="relashionshipStatus.type == 'pending'" class="btn-used flex justify-center w-full" text="Friend request send"></button-link>
-						<ButtonLink v-else-if="relashionshipStatus.type == 'block'" class="flex justify-center w-full" text="Unblock User" @click="unblock"></ButtonLink>
+						<button-link v-if="RelationshipType == ''" class="flex justify-center w-full" text="Ask a friend" @click="friendRequest"></button-link>
+						<button-link v-else-if="RelationshipType == 'pending'" class="btn-used flex justify-center w-full" text="Friend request send"></button-link>
+						<ButtonLink v-else-if="RelationshipType == 'block'" class="flex justify-center w-full" text="Unblock User" @click="unblock"></ButtonLink>
 					</Transition>
 					<Transition mode="out-in" name="btn">
-						<ButtonLink v-if="relashionshipStatus.type != 'block'" class="flex justify-center w-full btn-neutral" text="Block User" @click="openModal"></ButtonLink>
-						<ButtonLink v-else-if="relashionshipStatus.type == 'block'" class="flex justify-center w-full btn-inactive" text="This User is block"></ButtonLink>
+						<ButtonLink v-if="RelationshipType != 'block'" class="flex justify-center w-full btn-neutral" text="Block User" @click="openModal"></ButtonLink>
+						<ButtonLink v-else-if="RelationshipType == 'block'" class="flex justify-center w-full btn-inactive" text="This User is block"></ButtonLink>
 					</Transition>
 				</div>
 			</div>
@@ -101,6 +101,7 @@ import { useStore } from 'vuex'
 import { key } from '@/store/index'
 import router from '@/router';
 import Achievements from '@/components/profile/Achievements.vue';
+import { statusSocket } from '@/socket';
 
 export enum UserRelationshipType {
 	BLOCK = 'block',
@@ -146,12 +147,13 @@ export default defineComponent({
 			achievements: [] as Achievement[],
 			avatarPath: '',
 			relashionshipStatus: {} as UserRelationship,
-			status: ''
+			relationStatus: ''
 		}
 	},
 	methods: {
+
 		async getUser(username: string | string[]): Promise<void> {
-			const res = await API.get<Profile>('users/get-profile', {
+			await API.get<Profile>('users/get-profile', {
 				params: {
 					id: null,
 					login: username
@@ -168,8 +170,10 @@ export default defineComponent({
 						}
 					})
 					.then(res => {
-						this.relashionshipStatus = res.data
-						console.log('Relationship',this.relashionshipStatus.type)
+						if (res.data.type === undefined)
+							this.relationStatus = ''
+						else
+							this.relationStatus = res.data.type
 						
 					})
 					.catch(err => {
@@ -218,7 +222,8 @@ export default defineComponent({
 				fromId: this.$store.getters.getId,
 				toId: this.profile.user?.id
 			}).then( () => {
-				this.relashionshipStatus.type = UserRelationshipType.PENDING;
+				this.relationStatus = UserRelationshipType.PENDING;
+				console.log('Friend request sent', this.relationStatus)
 			})
 		},
 		async block() : Promise<void> {
@@ -226,25 +231,17 @@ export default defineComponent({
 				fromId: this.$store.getters.getId,
 				toId: this.profile.user?.id
 			}).then( () => {
-				this.relashionshipStatus.type = UserRelationshipType.BLOCK;
-				this.closeModal()
+				this.relationStatus = UserRelationshipType.BLOCK;
+				console.log('User blocked', this.relationStatus)
 			})
 		},
 		async unblock() : Promise<void> {
 			await API.post('users/unblock-user', {
 				fromId: this.$store.getters.getId,
 				toId: this.profile.user?.id
-			}).then( async () => {
-				await API.get<UserRelationship>('users/relationship-status', {
-						params: {
-							id: this.profile.user.id
-						}
-					})
-					.then(res => {
-						this.relashionshipStatus = res.data
-						console.log('Relationship',this.relashionshipStatus)
-						
-					})
+			}).then(() => {
+				this.relationStatus = ''
+				console.log('User unblocked', this.relationStatus)
 			})
 		},
 	},
@@ -260,6 +257,17 @@ export default defineComponent({
 		)
 	},
 	mounted(): void {
+		statusSocket.on("blocked", (id : number) => {
+			if(id == this.profile.user.id){
+				this.relationStatus = UserRelationshipType.BLOCK;
+			}
+			else
+				this.relationStatus = 'unknown';
+		}),
+		statusSocket.on("new_friend", (id : number) => {
+			console.log('NEW FRIEND IN YOUR LIFE bitch', id);
+			this.relationStatus = UserRelationshipType.FRIEND;
+		})
 		this.getUser(this.username);
 	},
 	computed: {
@@ -268,6 +276,10 @@ export default defineComponent({
 			return this.$store.getters.getAvatarPath
 		else
 			return this.profile.user?.avatarPath
+		},
+		RelationshipType() : string {
+			console.log('Relationship work', this.relationStatus)
+				return this.relationStatus
 		},
 	}
 })
