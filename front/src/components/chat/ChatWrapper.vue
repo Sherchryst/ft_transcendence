@@ -8,7 +8,7 @@
 				<discussion-preview v-for="(friend, index) in friends" :route="{name: 'direct-message', params: {userId: friend.id}}" :key="index" >
 					<template v-slot:image>
 						<div class="mr-5">
-							<img class="h-10 w-10" src="@/assets/blank-avatar.jpg" alt="_profile">
+							<img class="h-10 w-10" :src="'http://localhost:3000/' + friend.avatarPath" alt="_profile">
 						</div>
 					</template>
 					<p class="username text-lg">{{friend.nickname}}</p>
