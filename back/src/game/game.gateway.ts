@@ -14,10 +14,11 @@ import { MatchService } from "./match.service";
 import { CustomJwtService, getJwtFromSocket } from "src/auth/jwt/jwt.service";
 import { UsersService } from "src/users/users.service";
 import { WsJwt2faGuard } from "src/auth/jwt/jwt.guard";
-import { Req, UseGuards } from "@nestjs/common";
+import { ClassSerializerInterceptor, Req, UseGuards, UseInterceptors } from "@nestjs/common";
 import { Match, MatchType } from "./entities/match.entity";
 import { GameMap } from "./entities/game-map.entity";
 import { MatchInvitation } from "./entities/match-invitation.entity";
+import { instanceToPlain } from "class-transformer";
 
 const interval = 20;
 let pending_player: Array<number> = [];
@@ -64,6 +65,7 @@ function sleep(ms: number) {
 
 @UseGuards(WsJwt2faGuard)
 @WebSocketGateway(3001, { namespace: "game" })
+@UseInterceptors(ClassSerializerInterceptor)
 export class GameGateway implements OnGatewayConnection {
   static startGame() {
     throw new Error("Game : Method not implemented.");
@@ -182,7 +184,7 @@ export class GameGateway implements OnGatewayConnection {
           map,
           data.level
         );
-        this.gameService.WsClients.get(to_user.id).emit("invited", invitation);
+        this.gameService.WsClients.get(to_user.id).emit("invited", instanceToPlain(invitation));
         console.log("Game : Invitation sent to", to_user.nickname);
       } catch (e) {
         socket.emit("error", "Unknown error");
@@ -293,7 +295,7 @@ export class GameGateway implements OnGatewayConnection {
       if (matchInvit == null) socket.emit("error", "No invitation found");
       else if (await this.usersService.inMatch(matchInvit.from.id)) {
         socket.emit("warning", "Sender is already in a game, retry later");
-        socket.emit("invited", data);
+        socket.emit("invited", instanceToPlain(data));
       }
       else {
         const match = await this.createMatch(
