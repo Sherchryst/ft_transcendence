@@ -254,9 +254,8 @@ export default defineComponent({
 			this.notifications.splice(index)
 		},
 		search(expr: string): void {
-			API.get("users/search", {params: {expr: expr}}).then((res) => {
-				console.log(res);
-			})
+			if (expr && expr.length)
+				router.push({name: 'search', params: {expr: expr}});
 		}
 	},
 	computed: {
