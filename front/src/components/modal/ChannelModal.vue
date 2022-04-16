@@ -3,10 +3,10 @@
 		<template v-slot:title>
 			<slot>Channel invitation</slot>
 		</template>
-		<form>
+		<form @submit.prevent="send">
 			<div class="flex flex-col gap-4">
-				<ModInput type="password" class="mobile" v-model="FormData.password">Password</ModInput>
-				<ButtonLink @click="update">
+				<ModInput type="password" class="mobile" placeholder="Password" v-model="formData.password">Enter Password</ModInput>
+				<ButtonLink>
 					Confirm
 				</ButtonLink>
 			</div>
@@ -19,6 +19,8 @@ import { defineComponent } from "vue";
 import Modal from "../Modal.vue";
 import ButtonLink from "../ButtonLink.vue";
 import ModInput from "../form/ModInput.vue";
+import { API } from '@/scripts/auth';
+import router from '@/router';
 
 export default defineComponent({
 	name: "ChannelModal",
@@ -27,8 +29,8 @@ export default defineComponent({
 	},
 	data() {
 		return {
-			FormData: {
-				channelId: this.channeId,
+			formData: {
+				channelId: this.channelId,
 				password: ""
 			}
 		}
@@ -41,8 +43,16 @@ export default defineComponent({
 		close() : void {
 			(this.$refs['modal'] as typeof Modal).close()
 		},
-		update(){
-			console.log("password channel")
+		send(){
+			console.log("chan id", this.formData.channelId)
+			API.post("chat/join", 
+				this.formData
+			).then((res)=>{
+				console.log(res);
+				router.push({ name: 'unique-chat', params: { id: this.channelId }});
+			}).catch((error) => {
+				console.log(error)
+			})
 		}
 	}
 })

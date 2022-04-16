@@ -7,7 +7,7 @@
 				</div>
 				<button @click="join">join</button>
 		</div>
-		<ChannelModal v-if="channel.password" :channel-id="channel.id" :ref="index"></ChannelModal>
+		<ChannelModal v-if="channel.isPasswordSet" :channel-id="channel.id" :ref="index"></ChannelModal>
 	</div>
 </template>
 
@@ -41,13 +41,15 @@ export default defineComponent({
 			if (this.channel.isPasswordSet){
 				this.open()
 			}
-			API.post("chat/join", {
-				channelId: this.channel?.id,
-				password: ""
-			}).then((res)=>{
-				console.log(res);
-				router.push({ name: 'unique-chat', params: { id: this.channel?.id }});
-			}).catch((error) => {console.log(error)})
+			else {
+				API.post("chat/join", {
+					channelId: this.channel?.id,
+					password: ""
+				}).then((res)=>{
+					console.log(res);
+					router.push({ name: 'unique-chat', params: { id: this.channel?.id }});
+				}).catch((error) => {console.log(error)})
+			}
 		}
 	},
 	components: {ChannelModal, }
