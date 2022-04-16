@@ -1,5 +1,4 @@
 import { ClassSerializerInterceptor, Controller, Get, Query, UseGuards, UseInterceptors } from '@nestjs/common';
-import { instanceToPlain } from 'class-transformer';
 import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
 import { MatchService } from './match.service';
 
@@ -11,9 +10,7 @@ export class MatchController {
 
   @Get('get-history')
   async getHistory(@Query('userId') userId: number, @Query('limit') limit: number) {
-    const history = await this.matchsService.getHistory(userId, limit);
-    console.log(instanceToPlain(history));
-    return history;
+    return await this.matchsService.getHistory(userId, limit);
   }
 
   @Get('get-winrate')

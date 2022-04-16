@@ -6,6 +6,8 @@ import * as PostgresError from '@fiveem/postgres-error-codes'
 import * as sharp from 'sharp';
 import { UpdateNicknameDto } from './dto/update-nickname.dto';
 import { instanceToPlain } from 'class-transformer';
+import { User } from './entities/user.entity';
+import { UserRelationshipType } from './entities/user-relationship.entity';
 
 export const imageFilter: any = (req: any, file: { mimetype: string, size: number }, callback: (arg0: any, arg1: boolean) => void): any =>
 {
@@ -24,20 +26,27 @@ export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Post('accept-friend-request')
-  async acceptFriendRequest(@Body() dto: { fromId: number, toId: number }) {
-    const r = await this.usersService.hasSentFriendRequest(dto.fromId, dto.toId);
+  async acceptFriendRequest(@Req() req, @Body() dto: { fromId: number }) {
+    console.log(dto)
+    const r = await this.usersService.hasSentFriendRequest(dto.fromId, req.user.id);
+    console.log(r);
     if (!r)
       throw new UnauthorizedException('User has not sent friend request');
-    await this.usersService.acceptFriendRequest(dto.fromId, dto.toId);
+    await this.usersService.acceptFriendRequest(dto.fromId, req.user.id);
   }
 
   @Post('block-user')
-  async blockUser(@Body() dto: { fromId: number, toId: number }) {
+  async blockUser(@Req() req, @Body() dto: { toId: number }) {
     try {
-      await this.usersService.blockUser(dto.fromId, dto.toId);
+      await this.usersService.blockUser(req.user.id, dto.toId);
     } catch (error) {
       throw new UnauthorizedException('User is already blocked');
     }
+  }
+
+  @Get('block-list')
+  async block_list(@Req() req) {
+    return await this.usersService.getBlockedUsers(req.user.id);
   }
 
   @Get('get-friend-requests')
@@ -48,7 +57,6 @@ export class UsersController {
     return JSON.stringify(requests.map(({ id, nickname }) => ({ id, nickname })));
   }
 
-
   @Get('profile')
   async profile(@Req() req) {
     const achievements = await this.usersService.getUserAchievements(req.user.id);
@@ -58,7 +66,7 @@ export class UsersController {
 
   @Get('get-profile')
   async getProfile(@Query('id') id: number, @Query('login') login: string) {
-    let user;
+    let user : User;
     if (id)
       user = await this.usersService.findOne(id);
     else if (login)
@@ -87,7 +95,7 @@ export class UsersController {
   }
 
   @Get('relationship-status')
-  async relationshipStatus(@Req() req, @Query('id') id: number) {
+  async relationshipStatus(@Req() req : any, @Query('id') id: number) {
     if (!id)
       throw new BadRequestException('No id provided');
     const relation = await this.usersService.getOneRelationship(req.user.id, id);
@@ -97,14 +105,16 @@ export class UsersController {
   }
 
   @Post('send-friend-request')
-  async sendFriendRequest(@Body() dto: { fromId: number, toId: number }) {
-    try {
-      if (await this.usersService.isBlockedBy(dto.toId, dto.fromId)
-      || !(await this.usersService.sendFriendRequest(dto.fromId, dto.toId)))
-        throw new UnauthorizedException();
-    } catch (error) {
+  async sendFriendRequest(@Req() req, @Body() dto: { toId: number }) {
+    if (await this.usersService.isBlockedBy(dto.toId, req.user.id))
       throw new UnauthorizedException();
-    }
+    const rel = await this.usersService.getOneRelationship(req.user.id, dto.toId);
+    if (rel && (rel.type == UserRelationshipType.FRIEND || rel.type == UserRelationshipType.PENDING))
+      return
+    const request = await this.usersService.sendFriendRequest(req.user.id, dto.toId);
+    if (!request)
+      throw new UnauthorizedException();
+    this.usersService.WsClients.get(dto.toId).emit("friend-request", instanceToPlain(req.user));
   }
 
   @Get('top-ten')
@@ -113,18 +123,19 @@ export class UsersController {
   }
 
   @Post('unblock-user')
-  async unblockUser(@Body() dto: { fromId: number, toId: number }) {
+  async unblockUser(@Req() req, @Body() dto: { toId: number }) {
     try {
-      await this.usersService.unblockUser(dto.fromId, dto.toId);
+      await this.usersService.unblockUser(req.user.id, dto.toId);
     } catch (error) {
       throw new UnauthorizedException('User is not blocked');
     }
   }
 
   @Post('update-nickname')
-  async updateNickname(@Body() dto: UpdateNicknameDto) {
+  async updateNickname(@Req() req, @Body() dto: UpdateNicknameDto) {
     try {
-      await this.usersService.updateNickname(dto.id, dto.nickname);
+      await this.usersService.updateNickname(req.user.id, dto.nickname);
+      this.usersService.WsClients.get(req.user.id).emit('update_user', req.user.id);
     } catch (error) {
       if (error.code === PostgresError.PG_UNIQUE_VIOLATION)
         throw new ConflictException('Nickname already taken');
@@ -143,5 +154,6 @@ export class UsersController {
     let buffer = await sharp(file.buffer)
     .resize(400, 400).toFormat('jpeg').jpeg({ quality: 90 }).toBuffer();
     await this.usersService.updateAvatar(user.id, buffer);
+    this.usersService.WsClients.get(user.id).emit('update_user', user.id);
   }
 }

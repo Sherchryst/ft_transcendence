@@ -3,6 +3,7 @@
 	<form @submit.prevent="send">
 		<div class="flex flex-col justify-evenly">
 			<div class="self-center mb-16">
+				<main-title class="pb-16">Registration</main-title>
 				<ChooseAvatar @onInputImage="inputImage($event)">
 					<template v-slot:activator>
 						<div v-if="inside" class="grey frame flex flex-col place-content-center w-64 h-64 mb-10">
@@ -15,11 +16,13 @@
 				</ChooseAvatar>
 			</div>
 			<div class="flex flex-col place-content-center mb-12 space-y-4">
-				<label for="username">Enter username:</label>
-				<input type="text" class="input" id="username" name="username" v-model="nickname" placeholder="username" required>
+				<ModInput name="nickname" class="mobile" placeholder="Username" v-model="nickname">Choose an Username</ModInput>
+				<!-- <label for="username">Enter username:</label>
+				<input type="text" class="input" id="username" name="username"  placeholder="username" required> -->
 			</div>
-			<div class="self-center">
-				<button type="submit" class="button px-7 py-3 pb-2"> Register </button>
+			<div class="self-center w-full">
+				<ButtonLink class="flex justify-center w-full">Register</ButtonLink>
+				<!-- <button type="submit" class="button px-7 py-3 pb-2"> Register </button> -->
 			</div>
 		</div>
 	</form>
@@ -34,13 +37,19 @@ import { API } from '@/scripts/auth';
 import { useMeta } from 'vue-meta';
 import router from '@/router';
 import ProfilePicture from '@/components/profile/ProfilePicture.vue';
+import ModInput from '@/components/form/ModInput.vue';
+import ButtonLink from '@/components/ButtonLink.vue';
+import MainTitle from '@/components/MainTitle.vue';
 
 export default defineComponent({
 	components: {
-		ChooseAvatar,
-		SingleCardPage,
-		ProfilePicture,
-	},
+    ChooseAvatar,
+    SingleCardPage,
+    ProfilePicture,
+    ModInput,
+    ButtonLink,
+	MainTitle
+},
 	setup () {
 		useMeta({ title: 'Création du compte' })
 	},

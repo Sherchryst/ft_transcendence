@@ -16,7 +16,8 @@ export class ChatService {
       name: name,
       owner: owner,
       visibility: visibility,
-      password: password
+      password: password,
+      isPasswordSet: password != undefined && password.length != 0
     });
     await getRepository(Channel).save(channel);
     return channel;
@@ -90,8 +91,10 @@ export class ChatService {
   }
 
   async deleteChannel(channelId: number) {
+    await getRepository(ChannelModeration).delete({channel: {id: channelId}})
     await getRepository(ChannelInvitation).delete({channel: {id: channelId}});
     await getRepository(ChannelMessage).delete({channel: {id: channelId}});
+    await getRepository(ChannelMember).delete({channel: {id: channelId}})
     await getRepository(Channel).delete({ id: channelId });
   }
 
@@ -106,12 +109,14 @@ export class ChatService {
 
   async findChannel(channelId: number): Promise<Channel> {
     return getRepository(Channel).findOne({
+      relations: ['owner'],
       where: { id: channelId }
     });
   }
 
   async getChannelMember(channelId: number, userId: number): Promise<ChannelMember> {
     return await getRepository(ChannelMember).findOne({
+      relations: ['user'],
       where: { channel: { id: channelId }, user: {id: userId} }
     });
   }
@@ -204,8 +209,12 @@ export class ChatService {
   async updateChannel(channel: Channel): Promise<Channel> {
     return getRepository(Channel).save(channel);
   }
-
-  async updateMember(channelMember: ChannelMember): Promise<ChannelMember> {
-    return getRepository(ChannelMember).save(channelMember);
+  
+  async updateMemberRole(channelId : number, userId : number, role : ChannelMemberRole): Promise<ChannelMember> {
+    return getRepository(ChannelMember).save({
+      channel: { id: channelId },
+      user: { id: userId },
+      role: role
+    });
   }
 }

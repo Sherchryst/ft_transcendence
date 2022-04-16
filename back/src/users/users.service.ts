@@ -34,6 +34,8 @@ export class UsersService {
     await getRepository(UserRelationship).save({
       from: { id: toUserId }, to: { id: fromUserId }, type: UserRelationshipType.FRIEND
     });
+    this.WsClients.get(fromUserId).emit('new_friend', toUserId);
+    this.WsClients.get(toUserId).emit('new_friend', fromUserId);
     this.sendNewFriendStatus(fromUserId, toUserId);
   }
 
@@ -73,6 +75,7 @@ export class UsersService {
     await getRepository(UserRelationship).delete({
       from: { id: toUserId }, to: { id: fromUserId }, type: Not(UserRelationshipType.BLOCK)
     });
+    this.WsClients.get(fromUserId).emit('blocked', toUserId);
   }
 
   async create(login: string): Promise<User> {
@@ -248,6 +251,25 @@ export class UsersService {
     await getRepository(User).update(userId, {
       xp: xp,
       newUser: false
+    });
+  }
+
+  async sendOwnStatus(userId: number, status : string, message : string) {
+    const friends = await this.getFriends(userId);
+    friends.forEach((friend) => {
+      this.WsClients.get(friend.id)?.emit("status", { userId : userId, status : status, message : message });
+    });
+  }
+
+  async sendFriendsStatus(socket : Socket, userId : number) {
+    const friends = await this.getFriends(userId);
+    friends.forEach(async(friend) => {
+      const match = await this.inMatch(friend.id);
+      if (match) {
+        socket.emit("status", { userId : friend.id, status : "in game", message : `${match.id}` });
+      } else {
+        socket.emit("status", { userId : friend.id, status : (this.WsClients.has(friend.id)? "online" : "offline"), message : "" });
+      }
     });
   }
 }

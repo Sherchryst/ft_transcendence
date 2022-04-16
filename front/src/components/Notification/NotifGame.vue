@@ -32,7 +32,7 @@ export default defineComponent({
 			this.close()
 		},
 		declineInvitation() {
-			// this.socket.emit("declineInvit", this.data);
+			this.socket.emit("declineInvit", this.data);
 			console.log("declineInvit", this.data);
 			this.close()
 		},

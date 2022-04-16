@@ -13,7 +13,15 @@ API.interceptors.response.use(
 		return (response);
 	},
 	(error) => {
-		toast.error(error.response.data?.message || "An error occured")
+		const messages : string[] | string = error.response.data?.message
+		if (!error.response.data)
+			toast.error("An error occured")
+		else if (Array.isArray(messages))
+			messages.forEach(e => {
+				toast.error(e)
+			});
+		else
+			toast.error(messages)
 		return Promise.reject(error);
 	}
 )

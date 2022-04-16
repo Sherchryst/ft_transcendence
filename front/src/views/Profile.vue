@@ -2,7 +2,7 @@
 	<div class="grid grid-cols-12 lg:gap-x-16 2xl:gap-x-32">
 		<div class="col-span-12 md:col-span-4 flex flex-col max-w-sm">
 			<div class="flex place-content-center mb-4">
-				<ProfilePicture v-if="profile.user != undefined" :avatar="'http://localhost:3000/' + profile.user?.avatarPath"></ProfilePicture>
+				<ProfilePicture v-if="profile.user != undefined" :avatar="'http://localhost:3000/' + AvataPath"></ProfilePicture>
 			</div>
 			<div class="mb-6">
 				<MainTitle class="title-username">{{ profile.user?.nickname }}</MainTitle>
@@ -15,18 +15,18 @@
 				<ButtonLink v-if="username == selfLogin" route="edit-profile" class="flex justify-center w-full"  text="Edit Profile"></ButtonLink>
 				<div v-else class="flex flex-col gap-y-4">
 					<Transition mode="out-in" name="btn">
-						<button-link v-if="statut == 'NONE'" class="flex justify-center w-full" text="Ask a friend" @click="friendRequest"></button-link>
-						<button-link v-else-if="statut == 'WAIT'" class="btn-used flex justify-center w-full" text="Friend request send"></button-link>
-						<ButtonLink v-else-if="statut == 'BLOCK'" class="flex justify-center w-full" text="Unblock User" @click="unblock"></ButtonLink>
+						<button-link v-if="RelationshipType == ''" class="flex justify-center w-full" text="Ask a friend" @click="friendRequest"></button-link>
+						<button-link v-else-if="RelationshipType == 'pending'" class="btn-used flex justify-center w-full" text="Friend request send"></button-link>
+						<ButtonLink v-else-if="RelationshipType == 'block'" class="flex justify-center w-full" text="Unblock User" @click="unblock"></ButtonLink>
 					</Transition>
 					<Transition mode="out-in" name="btn">
-						<ButtonLink v-if="statut == 'NONE'" class="flex justify-center w-full btn-neutral" text="Block User" @click="openModal"></ButtonLink>
-						<ButtonLink v-else-if="statut == 'BLOCK'" class="flex justify-center w-full btn-inactive" text="This User is block"></ButtonLink>
+						<ButtonLink v-if="RelationshipType != 'block'" class="flex justify-center w-full btn-neutral" text="Block User" @click="openModal"></ButtonLink>
+						<ButtonLink v-else-if="RelationshipType == 'block'" class="flex justify-center w-full btn-inactive" text="This User is block"></ButtonLink>
 					</Transition>
 				</div>
 			</div>
-			<div class="flex flex-rows justify-around md:flex-wrap">
-				<div class="">
+			<div class="grid grid-cols-2 justify-items-stretch gap-16 justify-betweem">
+				<div class="justify-self-end">
 					<LittleCard>
 						<template v-slot:title>
 							<p>Winrate</p>
@@ -36,7 +36,7 @@
 						</template>
 					</LittleCard>
 				</div>
-				<div class="">
+				<div class="justify-self-start">
 					<LittleCard>
 						<template v-slot:title>
 							<p>Played</p>
@@ -56,9 +56,14 @@
 					<TitlePanel title="Match History"> <Scrool/> </TitlePanel>
 				</template>
 				<template v-slot:body>
-					<div class="overflow-auto max-h-64" >
-						<div v-for="(match, index) in history" :key="index">
-							<MatchesHistory :match="match" :userId="profile.user.id"></MatchesHistory>
+					<div class="overflow-auto h-64" >
+						<div v-if="history.length">
+							<div v-for="(match, index) in history" :key="index">
+								<MatchesHistory :match="match" :userId="profile.user.id"></MatchesHistory>
+							</div>
+						</div>
+						<div v-else class="flex flex-col justify-center text-xl h-64">
+							<div>Empty match history. No match played yet.</div>
 						</div>
 					</div>
 				</template>
@@ -91,12 +96,18 @@ import Trophy from '@/assets/icon/achievement.svg';
 import {defineComponent, watch, computed} from 'vue';
 import { API } from '@/scripts/auth';
 import BlockModal from '@/components/modal/BlockModal.vue';
-import { Achievement, Profile } from '@/interfaces/Profile';
+import { Achievement, Profile, UserRelationship} from '@/interfaces/Profile';
 import { useStore } from 'vuex'
 import { key } from '@/store/index'
 import router from '@/router';
 import Achievements from '@/components/profile/Achievements.vue';
+import { statusSocket } from '@/socket';
 
+export enum UserRelationshipType {
+	BLOCK = 'block',
+	FRIEND = 'friend',
+	PENDING = 'pending'
+  }
 
 export default defineComponent({
 	name: "Profile",
@@ -130,25 +141,45 @@ export default defineComponent({
 		return {
 			profile: {} as Profile,
 			showModal: false,
-			statut: "NONE",
 			count: 0,
 			winrate: 0,
 			history: [],
-			achievements: [] as Achievement[]
+			achievements: [] as Achievement[],
+			avatarPath: '',
+			relashionshipStatus: {} as UserRelationship,
+			relationStatus: ''
 		}
 	},
 	methods: {
-		getUser(username: string | string[]): void {
-			API.get<Profile>('users/get-profile', {
+
+		async getUser(username: string | string[]): Promise<void> {
+			await API.get<Profile>('users/get-profile', {
 				params: {
 					id: null,
 					login: username
 				}
 			})
-			.then((res) => {
+			.then(async (res) => {
+				console.log('Profile', res.data)
 				this.achievements = res.data.achievements
 				this.profile = res.data;
-				API.get('match/match-count', {
+				if (this.profile.user.id != this.$store.getters.getId)
+					await API.get<UserRelationship>('users/relationship-status', {
+						params: {
+							id: this.profile.user.id
+						}
+					})
+					.then(res => {
+						if (res.data.type === undefined)
+							this.relationStatus = ''
+						else
+							this.relationStatus = res.data.type
+						
+					})
+					.catch(err => {
+						console.log(err)
+					})
+				await API.get('match/match-count', {
 					params: {
 						userId: this.profile.user.id
 					}
@@ -157,7 +188,7 @@ export default defineComponent({
 				}).catch((err) => {
 					console.log(err)
 				})
-				API.get('match/get-winrate', {
+				await API.get('match/get-winrate', {
 					params: {
 						userId: this.profile.user.id
 					}
@@ -166,7 +197,7 @@ export default defineComponent({
 				}).catch((err) => {
 					console.log(err)
 				})
-				API.get('match/get-history', {
+				await API.get('match/get-history', {
 					params: {
 						userId: this.profile.user.id,
 						limit: 50
@@ -191,24 +222,26 @@ export default defineComponent({
 				fromId: this.$store.getters.getId,
 				toId: this.profile.user?.id
 			}).then( () => {
-				this.statut = 'WAIT'
+				this.relationStatus = UserRelationshipType.PENDING;
+				console.log('Friend request sent', this.relationStatus)
 			})
 		},
-		block() : void {
-			API.post('users/block-user', {
+		async block() : Promise<void> {
+			await API.post('users/block-user', {
 				fromId: this.$store.getters.getId,
 				toId: this.profile.user?.id
 			}).then( () => {
-				this.statut = 'BLOCK'
-				this.closeModal()
+				this.relationStatus = UserRelationshipType.BLOCK;
+				console.log('User blocked', this.relationStatus);
 			})
 		},
-		unblock() : void {
-			API.post('users/unblock-user', {
+		async unblock() : Promise<void> {
+			await API.post('users/unblock-user', {
 				fromId: this.$store.getters.getId,
 				toId: this.profile.user?.id
-			}).then( () => {
-				this.statut = 'NONE'
+			}).then(() => {
+				this.relationStatus = ''
+				console.log('User unblocked', this.relationStatus)
 			})
 		},
 	},
@@ -220,11 +253,36 @@ export default defineComponent({
 					this.getUser(newUsername.toString())
 				}
 			}
+
 		)
 	},
 	mounted(): void {
+		statusSocket.on("blocked", (id : number) => {
+			if(id == this.profile.user.id){
+				this.relationStatus = UserRelationshipType.BLOCK;
+			}
+			else
+				this.relationStatus = 'unknown';
+			this.$store.dispatch('connection');
+		}),
+		statusSocket.on("new_friend", (id : number) => {
+			console.log('NEW FRIEND IN YOUR LIFE bitch', id);
+			this.relationStatus = UserRelationshipType.FRIEND;
+		})
 		this.getUser(this.username);
 	},
+	computed: {
+		AvataPath() : string {
+		if(this.profile.user?.id === this.$store.getters.getId)
+			return this.$store.getters.getAvatarPath
+		else
+			return this.profile.user?.avatarPath
+		},
+		RelationshipType() : string {
+			console.log('Relationship work', this.relationStatus)
+				return this.relationStatus
+		},
+	}
 })
 </script>
 

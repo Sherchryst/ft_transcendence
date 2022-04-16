@@ -11,10 +11,10 @@
       <SquarePanel>
         <div class="h-full flex flex-col justify-between">
             <MainTitle>Winrate</MainTitle>
-            <div class="text-8xl font-bold pt-5 md:pb-12">{{winrate}}%</div>
+            <div class="text-7xl font-bold pt-5 md:pb-14">{{winrate}}%</div>
         </div>
       </SquarePanel>
-      <SquarePanel>
+      <SquarePanel v-if="topPlayer.length != 0">
         <div class="flex flex-col gap-3">
             <MainTitle>Top {{topPlayer?.length}}</MainTitle>
             <div class="flex flex-col overflow-auto max-h-52 gap-5">
@@ -25,7 +25,7 @@
         </div>
       </SquarePanel>
       <LargePanel v-if="friends.length != 0">
-        <div class="grid grid-cols-2 lg:grid-cols-6 gap-4  p-4">
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4  p-4">
             <div class=" friend-card" v-for="(friend, index) in friends" :key="index">
               <FriendCard :friend="friend"></FriendCard>
             </div>
@@ -77,6 +77,7 @@ export default defineComponent({
     useMeta({ title: 'Home' })
   },
   mounted () {
+    this.$store.dispatch('connection');
     statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
       data.message = data.message.replace(/<[^>]*>?/gm, '');
       setTimeout(() =>{

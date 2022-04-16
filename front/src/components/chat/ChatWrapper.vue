@@ -24,6 +24,12 @@
 			<discussion-preview v-for="(chan, index) in listChannel" :route="{name: 'unique-chat', params: {id: chan.id}}" :key="index" >
 				<p class="username text-lg">#-{{chan.name}}</p>
 			</discussion-preview>
+			<title-count :lenght="members.length" class="mt-4">
+				<h4 class="text-left font-bold text-xl" >Members</h4>
+			</title-count>
+			<div class="grid grid-cols-2 gap-5 max-h-52 overflow-auto" :key="members">
+				<ParticipantPreview v-for="(user, index) in members" :user="user" :key="index" />
+			</div>
 		</div>
 		<div :class="[ !hasConv ? 'hidden md:flex' : 'flex' ]" class="col-span-12 md:col-span-7 2xl:col-span-6 conversation flex-col justify-center px-3 md:px-7 py-5">
 			<slot></slot>
@@ -56,14 +62,18 @@ import { useMeta } from 'vue-meta'
 import TitleCount from '@/components/common/TitleCount.vue'
 import { Profile, User } from '@/interfaces/Profile';
 import { Channel } from '@/interfaces/Channel';
+import { Member_t } from '@/interfaces/Channel';
+import ParticipantPreview from './ParticipantPreview.vue';
 
 export default defineComponent({
 	components: {
-		DiscussionPreview,
-		TitleCount
-	},
+    DiscussionPreview,
+    TitleCount,
+    ParticipantPreview
+},
 	props: {
 		hasConv: Boolean,
+		members: {type: Array as () => Member_t[], default: () => []},
 	},
 	setup () {
 		useMeta({ title: 'Chat' })
@@ -85,6 +95,7 @@ export default defineComponent({
 		// })
 	},
 	mounted() {
+		console.log('ChatWrapper mounted', this.members)
 		API.get('users/profile').then( (response: {data : Profile} ) => {
 			this.friends = response.data.friends
 			console.log("Frends", this.friends)

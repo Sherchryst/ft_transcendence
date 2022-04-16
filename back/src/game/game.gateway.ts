@@ -14,11 +14,11 @@ import { MatchService } from "./match.service";
 import { CustomJwtService, getJwtFromSocket } from "src/auth/jwt/jwt.service";
 import { UsersService } from "src/users/users.service";
 import { WsJwt2faGuard } from "src/auth/jwt/jwt.guard";
-import { Req, UseGuards } from "@nestjs/common";
+import { ClassSerializerInterceptor, Req, UseGuards, UseInterceptors } from "@nestjs/common";
 import { Match, MatchType } from "./entities/match.entity";
 import { GameMap } from "./entities/game-map.entity";
 import { MatchInvitation } from "./entities/match-invitation.entity";
-import { StatusGateway } from "src/users/users.gateway";
+import { instanceToPlain } from "class-transformer";
 
 const interval = 20;
 let pending_player: Array<number> = [];
@@ -65,6 +65,7 @@ function sleep(ms: number) {
 
 @UseGuards(WsJwt2faGuard)
 @WebSocketGateway(3001, { namespace: "game" })
+@UseInterceptors(ClassSerializerInterceptor)
 export class GameGateway implements OnGatewayConnection {
   static startGame() {
     throw new Error("Game : Method not implemented.");
@@ -77,7 +78,7 @@ export class GameGateway implements OnGatewayConnection {
     private readonly matchService: MatchService,
     private readonly customJwtService: CustomJwtService,
     private readonly usersService: UsersService,
-    private readonly statusGateway: StatusGateway
+    // private readonly statusGateway: StatusGateway
   ) {}
 
   afterInit() {
@@ -170,6 +171,12 @@ export class GameGateway implements OnGatewayConnection {
     else if (data.nickname == req.user.nickname) {
       socket.emit("error", "You can't invite yourself");
     }
+    else if (await this.matchService.findMatchInvitation(
+      to_user.id,
+     req.user.id
+    )) {
+      socket.emit("error", "You already invited this user");
+    }
     else {
       try {
         const map = await this.matchService.findGameMap(data.mapId);
@@ -183,8 +190,7 @@ export class GameGateway implements OnGatewayConnection {
           map,
           data.level
         );
-        console.log("Game Invitation", invitation)
-        this.gameService.WsClients.get(to_user.id).emit("invited", invitation);
+        this.gameService.WsClients.get(to_user.id).emit("invited", instanceToPlain(invitation));
         console.log("Game : Invitation sent to", to_user.nickname);
       } catch (e) {
         socket.emit("error", "Unknown error");
@@ -228,8 +234,9 @@ export class GameGateway implements OnGatewayConnection {
     board.player[1].user_id = match.player2.id;
     player1_socket.join(`game:${match.id}`);
     player2_socket.join(`game:${match.id}`);
-    this.statusGateway.sendOwnStatus(player1, "in game", `${match.id}`);
-    this.statusGateway.sendOwnStatus(player2, "in game", `${match.id}`);
+    board.level = match.level;
+    this.usersService.sendOwnStatus(player1, "in game", `${match.id}`);
+    this.usersService.sendOwnStatus(player2, "in game", `${match.id}`);
     this.server.to(`game:${match.id}`).emit("gameStart", match.id);
     console.log("Game : Sending users to game");
     return match;
@@ -280,14 +287,22 @@ export class GameGateway implements OnGatewayConnection {
   }
 
   @SubscribeMessage("acceptInvit")
-  async handleAcceptInvit(@ConnectedSocket() socket : Socket, @MessageBody() data: MatchInvitation) {
+  async handleAcceptInvit(@ConnectedSocket() socket : Socket, @MessageBody() data: MatchInvitation, @Req() req: any) {
     // console.log("data", data);
+    if (data.to.id != req.user.id) {
+      socket.emit("error", "This invitation is not for you");
+      return;
+    }
     try {
       const matchInvit = await this.matchService.findMatchInvitation(
         data.to.id,
         data.from.id
       );
       if (matchInvit == null) socket.emit("error", "No invitation found");
+      else if (await this.usersService.inMatch(matchInvit.from.id)) {
+        socket.emit("warning", "Sender is already in a game, retry later");
+        socket.emit("invited", instanceToPlain(data));
+      }
       else {
         const match = await this.createMatch(
           matchInvit.map,
@@ -323,8 +338,6 @@ export class GameGateway implements OnGatewayConnection {
         socket.emit("error", "Match not found");
       }
       let player_id: number;
-      
-      console.log("Game : connection", socket.id, "match", id);
       if (board.player[0].user_socket == socket.id) player_id = 0;
       else if (board.player[1].user_socket == socket.id) player_id = 1;
       else player_id = 2;
@@ -460,8 +473,8 @@ export class GameGateway implements OnGatewayConnection {
       );
       this.server.socketsLeave(`game:${id}`);
       boards.delete(`${id}`);
-      this.statusGateway.sendOwnStatus(match.player1.id, "online", "");
-      this.statusGateway.sendOwnStatus(match.player2.id, "online", "");
+      this.usersService.sendOwnStatus(match.player1.id, "online", "");
+      this.usersService.sendOwnStatus(match.player2.id, "online", "");
       this.updateAchievements(board.player[0].user_id);
       this.updateAchievements(board.player[1].user_id);
   }

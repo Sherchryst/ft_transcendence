@@ -39,7 +39,7 @@ button {
 import { useMeta } from 'vue-meta'
 
 export default {
-  setup () {
+  setup (): void {
     useMeta({
       title: '',
     })

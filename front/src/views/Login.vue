@@ -3,15 +3,17 @@
 		<div class="mb-20 text-left">
 			<main-title class="pb-5">Apong Us</main-title>
 			<h2 class="font-sans font-bold text-3xl pb-5"></h2>
-			<p style="text-align: justify;">Welcome to Apong Us, a very exclusive website for students of 42. This website was made by asoursou, mbrunel, mchardin, roalvare and sgah. You will play one of the most iconic games of the last century. I hope you're glad to have access to this amazing experience and that you will enjoy the journey. </p>
+			<p>Welcome to Apong Us, a very exclusive website for students of 42. This website was made by asoursou, mbrunel, mchardin, roalvare and sgah. You will play one of the most iconic games of the last century. I hope you're glad to have access to this amazing experience and that you will enjoy the journey. </p>
 		</div>
 		<div v-if="!twofa" class="flex flex-col">
 			<ButtonLink text="Connect" href="http://localhost:3000/auth/login42" />
 			<a class="cheat mt-2" href="http://localhost:3000/auth/cheat_login">cheat login</a>
 		</div>
 		<div v-else>
-			<input v-model="digits" placeholder="Google authenticator Code">
-			<button v-on:click="send_digit_code()">Send</button>
+			<ModInput v-model="digits" class="mb-10 mobile" placeholder="Code">Google authenticator Code</ModInput>
+			<!-- <input v-model="digits" placeholder="Google authenticator Code"> -->
+			<ButtonLink v-on:click="send_digit_code()" class="w-full">Confirm</ButtonLink>
+			<!-- <button v-on:click="send_digit_code()">Send</button> -->
 		</div>
 	</single-card-page>
 </template>
@@ -28,13 +30,15 @@ import { useStore } from 'vuex'
 import { key } from '@/store/index'
 import { API } from '@/scripts/auth';
 import { Statut } from '@/interfaces/Profile';
+import ModInput from '@/components/form/ModInput.vue';
 
 export default defineComponent({
 	components: {
-		ButtonLink,
-		SingleCardPage,
-		MainTitle
-	},
+    ButtonLink,
+    SingleCardPage,
+    MainTitle,
+    ModInput
+},
 	data() {
 		return {
 			twofa: false,

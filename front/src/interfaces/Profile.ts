@@ -4,6 +4,19 @@ export enum Statut {
 	AUTH
   }
 
+export enum UserRelationshipType {
+	BLOCK = 'block',
+	FRIEND = 'friend',
+	PENDING = 'pending'
+  }
+
+export interface UserRelationship {
+	from: number;
+	to: number;
+	type: UserRelationshipType;
+	created_at: Date;
+}
+
 export interface Status{
 	message: string,
 	status: string,
