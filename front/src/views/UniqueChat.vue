@@ -28,7 +28,7 @@ import { chatSocket } from '@/socket'
 import InfoPanel from '@/components/chat/InfoPanel.vue';
 import OptionChannel from '../components/chat/OptionChannel.vue';
 import ChatViewWrapper from '@/components/chat/ChatViewWrapper.vue';
-import { API } from '@/scripts/auth.ts';
+import { API } from '@/scripts/auth';
 import router from '@/router';
 
 export default defineComponent({

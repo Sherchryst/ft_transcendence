@@ -15,7 +15,8 @@
 				</discussion-preview>
 			</div>
 			<div v-else>
-				<ButtonLink class="my-3">New conversation</ButtonLink>
+				No direct message.
+				<!-- <ButtonLink class="my-3">New conversation</ButtonLink> -->
 			</div>
 			<title-count :lenght="listChannel.length" class="mt-4">
 				<h4 class="text-left font-bold text-xl" >Channels</h4>
@@ -52,7 +53,6 @@ import { defineComponent } from 'vue';
 import { API } from '@/scripts/auth';
 import DiscussionPreview from '@/components/chat/DiscussionPreview.vue'
 import { useMeta } from 'vue-meta'
-import ButtonLink from '@/components/ButtonLink.vue'
 import TitleCount from '@/components/common/TitleCount.vue'
 import { Profile, User } from '@/interfaces/Profile';
 import { Channel } from '@/interfaces/Channel';
@@ -60,7 +60,6 @@ import { Channel } from '@/interfaces/Channel';
 export default defineComponent({
 	components: {
 		DiscussionPreview,
-		ButtonLink,
 		TitleCount
 	},
 	props: {

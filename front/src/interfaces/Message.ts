@@ -4,9 +4,7 @@ import { User } from "./Profile"
 export interface DirectMessage {
 	reat_at: Date,
 	to: User,
-	message: String
-	self?: boolean
-	photo?: boolean
+	message: Message_t
 }
 export interface Message_t {
 	from: ChannelMember_t
