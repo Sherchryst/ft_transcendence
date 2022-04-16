@@ -6,7 +6,7 @@
 		<form>
 			<div class="flex flex-col gap-4">
 				<ModInput type="password" class="mobile" v-model="FormData.password">Password</ModInput>
-				<ButtonLink @click="update">
+				<ButtonLink @click="send">
 					Send
 				</ButtonLink>
 			</div>
@@ -15,10 +15,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, PropType } from "vue";
 import Modal from "../Modal.vue";
 import ButtonLink from "../ButtonLink.vue";
 import ModInput from "../form/ModInput.vue";
+import { API } from "@/scripts/auth";
 
 export default defineComponent({
 	name: "PasswordModal",
@@ -29,6 +30,9 @@ export default defineComponent({
 			}
 		}
 	},
+	props: {
+		channelId: {type: Number, required: true}
+	},
 	components: { Modal, ButtonLink, ModInput },
 	methods: {
 		open() : void {
@@ -37,8 +41,12 @@ export default defineComponent({
 		close() : void {
 			(this.$refs['modal'] as typeof Modal).close()
 		},
-		update(){
-			console.log("update")
+		send(){
+			// doesn't work
+			// but i can't do anything about it
+			console.log("allo", this.channelId);
+			API.post('chat/set-password', {channelId: this.channelId, password: this.FormData.password}).then(() => {
+			this.close(); })
 		}
 	}
 })

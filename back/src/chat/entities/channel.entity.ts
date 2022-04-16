@@ -1,7 +1,7 @@
 import { Exclude } from 'class-transformer';
 import { BeforeInsert, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import sha from 'sha.js'
+import * as sha from 'sha.js';
 
 export enum ChannelVisibility {
   PRIVATE = 'private',
@@ -22,7 +22,7 @@ export class Channel {
   @Column({ type: 'enum', enum: ChannelVisibility, default: ChannelVisibility.PRIVATE })
   visibility: ChannelVisibility;
 
-  @Column({ length: 32, nullable: true, default: () => 'null' })
+  @Column({ length: 256, nullable: true, default: () => 'null' })
   @Exclude()
   password!: string;
 
@@ -30,7 +30,7 @@ export class Channel {
   isPasswordSet: boolean;
 
   doesPasswordMatch(plainPassword: string): boolean {
-    return sha('sha256').update(plainPassword).digest('hex') === this.password;
+    return !this.isPasswordSet || (plainPassword && sha('sha256').update(plainPassword).digest('hex') === this.password);
   }
 
   @BeforeInsert()
