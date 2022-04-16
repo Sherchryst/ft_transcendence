@@ -7,8 +7,6 @@ import * as sharp from 'sharp';
 import { UpdateNicknameDto } from './dto/update-nickname.dto';
 import { instanceToPlain } from 'class-transformer';
 import { User } from './entities/user.entity';
-import { StatusGateway } from './users.gateway';
-import { RelationIdAttribute } from 'typeorm/query-builder/relation-id/RelationIdAttribute';
 import { UserRelationshipType } from './entities/user-relationship.entity';
 
 export const imageFilter: any = (req: any, file: { mimetype: string, size: number }, callback: (arg0: any, arg1: boolean) => void): any =>
@@ -116,7 +114,7 @@ export class UsersController {
     const request = await this.usersService.sendFriendRequest(req.user.id, dto.toId);
     if (!request)
       throw new UnauthorizedException();
-    this.usersService.WsClients.get(dto.toId).emit("friend-request", req.user);
+    this.usersService.WsClients.get(dto.toId).emit("friend-request", instanceToPlain(req.user));
   }
 
   @Get('top-ten')
@@ -134,10 +132,10 @@ export class UsersController {
   }
 
   @Post('update-nickname')
-  async updateNickname(@Body() dto: UpdateNicknameDto) {
+  async updateNickname(@Req() req, @Body() dto: UpdateNicknameDto) {
     try {
-      await this.usersService.updateNickname(dto.id, dto.nickname);
-      this.usersService.WsClients.get(dto.id).emit('update_user', dto.id);
+      await this.usersService.updateNickname(req.user.id, dto.nickname);
+      this.usersService.WsClients.get(req.user.id).emit('update_user', req.user.id);
     } catch (error) {
       if (error.code === PostgresError.PG_UNIQUE_VIOLATION)
         throw new ConflictException('Nickname already taken');
