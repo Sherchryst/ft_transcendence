@@ -130,6 +130,17 @@ export class ChatService {
     }).then(messages => messages.map(m => m.message))).slice(0, maxMessages);
   }
 
+  async getDirectMessage(fromId: number, toId: number): Promise<DirectMessage[]> {
+    let messages =  (await getRepository(DirectMessage).find({
+      relations: ['message', 'to', 'message.from'],
+      where: [
+        {to: toId, message: { from: { id: fromId }}},
+        {to: fromId, message: { from: { id: toId }}}
+      ]
+    }))
+    return (messages)
+  }
+
   async isBanned(user: User, channelId: number): Promise<boolean> {
     return await getRepository(ChannelModeration).findOne({
       where: {
