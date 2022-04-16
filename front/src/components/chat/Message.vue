@@ -48,9 +48,6 @@ export default defineComponent({
             channel: {} as Channel
         }
     },
-    created() {
-        console.log("role", this.message.from);
-    },
     components: { UserPanel }
 })
 </script>

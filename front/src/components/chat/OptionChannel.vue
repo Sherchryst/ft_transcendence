@@ -19,6 +19,11 @@
 			</span>
 		</OneRowForm>
 	</div>
+	<div class="grid grid-cols-3 gap-3 overflow-auto max-h-24">
+		<div  v-for="(user, index) in members" :key="index">
+			<ParticipantPreview :user="user"></ParticipantPreview>
+		</div>
+	</div>
 </div>
 </template>
 
@@ -45,9 +50,11 @@ import OneRowForm from "../OneRowForm.vue";
 import SendIcon from '@/assets/icon/send.svg';
 import PasswordModal from '@/components/modal/PasswordModal.vue'
 import { chatSocket } from "@/socket";
-import { Channel, ChannelMemberRole } from "@/interfaces/Channel";
-import {API} from '@/scripts/auth.ts';
+import { Channel, ChannelMemberRole, Member_t } from "@/interfaces/Channel";
+import {API} from '@/scripts/auth';
 import router from '@/router';
+import ParticipantPreview from '@/components/chat/ParticipantPreview.vue';
+import { User } from "@/interfaces/Profile";
 
 export default defineComponent({
     name: "OptionChannelPanel",
@@ -58,7 +65,13 @@ export default defineComponent({
 	data() {
 		return {
 			socket : chatSocket,
+			members : [] as Member_t[],
 		}
+	},
+	mounted() {
+		API.get('chat/channel-info', {params: {channelId: this.channel?.id}}).then(res => {
+			this.members = (res.data.members as Member_t[]).filter(m => m.user.id != this.$store.getters.getId);
+		})
 	},
     methods: {
         leave_channel(): void {
@@ -73,6 +86,6 @@ export default defineComponent({
 			(this.$refs['password_block'] as typeof PasswordModal).open()
 		},
     },
-    components: { OneRowForm, SendIcon, PasswordModal }
+    components: { OneRowForm, SendIcon, PasswordModal, ParticipantPreview }
 })
 </script>
