@@ -61,10 +61,12 @@ export class UsersController {
   }
 
   @Get('profile')
-  async profile(@Req() req) {
+  async profile(@Req() req : any) {
+    console.log('profile');
+    const user = await this.usersService.findOne(req.user.id);
     const achievements = await this.usersService.getUserAchievements(req.user.id);
     const friends = await this.usersService.getFriends(req.user.id)
-    return {user: req.user, friends: friends, achievements: achievements}
+    return {user: { ...user, twofa: user.twofa } , friends: friends, achievements: achievements}
   }
 
   @Get('get-profile')
@@ -106,6 +108,15 @@ export class UsersController {
       return new NotFoundException('Relation not found');
     return relation;
   }
+
+  @Get('search')
+  async search(@Query('expr') expr : string) : Promise<User[]> {
+    if (!expr)
+      throw new BadRequestException('No expr provided');
+    if (expr.includes('%'))
+      throw new BadRequestException('Wildcards are forbidden');
+    return await this.usersService.search(expr);
+  } 
 
   @Post('send-friend-request')
   async sendFriendRequest(@Req() req, @Body() dto: { toId: number }) {

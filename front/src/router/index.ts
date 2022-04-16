@@ -11,6 +11,7 @@ import Register from '@/views/Register.vue'
 import GameChoice from '@/views/GameChoice.vue'
 import EditProfile from '@/views/EditProfile.vue'
 import Game from '@/views/Game.vue'
+import SearchResults from '@/views/SearchResults.vue'
 import NotFound from '@/views/NotFound.vue'
 import DirectMessage from '@/views/DirectMessage.vue'
 import { useCookies } from "vue3-cookies";
@@ -80,7 +81,13 @@ const routes: Array<RouteRecordRaw> = [
       name: "game",
       props: true,
       component: Game
-    }
+    },
+    {
+      path: '/search/:expr',
+      name: 'search',
+      component: SearchResults,
+      props: true
+    },
     ]
   },
   {
