@@ -25,7 +25,7 @@
             </button>
         </div>
         <BlockModal ref="modal_block" :user="user"></BlockModal>
-        <ChallengeModal ref="modal_challenge" :target="user.login" ></ChallengeModal>
+        <ChallengeModal ref="modal_challenge" :target="user.nickname" ></ChallengeModal>
         <AdminModal ref="modal_ban" :channelId="channelId" :toId="user.id" moderation="ban"></AdminModal>
         <AdminModal ref="modal_mute" :channelId="channelId" :toId="user.id" moderation="mute"></AdminModal>
     </div>
