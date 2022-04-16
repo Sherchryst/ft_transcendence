@@ -29,6 +29,13 @@ export class ChatController {
     return await this.userService.getAllChannelsConnected(user.id);
   }
 
+  @Get('direct-messages')
+  async directMessage(@Req() req, @Query('to') to: number) {
+    const user = req.user
+    const messages = JSON.stringify(await this.chatService.getDirectMessage(user.id, to))
+    return messages
+  }
+
   @Post('join')
   async join(@Req() req, @Body() data: {channelId: number, password: string}) {
       if (data.channelId == undefined)
