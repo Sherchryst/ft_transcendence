@@ -19,7 +19,7 @@
 				<nav-button text="Channels" :route="{name: 'channel'}">
 					<GroupIcon />
 				</nav-button>
-				<nav-button text="Chat" :route="{name: 'chat'}" class="chat-link" :notification="newMessage">
+				<nav-button text="Chat" :route="{name: 'chat'}" class="chat-link">
 					<ChatIcon />
 				</nav-button>
 				<ButtonLink @click="logout()" class="btn-neutral lg:hidden" text="Disconnect" />
@@ -60,7 +60,7 @@
 				</div>
 			</div>
 			<div class="">
-				<router-view @read-message="removeMessageFrom"/>
+				<router-view/>
 			</div>
 		</div>
 	</div>
@@ -114,7 +114,6 @@ export default defineComponent({
 			chatSocket : chatSocket,
 			gameSocket : gameSocket,
 			statusSocket : statusSocket,
-			channelMessage: [] as SocketMessage[],
 			notifications: [] as Notification[],
 			avatarPath: '',
 			componentKey: 0,
@@ -145,10 +144,6 @@ export default defineComponent({
 		this.avatarPath = this.$store.getters.getAvatarPath;
 		this.getNotif()
 		this.chatSocket
-			.on('message', (data: {channelMessage: SocketMessage}) => {
-				if (data.channelMessage.message.from.id != this.$store.getters.getId)
-					this.channelMessage.push(data.channelMessage)
-			})
 			.on('invited', (data: ChannelInvitation) => {
 				console.log('invite', data)
 				this.addChannelInivtation(data);
@@ -179,16 +174,6 @@ export default defineComponent({
 				localStorage.removeItem('user')
 				router.push({name: "login"})
 			})
-		},
-		removeMessageFrom(id: number)
-		{
-			console.log("remove message from ", id);
-			for( let i = 0; i < this.channelMessage.length; i++){ 
-				if ( this.channelMessage[i].channel.id == id) { 
-					this.channelMessage.splice(i, 1); 
-					i--; 
-				}
-			}
 		},
 		getNotif(): void {
 			API.get("/users/get-friend-requests", {
@@ -257,9 +242,6 @@ export default defineComponent({
 			const store = useStore(key)
 			return store.getters.getLogin || 'unknown'
 		},
-		newMessage() : number {
-			return this.channelMessage.length
-		}
 	}
 })
 </script>

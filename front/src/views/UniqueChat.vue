@@ -87,7 +87,6 @@ export default defineComponent({
                     return ;
                 if (data.channelMessage.channel.id == this.id) {
                     this.recv(data.channelMessage.message);
-                    this.readMessage(parseInt(this.id));
                 }
             })
             .on('joined', (data) => {
@@ -105,9 +104,6 @@ export default defineComponent({
         ;
 	},  
 	methods: {
-        readMessage(chanId: number){
-            this.$emit('read-message', chanId);
-        },
         send(message: string): void {
             console.log("message : ", message)
             if (message != "") {
@@ -140,7 +136,6 @@ export default defineComponent({
             }).catch((error) => {
                 console.log(error);
             })
-            this.readMessage(chanId);
 		},
         recv(data: ServerMessage ): void {
             let message: Message_t = {
