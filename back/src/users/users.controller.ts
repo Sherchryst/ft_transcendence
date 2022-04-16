@@ -61,10 +61,12 @@ export class UsersController {
   }
 
   @Get('profile')
-  async profile(@Req() req) {
+  async profile(@Req() req : any) {
+    console.log('profile');
+    const user = await this.usersService.findOne(req.user.id);
     const achievements = await this.usersService.getUserAchievements(req.user.id);
     const friends = await this.usersService.getFriends(req.user.id)
-    return {user: req.user, friends: friends, achievements: achievements}
+    return {user: { ...user, twofa: user.twofa } , friends: friends, achievements: achievements}
   }
 
   @Get('get-profile')
