@@ -31,6 +31,7 @@ import { key } from '@/store/index'
 import { API } from '@/scripts/auth';
 import { Statut } from '@/interfaces/Profile';
 import ModInput from '@/components/form/ModInput.vue';
+import { reload_socket } from '@/socket'
 
 export default defineComponent({
 	components: {
@@ -67,7 +68,7 @@ export default defineComponent({
 		send_digit_code(): void {
 			API.post('2fa/authenticate', {twoFactorAuthenticationCode: this.digits})
 			.then((response) => {
-				this.$forceUpdate();
+				reload_socket();
 				this.connection()
 			}).catch( (error) => {
 				console.log("ERROR", error.response.data)
