@@ -102,6 +102,15 @@ export class UsersController {
     return relation;
   }
 
+  @Get('search')
+  async search(@Query('expr') expr : string) : Promise<User[]> {
+    if (!expr)
+      throw new BadRequestException('No expr provided');
+    if (expr.includes('%'))
+      throw new BadRequestException('Wildcards are forbidden');
+    return await this.usersService.search(expr);
+  } 
+
   @Post('send-friend-request')
   async sendFriendRequest(@Req() req, @Body() dto: { toId: number }) {
     if (await this.usersService.isBlockedBy(dto.toId, req.user.id))

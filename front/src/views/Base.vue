@@ -6,9 +6,9 @@
 					<CrewMateIcon/>
 				</nav-button>
 			</div>
-			<one-row-form class="lg:hidden mb-6 mobile" placeholder="Search">
+			<!-- <one-row-form class="lg:hidden mb-6 mobile" v-model="search_expr" placeholder="Search" @change="search">
 				<SearchIcon />
-			</one-row-form>
+			</one-row-form> -->
 			<div class="flex flex-col w-full lg:w-min">
 				<nav-button text="Home" :route="{name: 'home'}">
 					<HomeIcon />
@@ -34,9 +34,10 @@
 					<div class="flex flex-row justify-between w-full lg:w-min">
 						<div class="hidden lg:flex flex-row justify-between justify-items-center">
 							<div class="self-center">
-								<one-row-form placeholder="Search">
+								<OneRowForm placeholder="Search" @callback="search">
 									<SearchIcon />
-								</one-row-form>
+								</OneRowForm>
+								
 							</div>
 						</div>
 						<div class="flex flex-row items-center lg:mx-5">
@@ -115,7 +116,8 @@ export default defineComponent({
 			gameSocket : gameSocket,
 			statusSocket : statusSocket,
 			channelMessage: [] as SocketMessage[],
-			notifications: [] as Notification[]
+			notifications: [] as Notification[],
+			search_expr: ""
 		}
 	},
 	mounted() {
@@ -244,6 +246,11 @@ export default defineComponent({
 			})
 			console.log("index", index)
 			this.notifications.splice(index)
+		},
+		search(expr: string): void {
+			API.get("users/search", {params: {expr: expr}}).then((res) => {
+				console.log(res);
+			})
 		}
 	},
 	computed: {

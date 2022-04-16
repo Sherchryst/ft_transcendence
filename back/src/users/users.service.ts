@@ -1,7 +1,7 @@
 import { Channel } from 'src/chat/entities/channel.entity';
 import { ChannelMember } from 'src/chat/entities/channel-member.entity';
 import { createWriteStream } from 'fs';
-import { getManager, getRepository, IsNull, Not } from 'typeorm';
+import { getManager, getRepository, IsNull, Like, Not } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { UserAchievement } from './entities/user-achievement.entity';
@@ -168,6 +168,12 @@ export class UsersService {
     return await getRepository(UserRelationship).findOne({
       where: { from: fromUserId, to: toUserId, type: UserRelationshipType.BLOCK }
     }) != null;
+  }
+
+  async search(expr : string) : Promise<User[]> {
+    return await getRepository(User).find({
+      nickname: Like('%' + expr + '%')
+    });
   }
 
   async sendFriendRequest(fromUserId: number, toUserId: number): Promise<UserRelationship> {
