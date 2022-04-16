@@ -1,12 +1,8 @@
-import { IsNotEmpty, Matches, MaxLength } from 'class-validator';
+import { IsNotEmpty, Matches, Length } from 'class-validator';
 
 export class UpdateNicknameDto {
   @IsNotEmpty()
-  id: number;
-
-  @IsNotEmpty()
-  @MaxLength(10)
-  @Matches('^(?!anon-).*$', '', { message: 'nickname cannot start with "anon-"' })
+  @Length(2, 10)
   @Matches('^[a-zA-Z0-9\-_]+$', '',
   { message: 'nickname can contain only alphanumeric characters, dashes and underscores' })
   nickname: string;

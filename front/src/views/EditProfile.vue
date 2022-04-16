@@ -144,12 +144,12 @@ export default defineComponent({
             this.SwitchOn = this.Switch;
             console.log('Switch', is2fa);
         },
-        send() {
+        async send() {
             var formData = new FormData();
             formData.append('file', this.avatar);
             formData.append('id', this.$store.getters.getId);
             if (this.nickname.length > 0)
-                API.post('users/update-nickname', {
+                await API.post('users/update-nickname', {
                     id: this.$store.getters.getId,
                     nickname: this.nickname
                 }).catch(function(error) {
@@ -157,7 +157,7 @@ export default defineComponent({
                 });
             console.log('avatar', this.avatar);
             if(this.avatar.size > 0)
-                API.post('users/update-avatar', formData, {
+                await API.post('users/update-avatar', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }}).catch(function(error) {

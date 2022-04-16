@@ -1,17 +1,12 @@
 <template>
 <div class="opt flex flex-col gap-4">
+	<div v-if="role == 'admin'">
 	<p class="opt-title">Admin</p>
-	<button @click="openPassword" class="text-left">
-		Set password
-	</button>
-	<PasswordModal ref="password_block" ></PasswordModal>
-	<button class="text-left">
-		Modify password
-	</button>
-	<button class="opt-danger text-left">
-		Remove password
-	</button>
-	<p class="opt-title">Option</p>
+		<button @click="openPassword" class="text-left">
+			Set password
+		</button>
+		<PasswordModal ref="password_block" :channelId="channel.id"></PasswordModal>
+	</div>
 	<button @click="leave_channel" class="opt-danger text-left">
 		Leave channel
 	</button>
@@ -50,14 +45,15 @@ import OneRowForm from "../OneRowForm.vue";
 import SendIcon from '@/assets/icon/send.svg';
 import PasswordModal from '@/components/modal/PasswordModal.vue'
 import { chatSocket } from "@/socket";
-import { Channel } from "@/interfaces/Channel";
+import { Channel, ChannelMemberRole } from "@/interfaces/Channel";
 import {API} from '@/scripts/auth.ts';
 import router from '@/router';
 
 export default defineComponent({
     name: "OptionChannelPanel",
 	props: {
-		channel: {type : Object as PropType<Channel>}
+		channel: {type : Object as PropType<Channel>},
+		role: {type : String as PropType<ChannelMemberRole>}
 	},
 	data() {
 		return {

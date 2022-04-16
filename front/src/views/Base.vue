@@ -88,7 +88,7 @@ import router from '@/router';
 import { SocketMessage } from '@/interfaces/Message';
 import { chatSocket, gameSocket, statusSocket } from '@/socket'
 import NotifPanel from '@/components/Notification/NotifPanel.vue';
-import { Statut } from '@/interfaces/Profile';
+import { Statut, User } from '@/interfaces/Profile';
 import BadgeNotif from '@/components/Notification/BadgeNotif.vue'; 
 import { Notification, FriendRequest, GameStart, GameInvitation, ChannelInvitation } from "@/interfaces/Notification";
 import { useToast } from "vue-toastification";
@@ -117,7 +117,9 @@ export default defineComponent({
 			statusSocket : statusSocket,
 			channelMessage: [] as SocketMessage[],
 			notifications: [] as Notification[],
-			search_expr: ""
+			search_expr: "",
+			avatarPath: '',
+			componentKey: 0,
 		}
 	},
 	mounted() {
@@ -130,6 +132,10 @@ export default defineComponent({
 			toast.warning(err);
 			// console.log("Game warning :", err);
 		})
+		statusSocket.on("new_friend", (id : number) => {
+			console.log('NEW FRIEND IN YOUR LIFE bitch', id);
+			this.$store.dispatch('connection')
+		})
 		statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
 			console.log('status data',data);
 			this.$store.dispatch("setStatus", {
@@ -138,7 +144,7 @@ export default defineComponent({
 				message: data.message
 			})
 		})
-		console.log('avatar', this.$store.state.profile.user.avatarPath)
+		this.avatarPath = this.$store.getters.getAvatarPath;
 		this.getNotif()
 		this.chatSocket
 			.on('message', (data: {channelMessage: SocketMessage}) => {
@@ -158,8 +164,8 @@ export default defineComponent({
 				router.push({name: 'game', params: {match_id: data}})
 			})
 		this.statusSocket
-			.on('friend-request', (request: FriendRequest) => {
-				this.addFriendRequest(request);
+			.on('friend-request', (user: User) => {
+				this.addFriendRequest(user);
 			})
 	},
 	methods: {

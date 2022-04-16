@@ -34,6 +34,8 @@ export class UsersService {
     await getRepository(UserRelationship).save({
       from: { id: toUserId }, to: { id: fromUserId }, type: UserRelationshipType.FRIEND
     });
+    this.WsClients.get(fromUserId).emit('new_friend', toUserId);
+    this.WsClients.get(toUserId).emit('new_friend', fromUserId);
     this.sendNewFriendStatus(fromUserId, toUserId);
   }
 
@@ -73,6 +75,7 @@ export class UsersService {
     await getRepository(UserRelationship).delete({
       from: { id: toUserId }, to: { id: fromUserId }, type: Not(UserRelationshipType.BLOCK)
     });
+    this.WsClients.get(fromUserId).emit('blocked', toUserId);
   }
 
   async create(login: string): Promise<User> {

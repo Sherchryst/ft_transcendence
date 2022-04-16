@@ -27,10 +27,12 @@ export default defineComponent({
 	components: { ButtonLink },
 	methods: {
 		accept() {
+			console.log(this.user)
 			API.post("users/accept-friend-request", {
 				fromId: this.user.id,
 				toId: this.$store.getters.getId
 			}).then( () => {
+				this.$store.dispatch("connection");
 				this.close()
 			})
 		},

@@ -1,11 +1,11 @@
 <template>
-	<ChatWrapper hasConv>
+	<ChatWrapper hasConv :members="members">
 		<div class="flex flex-row justify-between items-center">
 			<div><slot name="title">Channel Name</slot></div>
 			<div class="flex flex-row">
-				<button v-s-dropdown-toggle:info>
+				<!-- <button v-s-dropdown-toggle:info>
 					<info-icon class="h-10"></info-icon>
-				</button>
+				</button> -->
 				<s-dropdown name="info" align="left">
 					<slot name="info"></slot>
 				</s-dropdown>
@@ -42,13 +42,20 @@ import OneRowForm from '@/components/OneRowForm.vue'
 import SendIcon from '@/assets/icon/send.svg';
 import InfoIcon from '@/assets/icon/info.svg'
 import OptionIcon from '@/assets/icon/option.svg'
+import {Member_t } from "@/interfaces/Channel";
 
 export default defineComponent({
 	name: "ChatViewWrapper",
-	components: { OneRowForm, SendIcon, ChatWrapper, InfoIcon, OptionIcon },
+	components: { OneRowForm, SendIcon, ChatWrapper, OptionIcon },
 	methods: {
 		send(data: string) {
 			this.$emit('callback', data)
+		}
+	},
+	props: {
+		members: {
+			type: Array as () => Member_t[],
+			default: () => []
 		}
 	}
 })

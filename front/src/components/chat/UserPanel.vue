@@ -11,18 +11,21 @@
             <button class="text-left" @click="block">
                 Block
             </button>
-            <button class="text-left" @click="mute">
+            <button class="text-left" v-if="role=='admin'" @click="mute">
                 mute user
             </button>
-            <button class="text-left" @click="ban">
+            <button class="text-left" v-if="role=='admin'" @click="ban">
                 ban user
             </button>
-            <button v-if="owner" class="text-left" @click="promute">
+            <button v-if="owner" class="text-left" @click="promote">
                 Promote admin
+            </button>
+            <button v-if="owner" class="text-left" @click="demote">
+                Demote admin
             </button>
         </div>
         <BlockModal ref="modal_block" :user="user"></BlockModal>
-        <ChallengeModal ref="modal_challenge" :target="user.login" ></ChallengeModal>
+        <ChallengeModal ref="modal_challenge" :target="user.nickname" ></ChallengeModal>
         <AdminModal ref="modal_ban" :channelId="channelId" :toId="user.id" moderation="ban"></AdminModal>
         <AdminModal ref="modal_mute" :channelId="channelId" :toId="user.id" moderation="mute"></AdminModal>
     </div>
@@ -35,13 +38,14 @@ import BlockModal from '../modal/BlockModal.vue';
 import ChallengeModal from '../modal/ChallengeModal.vue';
 import { API } from '@/scripts/auth';
 import AdminModal from '../modal/AdminModal.vue';
+import { ChannelMemberRole } from '@/interfaces/Channel';
 
 export default defineComponent({
     name: "Message",
     props: {
         user: { type: Object as PropType<User>, required: true },
         channelId: { type: Number, required: true },
-        myRole: { type: String, default: "admin" },
+        role: { type: String as PropType<ChannelMemberRole>, default: 'member'},
         owner: { type: Boolean, default: true }
     },
     created() {
@@ -71,9 +75,12 @@ export default defineComponent({
             (this.$refs["modal_ban"] as typeof AdminModal).open()
             // API.post("chat/moderation", {channelId: this.channelId, toId: this.user.id, reason: null, duration: null, moderation: 'ban'})
         },
-        promute() {
-            console.log("promute");
+        promote() {
+            API.post('chat/promote', {channelId: this.channelId, targetId: this.user.id})
         },
+        demote() {
+            API.post('chat/demote', {channelId: this.channelId, targetId: this.user.id})
+        }
     },
     components: { BlockModal, ChallengeModal, AdminModal }
 })

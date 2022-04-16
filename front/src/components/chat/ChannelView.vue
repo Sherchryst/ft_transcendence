@@ -38,7 +38,7 @@ export default defineComponent({
 			(this.$refs[this.index] as typeof ChannelModal).open()
 		},
 		join() {
-			if (this.channel.password){
+			if (this.channel.isPasswordSet){
 				this.open()
 			}
 			API.post("chat/join", {

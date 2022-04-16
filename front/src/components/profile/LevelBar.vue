@@ -19,13 +19,12 @@ export default defineComponent({
 		level: function () {
 			let expe : number = (this.xp ? this.xp : 0);
 			if (expe == 0) return 0;
-			console.log((Math.sqrt(625 + (100 * expe)) - 50) / 50)
-			return parseInt(String((Math.sqrt(625 + (100 * expe)) - 50) / 50));
+			return parseInt(String((25 + (Math.sqrt(625 + (100 * expe)) - 50)) / 50));
 		},
 		pourcent: function() {
 			let expe : number = (this.xp ? this.xp : 0);
 			if (expe == 0) return 0;
-			return ((Math.sqrt(625 + (100 * expe)) - 50) / 50 - Math.floor((Math.sqrt(625 + (100 * expe)) - 50) / 50)) * 100;
+			return ((25 + (Math.sqrt(625 + (100 * expe)) - 50)) / 50) - parseInt(String((25 + (Math.sqrt(625 + (100 * expe)) - 50)) / 50));
 		},
 	}
 });
