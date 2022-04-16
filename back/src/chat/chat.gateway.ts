@@ -96,13 +96,16 @@ export class ChatGateway implements OnGatewayConnection{
 
     @SubscribeMessage('direct_message')
     async direct_message(@Req() req, @ConnectedSocket() client, @MessageBody() data: {towardId: number, content: string}) {
+        console.log("direct message", data)
         try {
             const to = await this.usersService.findOne(data.towardId);
             const message = await this.chatService.createMessage(req.user, data.content)
-            this.wsClients.get(to.id).send(await this.chatService.createDirectMessage(to, message));
+            const direct_message = await this.chatService.createDirectMessage(to, message)
+            this.wsClients.get(to.id).emit("direct_message", direct_message);
+            client.emit("direct_message", direct_message)
         }
         catch (error) {
-            client.send("error", error);
+            client.emit("error", error);
         }
     }
 }
