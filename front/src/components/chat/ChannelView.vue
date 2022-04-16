@@ -35,10 +35,11 @@ export default defineComponent({
 	},
 	methods: {
 		open() : void {
-			(this.$refs[this.index] as typeof ChannelModal).open()
+			console.log("dfkjdslf", this.index, this.$refs);
+			(this.$refs['channel_block'] as typeof ChannelModal).open()
 		},
 		join() {
-			if (this.channel.password){
+			if (this.channel.isPasswordSet){
 				this.open()
 			}
 			API.post("chat/join", {
