@@ -77,6 +77,7 @@ export default defineComponent({
     useMeta({ title: 'Home' })
   },
   mounted () {
+    this.$store.dispatch('connection');
     statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
       data.message = data.message.replace(/<[^>]*>?/gm, '');
       setTimeout(() =>{

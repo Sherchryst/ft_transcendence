@@ -232,7 +232,7 @@ export default defineComponent({
 				toId: this.profile.user?.id
 			}).then( () => {
 				this.relationStatus = UserRelationshipType.BLOCK;
-				console.log('User blocked', this.relationStatus)
+				console.log('User blocked', this.relationStatus);
 			})
 		},
 		async unblock() : Promise<void> {
@@ -263,6 +263,7 @@ export default defineComponent({
 			}
 			else
 				this.relationStatus = 'unknown';
+			this.$store.dispatch('connection');
 		}),
 		statusSocket.on("new_friend", (id : number) => {
 			console.log('NEW FRIEND IN YOUR LIFE bitch', id);
