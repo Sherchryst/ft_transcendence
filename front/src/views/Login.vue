@@ -67,8 +67,8 @@ export default defineComponent({
 		send_digit_code(): void {
 			API.post('2fa/authenticate', {twoFactorAuthenticationCode: this.digits})
 			.then((response) => {
+				this.$forceUpdate();
 				this.connection()
-				console.log(response.data)
 			}).catch( (error) => {
 				console.log("ERROR", error.response.data)
 				if (error.response && error.response.data.message == "Unauthorized")
