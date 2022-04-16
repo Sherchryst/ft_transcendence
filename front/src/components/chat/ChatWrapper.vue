@@ -91,18 +91,14 @@ export default defineComponent({
 	mounted() {
 		chatSocket.on('joined', (data) => {
 			this.members.push(data);
-			console.log('this one just joined', data);
 		})
 		API.get('users/profile').then( (response: {data : Profile} ) => {
 			this.friends = response.data.friends
-			console.log("Frends", this.friends)
 		})
 		API.get('chat/join-list').then((response) => {
 			this.listChannel = response.data
-			console.log("list", this.listChannel)
 		}).catch((error) => {
 			this.listChannel = []
-			console.log(error)
 		})
 	},
 })

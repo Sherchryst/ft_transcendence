@@ -28,12 +28,10 @@ export default defineComponent({
 	methods: {
 		acceptInvitation() {
 			this.socket.emit("acceptInvit", this.data);
-			console.log("acceptInvit", this.data);
 			this.close()
 		},
 		declineInvitation() {
 			this.socket.emit("declineInvit", this.data);
-			console.log("declineInvit", this.data);
 			this.close()
 		},
 		close(){

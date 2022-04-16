@@ -68,7 +68,6 @@ export default defineComponent({
     friends: {
       handler(newValue: User[]) {
         this.friends = newValue;
-        console.log('this change')
       },
       deep: true,
     },
@@ -85,11 +84,8 @@ export default defineComponent({
       }, 100)
     })
     this.friends = this.$store.getters.getFriends
-    console.log('friends', this.friends);
-    console.log('created', this.$store.getters.getId)
     API.get('users/top-ten').then((res) => {
       this.topPlayer = res.data
-      console.log(res.data)
     })
     API.get('match/get-winrate', {
       params: {
@@ -97,9 +93,6 @@ export default defineComponent({
       }
     }).then((res) => {
       this.winrate = parseInt(res.data.winrate) ;
-      console.log('Winrate',this.winrate)
-    }).catch((err) => {
-      console.log(err)
     })
     API.get('match/get-history', {
       params: {
@@ -108,9 +101,6 @@ export default defineComponent({
       }
     }).then((res) => {
       this.history = res.data;
-      console.log('Matches' ,res.data)
-    }).catch((err) => {
-      console.log(err)
     })
   },
 })
