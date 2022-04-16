@@ -1,5 +1,5 @@
 <template>
-	<ChatWrapper hasConv>
+	<ChatWrapper hasConv :members="members">
 		<div class="flex flex-row justify-between items-center">
 			<div><slot name="title">Channel Name</slot></div>
 			<div class="flex flex-row">
@@ -42,6 +42,7 @@ import OneRowForm from '@/components/OneRowForm.vue'
 import SendIcon from '@/assets/icon/send.svg';
 import InfoIcon from '@/assets/icon/info.svg'
 import OptionIcon from '@/assets/icon/option.svg'
+import {Member_t } from "@/interfaces/Channel";
 
 export default defineComponent({
 	name: "ChatViewWrapper",
@@ -49,6 +50,12 @@ export default defineComponent({
 	methods: {
 		send(data: string) {
 			this.$emit('callback', data)
+		}
+	},
+	props: {
+		members: {
+			type: Array as () => Member_t[],
+			default: () => []
 		}
 	}
 })

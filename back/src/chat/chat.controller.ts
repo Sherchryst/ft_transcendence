@@ -4,10 +4,9 @@ import { Jwt2faGuard } from 'src/auth/jwt/jwt.guard';
 import { UsersService } from 'src/users/users.service';
 import { ChannelMemberRole } from './entities/channel-member.entity';
 import { ChatGateway } from './chat.gateway';
-import { ChannelVisibility } from './entities/channel.entity';
 import { ChannelModerationType } from './entities/channel-moderation.entity';
 import { instanceToPlain } from 'class-transformer';
-import { channel } from 'diagnostics_channel';
+import { CreateChannelDto } from './dto/create.dto';
 
 @Controller('chat')
 @UseGuards(Jwt2faGuard)
@@ -32,7 +31,7 @@ export class ChatController {
 
   @Post('join')
   async join(@Req() req, @Body() data: {channelId: number, password: string}) {
-      if (!data.channelId)
+      if (data.channelId == undefined)
         throw new BadRequestException();
       const client = await this.chatGateway.wsClients.get(req.user.id);
       let channel = await this.chatService.findChannel(data.channelId);
@@ -53,7 +52,7 @@ export class ChatController {
   }
 
   @Post('create')
-  async create(@Req() req, @Body() data: {name: string, password: string, visibility: ChannelVisibility}) {
+  async create(@Req() req, @Body() data: CreateChannelDto) {
     const client = await this.chatGateway.wsClients.get(req.user.id);
     let channel;
     try {
@@ -69,7 +68,7 @@ export class ChatController {
 
   @Post('leave')
   async leave(@Req() req, @Body() data: {channelId: number}) {
-    if (!data.channelId)
+    if (data.channelId == undefined)
       throw new BadRequestException();
     console.log(req.user.id)
     const client = await this.chatGateway.wsClients.get(req.user.id);
@@ -111,7 +110,7 @@ export class ChatController {
 
   @Post('invite')
   async invite(@Req() req, @Body() data: {channelId: number, invitedNick: string}) {
-    if (!data.channelId || !data.invitedNick)
+    if (data.channelId == undefined || data.invitedNick == undefined)
       throw new BadRequestException('undefined parameters')
     const sender = await this.chatService.getChannelMember(data.channelId, req.user.id);
     if (!sender)
@@ -131,7 +130,7 @@ export class ChatController {
 
   @Post('delete-invitation')
   async delete_invitation(@Body() data: {channelId: number, fromId: number, toId: number}) {
-    if (!data.channelId || !data.fromId || !data.toId)
+    if (data.channelId == undefined || data.fromId == undefined || data.toId == undefined)
       throw new BadRequestException()
     this.chatService.deleteInvitation(data.channelId, data.fromId, data.toId);
   }
@@ -143,7 +142,7 @@ export class ChatController {
 
   @Post('moderation')
   async moderation(@Req() req, @Body() data: {channelId: number, toId: number, reason: string, duration: number, moderation: ChannelModerationType}) {
-    if (!data.channelId || !data.toId)
+    if (data.channelId == undefined || data.toId == undefined)
       throw new BadRequestException()
     const member = await this.chatService.getChannelMember(data.channelId, req.user.id);
     const target = await this.chatService.getChannelMember(data.channelId, data.toId);
@@ -164,7 +163,7 @@ export class ChatController {
 
   @Post('promote')
   async promote(@Req() req, @Body() data: {channelId: number, targetId: number}) {
-    if (!data.channelId || !data.targetId)
+    if (data.channelId == undefined || data.targetId == undefined)
       throw new BadRequestException("undefined parameters");
     const channel = await this.chatService.findChannel(data.channelId);
     if (!channel || channel.owner.id != req.user.id)
@@ -180,7 +179,7 @@ export class ChatController {
 
   @Post('demote')
   async demote(@Req() req, @Body() data: {channelId: number, targetId: number}) {
-    if (!data.channelId || !data.targetId)
+    if (data.channelId == undefined || data.targetId == undefined)
       throw new BadRequestException("undefined parameters");
     const channel = await this.chatService.findChannel(data.channelId);
     if (!channel || channel.owner.id != req.user.id)
@@ -196,7 +195,7 @@ export class ChatController {
 
   @Post('set-password')
   async setPassword(@Req() req, @Body() data: {channelId: number, password: string}) {
-    if (!data.channelId || !data.password)
+    if (data.channelId == undefined || data.password == undefined)
       throw new BadRequestException('undefined parameters')
     const channel = await this.chatService.findChannel(data.channelId);
     if (!channel || channel.owner.id != req.user.id)

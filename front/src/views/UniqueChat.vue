@@ -1,5 +1,5 @@
 <template>
-    <ChatViewWrapper @callback="send">
+    <ChatViewWrapper @callback="send" :members="members">
         <template v-slot:title>#-{{channel.name}}</template>
         <!-- <template v-slot:info>
             <InfoPanel></InfoPanel>

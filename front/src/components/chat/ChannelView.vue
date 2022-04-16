@@ -35,8 +35,7 @@ export default defineComponent({
 	},
 	methods: {
 		open() : void {
-			console.log("dfkjdslf", this.index, this.$refs);
-			(this.$refs['channel_block'] as typeof ChannelModal).open()
+			(this.$refs[this.index] as typeof ChannelModal).open()
 		},
 		join() {
 			if (this.channel.isPasswordSet){

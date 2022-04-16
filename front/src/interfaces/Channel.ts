@@ -15,6 +15,12 @@ export interface ChannelMember_t{
 	role: ChannelMemberRole
 }
 
+export interface Member_t {
+	last_read_at: Date,
+	role: string,
+	user: User
+}
+
 export enum ChannelMemberRole {
 	ADMIN = 'admin',
 	MEMBER = 'member'
