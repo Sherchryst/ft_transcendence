@@ -59,6 +59,7 @@ import MainTitle from "@/components/MainTitle.vue";
 import ButtonLink from "@/components/ButtonLink.vue";
 import ModInput from "@/components/form/ModInput.vue";
 import ModLabel from "@/components/form/ModLabel.vue";
+import {reload_socket} from '@/socket';
 
 export enum State {
   NOTLOGIN,
@@ -122,6 +123,7 @@ export default defineComponent({
         },
         send_digit_code(path: string): void {
         API.post('2fa' + path, {twoFactorAuthenticationCode: this.digits}).then((response) => {
+            reload_socket();
             sessionStorage.setItem("state", State.AUTH.toString())
             this.state = State.AUTH
             this.SwitchOn = false
