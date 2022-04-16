@@ -17,7 +17,7 @@ services:
     restart: always
     volumes:
       - ./back:/app
-    command: sh -c 'npm install && npm run start:dev'
+    command: sh -c 'npm install && npm run build && npm run start:prod'
 
   db:
     image: postgres:alpine
@@ -39,7 +39,7 @@ services:
     restart: always
     volumes:
       - ./front:/app
-    command: sh -c 'npm install && npm run serve'
+    command: sh -c 'npm install && npm run build && npm run production'
 
   adminer:
     container_name: monitoring
