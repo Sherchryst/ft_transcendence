@@ -83,7 +83,8 @@ export class ChatService {
   async createDirectMessage(to: User, message: Message): Promise<DirectMessage> {
     const msg = getRepository(DirectMessage).create({
       to: to,
-      message: message
+      message: message,
+      read_at: new Date() // null ?
     });
     await getRepository(DirectMessage).save(msg);
     return msg;
@@ -132,6 +133,17 @@ export class ChatService {
       relations: ['message', 'message.from'],
       where: { channel: { id: channelId }, message: { sent_at: LessThanOrEqual(maxDate) } }
     }).then(messages => messages.map(m => m.message))).slice(0, maxMessages);
+  }
+
+  async getDirectMessage(fromId: number, toId: number): Promise<DirectMessage[]> {
+    let messages =  (await getRepository(DirectMessage).find({
+      relations: ['message', 'to', 'message.from'],
+      where: [
+        {to: toId, message: { from: { id: fromId }}},
+        {to: fromId, message: { from: { id: toId }}}
+      ]
+    }))
+    return (messages)
   }
 
   async isBanned(user: User, channelId: number): Promise<boolean> {

@@ -12,6 +12,7 @@ import GameChoice from '@/views/GameChoice.vue'
 import EditProfile from '@/views/EditProfile.vue'
 import Game from '@/views/Game.vue'
 import NotFound from '@/views/NotFound.vue'
+import DirectMessage from '@/views/DirectMessage.vue'
 import { useCookies } from "vue3-cookies";
 import { Statut } from '@/interfaces/Profile'
 
@@ -48,6 +49,12 @@ const routes: Array<RouteRecordRaw> = [
           path: 'channel/:id',
           name: 'unique-chat',
           component: UniqueChat,
+          props: true,
+        },
+        {
+          path: 'direct-message/:userId',
+          name: 'direct-message',
+          component: DirectMessage,
           props: true,
         },
       ]
