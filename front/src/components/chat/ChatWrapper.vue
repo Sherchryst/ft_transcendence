@@ -17,7 +17,7 @@
 			<title-count :lenght="members.length" class="mt-4">
 				<h4 class="text-left font-bold text-xl" >Participant</h4>
 			</title-count>
-			<div class="grid grid-cols-3">
+			<div class="grid grid-cols-2 gap-5 max-h-52 overflow-auto">
 				<ParticipantPreview v-for="(user, index) in members" :user="user" :key="index" />
 			</div>
 		</div>
