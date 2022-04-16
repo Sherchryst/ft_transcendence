@@ -45,7 +45,7 @@ export class ChatGateway implements OnGatewayConnection{
     @SubscribeMessage('message')
     async handleMsg(@Req() req, @ConnectedSocket() client, @MessageBody() data: {chanId: number, msg: string}) {
         try {
-        if (await this.chatService.isMuted(req.user, data.chanId))
+        if (await this.chatService.isMuted(req.user, data.chanId) || await this.chatService.isBanned(req.user, data.chanId))
             return  
         const message = await this.chatService.createMessage(req.user, data.msg);
         const channelMessage = await this.chatService.createChannelMessage(data.chanId, message);
