@@ -3,7 +3,7 @@
 		<span class="font-accentuate font-semibold">{{username}}</span> wants to challenge you on <span class="font-accentuate font-semibold">{{ mode }}</span> mode
 		<div class="grid grid-cols-2 gap-3 my-2">
 			<ButtonLink @click="acceptInvitation">Accept</ButtonLink>
-			<ButtonLink @click="close" class="btn-neutral">Decline</ButtonLink>
+			<ButtonLink @click="declineInvitation" class="btn-neutral">Decline</ButtonLink>
 		</div>
 	</div>
 </template>
