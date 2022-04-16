@@ -54,7 +54,7 @@ export class ChatController {
         throw new UnauthorizedException("Wrong Password");
       await this.chatService.joinChannel(req.user, data.channelId, ChannelMemberRole.MEMBER);
       client.join("channel:" + channel.id);
-      this.chatGateway.server.in("channel:" + channel.id).emit("joined", req.user)
+      this.chatGateway.server.in("channel:" + channel.id).emit("joined", instanceToPlain(req.user));
       this.chatGateway.handleMsg(req, client, {chanId: channel.id, msg: "Hello"});
   }
 
@@ -68,16 +68,15 @@ export class ChatController {
       throw new ConflictException("channel already exists");
     }
     await this.chatService.joinChannel(req.user, channel.id, ChannelMemberRole.ADMIN);
-    this.chatGateway.server.emit("created", { channel: channel})
+    this.chatGateway.server.emit("created", { channel: instanceToPlain(channel)})
     client.join("channel:" + channel.id);
-    return JSON.stringify(channel);
+    return JSON.stringify(instanceToPlain(channel));
   }
 
   @Post('leave')
   async leave(@Req() req, @Body() data: {channelId: number}) {
     if (data.channelId == undefined)
       throw new BadRequestException();
-    console.log(req.user.id)
     const client = await this.chatGateway.wsClients.get(req.user.id);
     await this.chatService.leaveChannel(req.user, data.channelId);
     const members = await this.chatService.getChannelMembers(data.channelId);
@@ -111,8 +110,7 @@ export class ChatController {
       if (!block_list.find((user) => {return user.id == history[i].from.id}))
         filtered_history.push(history[i])
     }
-    console.log("after", filtered_history);
-    return JSON.stringify({'channel': instanceToPlain(channel), 'history': filtered_history, 'members': members});
+    return JSON.stringify({'channel': instanceToPlain(channel), 'history': instanceToPlain(filtered_history), 'members': instanceToPlain(members)});
   }
 
   @Post('invite')
@@ -131,7 +129,6 @@ export class ChatController {
     invitation.channel = await this.chatService.findChannel(invitation.channel.id);
     if (!invitation)
       throw new NotFoundException("target doesn't exist");
-    console.log("Channel Invitation", invitation)
     this.chatGateway.wsClients.get(invited.id).emit("invited", instanceToPlain(invitation));
   }
 
@@ -162,7 +159,6 @@ export class ChatController {
     await this.chatService.createChannelModeration(data.channelId, data.toId, req.user, data.moderation, data.reason, data.duration);
     await this.chatGateway.handleMsg(req, this.chatGateway.wsClients.get(req.user.id), {chanId: data.channelId, msg: data.moderation + " " + target.user.nickname + " because : " + data.reason})
     if (data.moderation == "ban") {
-      console.log(req.user.id);
       req.user = target.user;
       this.leave(req, {channelId: data.channelId})
     }
