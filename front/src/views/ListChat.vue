@@ -10,9 +10,6 @@
             </form>
         </div>
         <div class="col-span-2 flex flex-col gap-4 lg:w-3/4">
-            <title-count :lenght="0">
-                <h3 class="form-title font-bold text-2xl text-left">Your channels</h3>
-            </title-count>
             <title-count :lenght="listChannel.length">
                 <h3 class="form-title font-bold text-2xl text-left">public channels</h3>
             </title-count>
@@ -58,11 +55,6 @@ export default defineComponent ({
             }
         }
     },
-    // computed: {
-    //     // visibility(): string {
-    //     //     return ""
-    //     // }
-    // },
     mounted() {
         this.socket
             .on("disconnect", (reason) => {
