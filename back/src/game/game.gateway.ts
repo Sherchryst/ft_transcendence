@@ -171,6 +171,12 @@ export class GameGateway implements OnGatewayConnection {
     else if (data.nickname == req.user.nickname) {
       socket.emit("error", "You can't invite yourself");
     }
+    else if (await this.matchService.findMatchInvitation(
+      to_user.id,
+     req.user.id
+    )) {
+      socket.emit("error", "You already invited this user");
+    }
     else {
       try {
         const map = await this.matchService.findGameMap(data.mapId);

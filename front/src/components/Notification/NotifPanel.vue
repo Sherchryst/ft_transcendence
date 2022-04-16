@@ -2,7 +2,6 @@
 	<div class="notif-panel flex flex-col">
 		<div class="flex justify-between">
 			<div class="font-bold text-xl mb-5">Notifications</div>
-			<router-link to="home">view all</router-link>
 		</div>
 		<div v-if="notifications.length != 0">
 			<NotifCard v-for="(notification, index) in notifications" :key="index" :dateTime="notification.date">
