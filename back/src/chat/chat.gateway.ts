@@ -62,9 +62,8 @@ export class ChatGateway implements OnGatewayConnection{
             const to = await this.usersService.findOne(data.towardId);
             const message = await this.chatService.createMessage(req.user, data.content)
             const direct_message = await this.chatService.createDirectMessage(to, message)
-            this.wsClients.get(to.id).emit("direct_message", direct_message);
-            client.emit("direct_message", direct_message)
-            // this.wsClients.get(to.id).send(instanceToPlain(await this.chatService.createDirectMessage(to, message)));
+            client.emit("direct_message", instanceToPlain(direct_message));
+            this.wsClients.get(to.id).emit("direct_message", instanceToPlain(direct_message));
         }
         catch (error) {
             client.emit("error", error);
