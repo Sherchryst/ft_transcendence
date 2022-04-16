@@ -1,5 +1,8 @@
 <template>
 	<ChatViewWrapper @callback="send">
+		<template v-slot:title>
+			{{ member.friend.nickname }}
+		</template>
 		<template v-slot:info>
 			
 		</template>
@@ -7,7 +10,7 @@
 			
 		</template>
 		<template v-slot:messages>
-			<message v-for="(message, index) in history" :key="index" :message="message" :channelId="parseInt(userId)">
+			<message v-for="(message, index) in history" :key="index" :message="message" :channelId="parseInt(userId)" :id="index" :role="message.from.role">
 				{{message.content}}
 			</message>
 		</template>
@@ -21,7 +24,8 @@ import Message from '@/components/chat/Message.vue'
 import ChatViewWrapper from '@/components/chat/ChatViewWrapper.vue';
 import { DirectMessage, Message_t } from '@/interfaces/Message';
 import { chatSocket } from '@/socket'
-import { ChannelMember_t, ChannelMemberRole } from '@/interfaces/Channel';
+import { ChannelMemberRole } from '@/interfaces/Channel';
+import { Profile, User } from '@/interfaces/Profile';
 
 export default defineComponent({
 	name: 'DirectMessage',
@@ -34,8 +38,7 @@ export default defineComponent({
 			socket : chatSocket,
 			history: [] as Message_t[],
 			member: {
-				you: {} as ChannelMember_t,
-				friend: {} as ChannelMember_t
+				friend: {} as User
 			}
 		}
 	},
@@ -51,6 +54,14 @@ export default defineComponent({
 		},
 		init(userId: number): void {
 			this.history = []
+			API.get<Profile>('users/get-profile', {
+				params: {
+					id: userId,
+					login: null
+				}
+			}).then( async (response) => {
+				this.member.friend = response.data.user
+			})
 			API.get('chat/direct-messages', {
 				params: {
 					to: userId
@@ -67,7 +78,8 @@ export default defineComponent({
 				from: data.message.from,
 				self: false,
 				photo: true,
-			} 
+			}
+			message.from.role = ChannelMemberRole.MEMBER
 			if (this.$store.getters.getId == message.from.id)
                 message.self = true
             if (this.history.length && this.history[0].from.id == message.from.id)
@@ -88,7 +100,6 @@ export default defineComponent({
 		this.init(this.id)
 		this.socket
 			.on('direct_message', (data) => {
-				console.log("Direct_mesage", data)
 				this.recv(data)
 			})
 	},

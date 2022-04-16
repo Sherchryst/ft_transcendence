@@ -6,7 +6,7 @@
                     <img class="h-10 w-10" src="@/assets/blank-avatar.jpg" alt="">
                 </button>
                 <s-dropdown :name="messageId" position="top" align="right" :offset="30">
-                    <UserPanel :channelId="channelId" :user="message.from" :role="role" :owner="owner" :target_role="message.role"></UserPanel>
+                    <UserPanel :channelId="channelId" :user="message.from" :role="role" :owner="owner" :target_role="role"></UserPanel>
                 </s-dropdown>
             </div>
             <div v-else>

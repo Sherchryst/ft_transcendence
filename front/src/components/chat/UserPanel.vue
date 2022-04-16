@@ -1,6 +1,7 @@
 <template>
     <div>
         <div class="flex flex-col gap-4">
+            <div class="text-lg font-bold">{{ user.nickname }}</div>
             <router-link :to="{name: 'profile', params: { username: user?.login }}">View profile</router-link>
             <button class="text-left" @click="challenge">
                 Challenge
@@ -17,10 +18,10 @@
             <button class="text-left" v-if="role=='admin'" @click="ban">
                 ban user
             </button>
-            <button v-if="owner" class="text-left" @click="promote">
+            <button v-if="owner && role=='admin'" class="text-left" @click="promote">
                 Promote admin
             </button>
-            <button v-if="owner" class="text-left" @click="demote">
+            <button v-if="owner && role=='admin'" class="text-left" @click="demote">
                 Demote admin
             </button>
         </div>
