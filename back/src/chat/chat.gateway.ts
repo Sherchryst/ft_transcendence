@@ -3,13 +3,10 @@ import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import { CustomJwtService } from 'src/auth/jwt/jwt.service';
 import { UsersService } from 'src/users/users.service';
-import { ChannelMember, ChannelMemberRole } from './entities/channel-member.entity';
-import { ChannelVisibility } from './entities/channel.entity';
-import { ChannelModerationType } from './entities/channel-moderation.entity';
 import { getJwtFromSocket } from 'src/auth/jwt/jwt.service';
-import { ClassSerializerInterceptor, Req, UseGuards, UseInterceptors } from '@nestjs/common';
+import { ClassSerializerInterceptor, Req, UnauthorizedException, UseGuards, UseInterceptors } from '@nestjs/common';
 import { WsJwt2faGuard } from 'src/auth/jwt/jwt.guard';
-import * as PostgresError from '@fiveem/postgres-error-codes';
+import { instanceToPlain } from 'class-transformer';
 
 @UseGuards(WsJwt2faGuard)
 @WebSocketGateway(3001, {namespace: "chat"})
@@ -48,50 +45,14 @@ export class ChatGateway implements OnGatewayConnection{
     @SubscribeMessage('message')
     async handleMsg(@Req() req, @ConnectedSocket() client, @MessageBody() data: {chanId: number, msg: string}) {
         try {
+        if (await this.chatService.isMuted(req.user, data.chanId))
+            return  
         const message = await this.chatService.createMessage(req.user, data.msg);
         const channelMessage = await this.chatService.createChannelMessage(data.chanId, message);
-        this.server.in("channel:" + data.chanId).emit("message", { channelMessage: channelMessage });
+        this.server.in("channel:" + data.chanId).emit("message", { channelMessage: instanceToPlain(channelMessage) });
         } catch (error) {
             client.send("error", error)
         }
-    }
-
-    @SubscribeMessage('chanModeration')
-    async ban(@Req() req, @ConnectedSocket() client, @MessageBody() data: {chanId: number, userId: number, action: ChannelModerationType, duration: number, reason: string}) {
-        const admin = await this.chatService.getChannelMember(data.chanId, req.user.id);
-        if (admin.role !== ChannelMemberRole.ADMIN)
-            throw new WsException('you\'re not an administrator')
-        const members = await this.chatService.getChannelMembers(data.chanId);
-        this.chatService.createChannelModeration(data.chanId, data.userId, req.user, data.action, data.reason, data.duration)
-    }
-
-    @SubscribeMessage('change_owner')
-    async change_owner(@Req() req, @ConnectedSocket() client, @MessageBody() data: {chanId: number, newOwnerId: number}) {
-        const channel = await this.chatService.findChannel(data.chanId);
-        if (req.user.id != channel.owner.id)
-            throw new WsException('you\'re not the owner');
-        channel.owner = await this.usersService.findOne(data.newOwnerId);
-        this.chatService.updateChannel(channel);
-    }
-
-    @SubscribeMessage('promote')
-    async promote(@Req() req, @ConnectedSocket() client, @MessageBody() data: {chanId: number, userId: number}) {
-        const channel = await this.chatService.findChannel(data.chanId);
-        if (req.user.id != channel.owner.id)
-            throw new WsException('you\'re not the owner');
-        const member = await this.chatService.getChannelMember(channel.id, req.user.id);
-        member.role = ChannelMemberRole.ADMIN;
-        this.chatService.updateMember(member);
-    }
-
-    @SubscribeMessage('demote')
-    async demote(@Req() req, @ConnectedSocket() client, @MessageBody() data: {chanId: number, userId: number}) {
-        const channel = await this.chatService.findChannel(data.chanId);
-        if (req.user.id != channel.owner.id)
-            throw new WsException('you\'re not the owner');
-        const member = await this.chatService.getChannelMember(channel.id, req.user.id);
-        member.role = ChannelMemberRole.MEMBER;
-        this.chatService.updateMember(member);
     }
 
     @SubscribeMessage('direct_message')
@@ -99,7 +60,7 @@ export class ChatGateway implements OnGatewayConnection{
         try {
             const to = await this.usersService.findOne(data.towardId);
             const message = await this.chatService.createMessage(req.user, data.content)
-            this.wsClients.get(to.id).send(await this.chatService.createDirectMessage(to, message));
+            this.wsClients.get(to.id).send(instanceToPlain(await this.chatService.createDirectMessage(to, message)));
         }
         catch (error) {
             client.send("error", error);

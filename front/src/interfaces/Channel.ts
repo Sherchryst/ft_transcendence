@@ -5,7 +5,8 @@ export interface Channel{
 	name: string,
 	owner?: User,
 	visibility: number,
-	password: string | null
+	password: string | null,
+	isPasswordSet: boolean	
 }
 
 export interface ChannelMember_t{
