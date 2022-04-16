@@ -3,9 +3,9 @@
 		<div class="flex flex-row justify-between items-center">
 			<div><slot name="title">Channel Name</slot></div>
 			<div class="flex flex-row">
-				<button v-s-dropdown-toggle:info>
+				<!-- <button v-s-dropdown-toggle:info>
 					<info-icon class="h-10"></info-icon>
-				</button>
+				</button> -->
 				<s-dropdown name="info" align="left">
 					<slot name="info"></slot>
 				</s-dropdown>
@@ -46,7 +46,7 @@ import {Member_t } from "@/interfaces/Channel";
 
 export default defineComponent({
 	name: "ChatViewWrapper",
-	components: { OneRowForm, SendIcon, ChatWrapper, InfoIcon, OptionIcon },
+	components: { OneRowForm, SendIcon, ChatWrapper, OptionIcon },
 	methods: {
 		send(data: string) {
 			this.$emit('callback', data)
