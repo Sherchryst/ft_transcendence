@@ -40,7 +40,14 @@ export class MatchService {
       level: level
     });
     await getRepository(MatchInvitation).save(matchInvitation);
-    return matchInvitation;
+    const invitation = await getRepository(MatchInvitation).findOne({
+      relations: [ 'from', 'to', 'map' ],
+      where: { 
+        from: { id: from },
+        to: { id: to },
+      }
+    })
+    return invitation;
   }
 
   async deleteMatch(matchId: number) {
