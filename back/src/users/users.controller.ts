@@ -137,6 +137,7 @@ export class UsersController {
   async updateNickname(@Body() dto: UpdateNicknameDto) {
     try {
       await this.usersService.updateNickname(dto.id, dto.nickname);
+      this.usersService.WsClients.get(dto.id).emit('update_user', dto.id);
     } catch (error) {
       if (error.code === PostgresError.PG_UNIQUE_VIOLATION)
         throw new ConflictException('Nickname already taken');
@@ -155,5 +156,6 @@ export class UsersController {
     let buffer = await sharp(file.buffer)
     .resize(400, 400).toFormat('jpeg').jpeg({ quality: 90 }).toBuffer();
     await this.usersService.updateAvatar(user.id, buffer);
+    this.usersService.WsClients.get(user.id).emit('update_user', user.id);
   }
 }
