@@ -23,9 +23,6 @@ export default defineComponent({
             default: () => ({}),
         },
     },
-    mounted() {
-        console.log(this.user)
-    },
 })
 </script>
 

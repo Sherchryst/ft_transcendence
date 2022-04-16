@@ -1,5 +1,5 @@
 <template>
-	<ChatWrapper hasConv :members="members">
+	<ChatWrapper hasConv>
 		<div class="flex flex-row justify-between items-center">
 			<div><slot name="title">Channel Name</slot></div>
 			<div class="flex flex-row">
@@ -52,11 +52,5 @@ export default defineComponent({
 			this.$emit('callback', data)
 		}
 	},
-	props: {
-		members: {
-			type: Array as () => Member_t[],
-			default: () => []
-		}
-	}
 })
 </script>
