@@ -101,7 +101,6 @@ export default defineComponent({
         }
     },
     mounted() {
-        console.log('is2fa', this.$store.getters.is2FA);
         this.Is2fa = this.$store.getters.is2FA;
     },
     methods: {
@@ -127,12 +126,8 @@ export default defineComponent({
             sessionStorage.setItem("state", State.AUTH.toString())
             this.state = State.AUTH
             this.SwitchOn = false
-            console.log('Data', response.data)
             this.$store.dispatch('connection');
             this.Is2fa = this.$store.getters.is2FA;
-            console.log('is2fa', this.$store.getters.is2FA);
-        }).catch((response) => {
-            console.log('Response', response)
         })
         },
         inputImage(image: File) {
@@ -141,10 +136,8 @@ export default defineComponent({
             this.inside = false;
         },
         inputSwitch(is2fa: boolean) {
-            console.log('Switch',this.Switch)
             is2fa ? this.Switch = true : this.Switch = false;
             this.SwitchOn = this.Switch;
-            console.log('Switch', is2fa);
         },
         async send() {
             var formData = new FormData();
@@ -154,17 +147,12 @@ export default defineComponent({
                 await API.post('users/update-nickname', {
                     id: this.$store.getters.getId,
                     nickname: this.nickname
-                }).catch(function(error) {
-                    console.log(error);
-                });
-            console.log('avatar', this.avatar);
+                })
             if(this.avatar.size > 0)
                 await API.post('users/update-avatar', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
-                    }}).catch(function(error) {
-                    console.log("update failed", error);
-                });
+                    }})
             this.$store.dispatch('connection').then(() => {
                 router.push({name: "profile", params: {username: this.$store.getters.getLogin}});
             });

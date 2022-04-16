@@ -71,7 +71,6 @@ export default defineComponent({
 				reload_socket();
 				this.connection()
 			}).catch( (error) => {
-				console.log("ERROR", error.response.data)
 				if (error.response && error.response.data.message == "Unauthorized")
 					this.handleUnauthorize()
 			})

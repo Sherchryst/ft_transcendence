@@ -44,7 +44,6 @@ export default defineComponent({
 	},
 	methods: {
 		send(message: string): void {
-			console.log("direct message : ", message)
 			if (message != "") {
 				this.socket.emit('direct_message', {
 					towardId: parseInt(this.userId),

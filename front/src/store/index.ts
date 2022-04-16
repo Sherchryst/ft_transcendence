@@ -69,9 +69,8 @@ export const store = createStore<State>({
             _profile.friends[i].message = profile.friends[i].message
           }
         } catch (e) {
-          console.log(e)
+          console.log('Catched', e)
         }
-      console.log(_profile)
       localStorage.setItem("state", Statut.AUTH.toString())
       localStorage.setItem('user', JSON.stringify(_profile))
       //state.profile = _profile

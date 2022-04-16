@@ -77,7 +77,7 @@ export default defineComponent({
         leave_channel(): void {
             API.post('chat/leave', {channelId: this.channel?.id}).then((response) => {
                 router.push({name: 'chat'});
-            }).catch((error) => {console.log(error)})
+            })
 		},
         invitation(nickname: string) {
 			API.post('chat/invite', {channelId: this.channel?.id, invitedNick: nickname})

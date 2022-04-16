@@ -160,7 +160,6 @@ export default defineComponent({
 				}
 			})
 			.then(async (res) => {
-				console.log('Profile', res.data)
 				this.achievements = res.data.achievements
 				this.profile = res.data;
 				if (this.profile.user.id != this.$store.getters.getId)
@@ -176,17 +175,12 @@ export default defineComponent({
 							this.relationStatus = res.data.type
 						
 					})
-					.catch(err => {
-						console.log(err)
-					})
 				await API.get('match/match-count', {
 					params: {
 						userId: this.profile.user.id
 					}
 				}).then((res) => {
 					this.count = res.data.count;
-				}).catch((err) => {
-					console.log(err)
 				})
 				await API.get('match/get-winrate', {
 					params: {
@@ -194,8 +188,6 @@ export default defineComponent({
 					}
 				}).then((res) => {
 					this.winrate = parseInt(res.data.winrate) ;
-				}).catch((err) => {
-					console.log(err)
 				})
 				await API.get('match/get-history', {
 					params: {
@@ -204,8 +196,6 @@ export default defineComponent({
 					}
 				}).then((res) => {
 					this.history = res.data;
-				}).catch((err) => {
-					console.log(err)
 				})
 			}).catch(() => {
 				router.push({name: 'not-found', replace: true })
@@ -223,7 +213,6 @@ export default defineComponent({
 				toId: this.profile.user?.id
 			}).then( () => {
 				this.relationStatus = UserRelationshipType.PENDING;
-				console.log('Friend request sent', this.relationStatus)
 			})
 		},
 		async block() : Promise<void> {
@@ -232,7 +221,6 @@ export default defineComponent({
 				toId: this.profile.user?.id
 			}).then( () => {
 				this.relationStatus = UserRelationshipType.BLOCK;
-				console.log('User blocked', this.relationStatus);
 			})
 		},
 		async unblock() : Promise<void> {
@@ -241,7 +229,6 @@ export default defineComponent({
 				toId: this.profile.user?.id
 			}).then(() => {
 				this.relationStatus = ''
-				console.log('User unblocked', this.relationStatus)
 			})
 		},
 	},
@@ -266,7 +253,6 @@ export default defineComponent({
 			this.$store.dispatch('connection');
 		}),
 		statusSocket.on("new_friend", (id : number) => {
-			console.log('NEW FRIEND IN YOUR LIFE bitch', id);
 			this.relationStatus = UserRelationshipType.FRIEND;
 		})
 		this.getUser(this.username);
@@ -279,7 +265,6 @@ export default defineComponent({
 			return this.profile.user?.avatarPath
 		},
 		RelationshipType() : string {
-			console.log('Relationship work', this.relationStatus)
 				return this.relationStatus
 		},
 	}

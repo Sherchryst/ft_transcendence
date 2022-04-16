@@ -53,7 +53,6 @@ export default defineComponent({
 	},
 	methods: {
 		print(){
-			console.log("FormData", this.formData)
 			gameSocket.emit("invite", this.formData);
 		},
 		toggleOption(){
