@@ -202,6 +202,7 @@ export class ChatService {
 
   async listChannels(): Promise<Channel[]> {
     return getRepository(Channel).find({
+      relations: ['owner'],
       where: { visibility: ChannelVisibility.PUBLIC }
     });
   }

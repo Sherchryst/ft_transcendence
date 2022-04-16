@@ -3,7 +3,7 @@
 		<div class="chan flex flex-row justify-between px-4 py-3">
 				<div class="flex flex-col items-start">
 					<span class="title font-bold text-xl">#-{{channel?.name}}</span>
-					<span class="font-light">Username</span>
+					<span class="font-light">{{ channel.owner?.nickname }}</span>
 				</div>
 				<button @click="join">join</button>
 		</div>
@@ -64,6 +64,9 @@ export default defineComponent({
     }
     &:hover{
         background: $panel-color;
+    }
+    button {
+        color: $action;
     }
 }
 </style>
