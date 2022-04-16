@@ -7,6 +7,7 @@ import { ChatGateway } from './chat.gateway';
 import { ChannelVisibility } from './entities/channel.entity';
 import { ChannelModerationType } from './entities/channel-moderation.entity';
 import sha from 'sha.js';
+import { CreateChannelDto } from './dto/create.dto';
 
 @Controller('chat')
 @UseGuards(Jwt2faGuard)
@@ -50,7 +51,7 @@ export class ChatController {
   }
 
   @Post('create')
-  async create(@Req() req, @Body() data: {name: string, password: string, visibility: ChannelVisibility}) {
+  async create(@Req() req, @Body() data: CreateChannelDto) {
     const client = await this.chatGateway.wsClients.get(req.user.id);
     let channel;
     try {
