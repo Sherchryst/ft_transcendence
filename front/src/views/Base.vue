@@ -236,7 +236,7 @@ export default defineComponent({
 				return (notif.content == data)
 			})
 			console.log("index", index)
-			this.notifications.splice(index)
+			this.notifications.splice(index, 1)
 		},
 		search(expr: string): void {
 			if (expr && expr.length)
