@@ -157,7 +157,7 @@ export class ChatController {
       throw new UnauthorizedException("you're not an admin");
     if (!target || target.role == ChannelMemberRole.ADMIN)
       throw new UnauthorizedException("you can't target this user");
-    if (data.duration <= 0)
+    if (data.duration <= 0 || data.duration > 31536000000)
       throw new BadRequestException("Wrong duration");
     await this.chatService.createChannelModeration(data.channelId, data.toId, req.user, data.moderation, data.reason, data.duration);
     await this.chatGateway.handleMsg(req, this.chatGateway.wsClients.get(req.user.id), {chanId: data.channelId, msg: data.moderation + " " + target.user.nickname + " because : " + data.reason})
