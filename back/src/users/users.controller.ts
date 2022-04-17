@@ -36,6 +36,13 @@ export class UsersController {
     await this.usersService.acceptFriendRequest(dto.fromId, req.user.id);
   }
 
+  @Post('decline-friend')
+  async decline(@Req() req, @Body() dto: { fromId: number }) {
+    if (!dto.fromId)
+      throw new BadRequestException('No fromId provided');
+    this.usersService.declineFriend(dto.fromId, req.user.id)
+  }
+
   @Post('block-user')
   async blockUser(@Req() req, @Body() dto: { toId: number }) {
     if (!dto.toId)
@@ -57,7 +64,9 @@ export class UsersController {
     if (!id)
       throw new BadRequestException('No id provided');
     const requests = await this.usersService.getFriendRequests(id);
-    return JSON.stringify(requests.map(({ id, nickname }) => ({ id, nickname })));
+    return (requests)
+    // console.log("REQUEST", requests)
+    // return JSON.stringify(requests.map(({ id, nickname }) => ({ id, nickname })));
   }
 
   @Get('profile')
@@ -130,7 +139,8 @@ export class UsersController {
     const request = await this.usersService.sendFriendRequest(req.user.id, dto.toId);
     if (!request)
       throw new UnauthorizedException();
-    this.usersService.WsClients.get(dto.toId).emit("friend-request", instanceToPlain(req.user));
+    request.from = req.user
+    this.usersService.WsClients.get(dto.toId).emit("friend-request", instanceToPlain(request));
   }
 
   @Get('top-ten')

@@ -39,6 +39,13 @@ export class UsersService {
     this.sendNewFriendStatus(fromUserId, toUserId);
   }
 
+  async declineFriend(fromUserId: number, toUserId: number) {
+    await getRepository(UserRelationship).delete({
+      from: { id: fromUserId },
+      to: { id: toUserId }
+    })
+  }
+
   async inMatch(userId: number): Promise<Match> {
     return await getRepository(Match).findOne({
       relations: ['player1', 'player2', 'winner'],
@@ -129,11 +136,11 @@ export class UsersService {
     return await this.getRelationships(userId, UserRelationshipType.FRIEND);
   }
 
-  async getFriendRequests(userId: number): Promise<User[]> {
+  async getFriendRequests(userId: number): Promise<UserRelationship[]> {
     return await getRepository(UserRelationship).find({
       relations: ['from'],
       where: { to: { id: userId }, type: UserRelationshipType.PENDING }
-    }).then(relations => relations.map(r => r.from));
+    })
   }
 
   async getOneRelationship(fromUserId: number, toUserId: number): Promise<UserRelationship> {

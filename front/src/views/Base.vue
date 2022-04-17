@@ -154,8 +154,9 @@ export default defineComponent({
 				router.push({name: 'game', params: {match_id: data}})
 			})
 		this.statusSocket
-			.on('friend-request', (user: User) => {
-				this.addFriendRequest(user);
+			.on('friend-request', (request: FriendRequest) => {
+				console.log(request)
+				this.addFriendRequest(request);
 			})
 	},
 	methods: {
@@ -193,12 +194,10 @@ export default defineComponent({
 			})
 		},
 		addFriendRequest(data: FriendRequest): void {
-			let friendRequest =  { nickname: data.nickname, id: data.id} as FriendRequest
-			let dateEvent = new Date()
 			this.notifications.push({
 				container: 'NotifFriend',
-				content: friendRequest,
-				date: dateEvent
+				content: data,
+				date: new Date(data.created_at)
 			} as Notification)
 		},
 		addGameInvitation(data: GameInvitation): void {

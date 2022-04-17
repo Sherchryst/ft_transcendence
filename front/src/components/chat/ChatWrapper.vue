@@ -16,7 +16,6 @@
 			</div>
 			<div v-else>
 				No direct message.
-				<!-- <ButtonLink class="my-3">New conversation</ButtonLink> -->
 			</div>
 			<title-count :lenght="listChannel.length" class="mt-4">
 				<h4 class="text-left font-bold text-xl" >Channels</h4>

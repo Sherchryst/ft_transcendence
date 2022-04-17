@@ -26,7 +26,6 @@ import { key } from '@/store'
 import { Message_t, ServerMessage } from '@/interfaces/Message';
 import { Channel, ChannelMember_t, ChannelMemberRole } from '@/interfaces/Channel';
 import { chatSocket } from '@/socket'
-import InfoPanel from '@/components/chat/InfoPanel.vue';
 import OptionChannel from '../components/chat/OptionChannel.vue';
 import ChatViewWrapper from '@/components/chat/ChatViewWrapper.vue';
 import { API } from '@/scripts/auth';
