@@ -66,7 +66,7 @@ export class ChatController {
     try {
       channel = await this.chatService.createChannel(data.name, req.user, data.password, data.visibility);
     } catch (error) {
-      throw new ConflictException("channel already exists");
+      throw new ConflictException("Channel already exists");
     }
     await this.chatService.joinChannel(req.user, channel.id, ChannelMemberRole.ADMIN);
     this.chatGateway.server.emit("created", { channel: instanceToPlain(channel)})
@@ -79,17 +79,19 @@ export class ChatController {
     if (data.channelId == undefined)
       throw new BadRequestException();
     const client = await this.chatGateway.wsClients.get(req.user.id);
-    await this.chatService.leaveChannel(req.user, data.channelId);
     const members = await this.chatService.getChannelMembers(data.channelId);
     const channel = await this.chatService.findChannel(data.channelId);
-    if (members.length == 0 || channel.owner.id == req.user.id) {
+    if (! await this.chatService.getChannelMember(data.channelId, req.user.id))
+      throw new UnauthorizedException("You're not a channel member");
+    if (members.length == 1 || channel.owner.id == req.user.id) {
       await this.chatService.deleteChannel(data.channelId);
       this.chatGateway.server.in("channel:" + data.channelId).socketsLeave("channel:" + data.channelId);
     }
     else {
       this.chatGateway.server.in("channel:" + data.channelId).emit("left", req.user.id);
-      this.chatGateway.handleMsg(req, client, {chanId: channel.id, msg: "Bye"});
+      await this.chatGateway.handleMsg(req, client, {chanId: channel.id, msg: "Bye"});
       client.leave("channel:" + data.channelId);
+      await this.chatService.leaveChannel(req.user, data.channelId);
     }
   }
 
