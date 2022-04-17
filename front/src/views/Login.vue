@@ -24,7 +24,6 @@
 				<p>Welcome to Apong Us, a very exclusive website for students of 42. This website was made by asoursou, mbrunel, mchardin, roalvare and sgah. You will play one of the most iconic games of the last century. I hope you're glad to have access to this amazing experience and that you will enjoy the journey. </p>
 			</div>
 			<ButtonLink text="Connect" href="http://localhost:3000/auth/login42" />
-			<a class="cheat mt-2" href="http://localhost:3000/auth/cheat_login">cheat login</a>
 		</div>
 	</single-card-page>
 </template>
