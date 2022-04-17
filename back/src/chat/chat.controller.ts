@@ -194,7 +194,7 @@ export class ChatController {
     if (!member)
       throw new UnauthorizedException("target doesn't exist");
     if (member.role == ChannelMemberRole.MEMBER)
-      throw new UnauthorizedException("already a member");
+      throw new UnauthorizedException("Not an administrator");
     this.chatService.updateMemberRole(channel.id, data.targetId, ChannelMemberRole.MEMBER);
     this.chatGateway.handleMsg(req, this.chatGateway.wsClients.get(req.user.id), {chanId: data.channelId, msg: member.user.nickname + " is no longer an administrator"})
   }
