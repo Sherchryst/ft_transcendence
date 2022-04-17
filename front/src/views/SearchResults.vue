@@ -25,9 +25,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, watch } from 'vue'
 import { useMeta } from 'vue-meta'
 import { API } from '@/scripts/auth'
+import router from '@/router';
 
 export default defineComponent({
 	name: "search",
@@ -42,17 +43,26 @@ export default defineComponent({
     setup () {
         useMeta({ title: 'search' })
     },
-    beforeUpdate() {
-        this.search()
-    },
+    created() {
+       watch(
+           () => this.$route.params.expr,
+           (newExpr) => {
+               if (newExpr) {
+                   this.matchs = []
+                   this.search(String(newExpr))
+               }
+           }
+       )
+   },
     mounted() {
-        this.search()
+        this.search(this.expr)
     },
     methods: {
-        search() {
-        API.get('users/search', {params: {expr: this.expr}}).then((res) => {
+        search(expr: string) {
+        API.get('users/search', {params: {expr: expr}}).then((res) => {
                 this.matchs = res.data
             }).catch(() => {
+                router.push({name: 'home'})
             this.matchs = []
         })
         }

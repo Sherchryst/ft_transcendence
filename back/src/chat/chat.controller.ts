@@ -201,14 +201,16 @@ export class ChatController {
 
   @Post('set-password')
   async setPassword(@Req() req, @Body() data: {channelId: number, password: string}) {
+    console.log(data)
     if (data.channelId == undefined || data.password == undefined)
       throw new BadRequestException('undefined parameters')
     const channel = await this.chatService.findChannel(data.channelId);
     if (!channel || channel.owner.id != req.user.id)
       throw new UnauthorizedException("you're not the owner");
-    channel.password = sha('sha256').update(data.password).digest('hex');
+    channel.password = data.password.length ? sha('sha256').update(data.password).digest('hex') : null;
     channel.isPasswordSet = channel.password != null;
     this.chatService.updateChannel(channel);
     await this.chatGateway.handleMsg(req, this.chatGateway.wsClients.get(req.user.id), {chanId: data.channelId, msg: "The new password is : " + data.password})
+    return 'ok';
   }
 }
