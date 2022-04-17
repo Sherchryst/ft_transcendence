@@ -45,10 +45,10 @@ export default defineComponent({
 				API.post("chat/join", {
 					channelId: this.channel?.id,
 					password: ""
-				}).then((res)=>{
+				}).then(()=>{
 					router.push({ name: 'unique-chat', params: { id: this.channel?.id }});
-				}).catch((err)=>{
-					console.log(err)
+				}).catch(()=>{
+					//console.log(err)
 				})
 			}
 		}

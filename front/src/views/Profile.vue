@@ -174,8 +174,8 @@ export default defineComponent({
 						else
 							this.relationStatus = res.data.type
 						
-					}).catch(err => {
-						console.log(err)
+					}).catch(() => {
+						//console.log(err)
 					})
 				await API.get('match/match-count', {
 					params: {
@@ -183,8 +183,8 @@ export default defineComponent({
 					}
 				}).then((res) => {
 					this.count = res.data.count;
-				}).catch(err => {
-						console.log(err)
+				}).catch( ()=> {
+						//console.log(err)
 					})
 				await API.get('match/get-winrate', {
 					params: {
@@ -192,8 +192,8 @@ export default defineComponent({
 					}
 				}).then((res) => {
 					this.winrate = parseInt(res.data.winrate) ;
-				}).catch(err => {
-						console.log(err)
+				}).catch(() => {
+						//console.log(err)
 					})
 				await API.get('match/get-history', {
 					params: {
@@ -202,8 +202,8 @@ export default defineComponent({
 					}
 				}).then((res) => {
 					this.history = res.data;
-				}).catch(err => {
-						console.log(err)
+				}).catch(() => {
+						//console.log(err)
 					})
 			}).catch(() => {
 				router.push({name: 'not-found', replace: true })
@@ -221,8 +221,8 @@ export default defineComponent({
 				toId: this.profile.user?.id
 			}).then( () => {
 				this.relationStatus = UserRelationshipType.PENDING;
-			}).catch((err) => {
-				console.log(err)
+			}).catch(() => {
+				//console.log(err)
 			})
 		},
 		async block() : Promise<void> {
@@ -231,8 +231,8 @@ export default defineComponent({
 				toId: this.profile.user?.id
 			}).then( () => {
 				this.relationStatus = UserRelationshipType.BLOCK;
-			}).catch((err) => {
-				console.log(err)
+			}).catch(() => {
+				//console.log(err)
 			})
 		},
 		async unblock() : Promise<void> {
@@ -241,8 +241,8 @@ export default defineComponent({
 				toId: this.profile.user?.id
 			}).then(() => {
 				this.relationStatus = ''
-			}).catch((err) => {
-				console.log(err)
+			}).catch(() => {
+				//console.log(err)
 			})
 		},
 	},
@@ -266,7 +266,7 @@ export default defineComponent({
 				this.relationStatus = 'unknown';
 			this.$store.dispatch('connection');
 		}),
-		statusSocket.on("new_friend", (id : number) => {
+		statusSocket.on("new_friend", () => {
 			this.relationStatus = UserRelationshipType.FRIEND;
 		})
 		this.getUser(this.username);

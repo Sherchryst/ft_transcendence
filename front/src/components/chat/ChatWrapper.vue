@@ -55,8 +55,6 @@ import { useMeta } from 'vue-meta'
 import TitleCount from '@/components/common/TitleCount.vue'
 import { Profile, User } from '@/interfaces/Profile';
 import { Channel } from '@/interfaces/Channel';
-import { Member_t } from '@/interfaces/Channel';
-import ParticipantPreview from './ParticipantPreview.vue';
 import { chatSocket } from '@/socket';
 
 export default defineComponent({
@@ -93,15 +91,13 @@ export default defineComponent({
 		})
 		API.get('users/profile').then( (response: {data : Profile} ) => {
 			this.friends = response.data.friends
-		}).catch( (error) => {
-			console.log(error)
+		}).catch( () => {
+			//console.log(error)
 		})
 		API.get('chat/join-list').then((response) => {
 			this.listChannel = response.data
-		}).catch((error) => {
+		}).catch(() => {
 			this.listChannel = []
-		}).catch((error) => {
-			console.log(error)
 		})
 	},
 })
