@@ -150,7 +150,6 @@ export default defineComponent({
 				this.addGameInvitation(data)
 			})
 			.on('gameStart', (data: number) => {
-				toast.info("Transfered to game");
 				router.push({name: 'game', params: {match_id: data}})
 			})
 		this.statusSocket

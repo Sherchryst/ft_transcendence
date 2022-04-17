@@ -7,6 +7,7 @@ import { ChatGateway } from './chat.gateway';
 import { ChannelModerationType } from './entities/channel-moderation.entity';
 import { instanceToPlain } from 'class-transformer';
 import { CreateChannelDto } from './dto/create.dto';
+import * as sha from 'sha.js';
 
 @Controller('chat')
 @UseGuards(Jwt2faGuard)
@@ -129,7 +130,9 @@ export class ChatController {
     invitation.channel = await this.chatService.findChannel(invitation.channel.id);
     if (!invitation)
       throw new NotFoundException("target doesn't exist");
-    this.chatGateway.wsClients.get(invited.id).emit("invited", instanceToPlain(invitation));
+    try {
+      this.chatGateway.wsClients.get(invited.id).emit("invited", instanceToPlain(invitation));
+    } catch (error) {}
   }
 
   @Post('delete-invitation')
@@ -203,9 +206,9 @@ export class ChatController {
     const channel = await this.chatService.findChannel(data.channelId);
     if (!channel || channel.owner.id != req.user.id)
       throw new UnauthorizedException("you're not the owner");
-    channel.password = data.password;
+    channel.password = sha('sha256').update(data.password).digest('hex');
     channel.isPasswordSet = channel.password != null;
     this.chatService.updateChannel(channel);
-    await this.chatGateway.handleMsg(req, this.chatGateway.wsClients.get(req.user.id), {chanId: data.channelId, msg: "The new password is : " + channel.password})
+    await this.chatGateway.handleMsg(req, this.chatGateway.wsClients.get(req.user.id), {chanId: data.channelId, msg: "The new password is : " + data.password})
   }
 }

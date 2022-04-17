@@ -87,6 +87,7 @@ export default defineComponent({
                 }
             })
             .on('joined', (data) => {
+                console.log('joined', data)
                 this.members.push(data);
             })
             .on('left', (id) => {
