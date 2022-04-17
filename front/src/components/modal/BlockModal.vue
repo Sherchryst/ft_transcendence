@@ -44,6 +44,8 @@ export default defineComponent({
 			}).then( () => {
 				this.close()
 				this.$emit('block')
+			}).catch( (err) => {
+				console.log(err)
 			})
 		},
 	}

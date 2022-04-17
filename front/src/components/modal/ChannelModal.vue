@@ -48,6 +48,8 @@ export default defineComponent({
 				this.formData
 			).then((res)=>{
 				router.push({ name: 'unique-chat', params: { id: this.channelId }});
+			}).catch((err)=>{
+				console.log(err)
 			})
 		}
 	}

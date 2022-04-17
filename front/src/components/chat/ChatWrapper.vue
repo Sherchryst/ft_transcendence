@@ -93,11 +93,15 @@ export default defineComponent({
 		})
 		API.get('users/profile').then( (response: {data : Profile} ) => {
 			this.friends = response.data.friends
+		}).catch( (error) => {
+			console.log(error)
 		})
 		API.get('chat/join-list').then((response) => {
 			this.listChannel = response.data
 		}).catch((error) => {
 			this.listChannel = []
+		}).catch((error) => {
+			console.log(error)
 		})
 	},
 })

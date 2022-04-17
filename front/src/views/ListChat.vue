@@ -69,6 +69,7 @@ export default defineComponent ({
         API.get('chat/list').then((response) => {
             this.listChannel = response.data
         }).catch((error) => {
+            console.log(error)
             this.listChannel = [];
         })
     },
@@ -79,8 +80,10 @@ export default defineComponent ({
                     if (this.listChannel[i].id == response.data.id)
                         return ;
                 this.listChannel.push(response.data);
+            }).catch((error) => {
+                console.log(error)
             })
-		},
+        },
         switchVisibility(): void {
             let visibility =  this.formCreate.visibility
             this.formCreate.visibility =  visibility == "public" ? "private" : "public"
