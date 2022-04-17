@@ -13,6 +13,7 @@ export interface ChannelMember_t{
 	id: number,
 	nickname: string,
 	role: ChannelMemberRole
+	avatarPath: string
 }
 
 export interface Member_t {

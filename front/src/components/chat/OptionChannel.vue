@@ -1,12 +1,13 @@
 <template>
 <div class="opt flex flex-col gap-4">
-	<div v-if="role == 'admin'">
-	<p class="opt-title">Admin</p>
+	<div v-if="role == 'admin'" class="flex flex-col gap-4">
+		<p class="opt-title">Admin</p>
 		<button @click="openPassword" class="text-left">
 			Set password
 		</button>
 		<PasswordModal ref="password_block" :channelId="channel.id"></PasswordModal>
 	</div>
+	<p class="opt-title">Action</p>
 	<button @click="leave_channel" class="opt-danger text-left">
 		Leave channel
 	</button>
@@ -14,11 +15,11 @@
 		<div class="mb-2">Invitation</div>
 		<OneRowForm placeholder="Nickname" @callback="invitation" class="mobile">
 			<span class="flex flex-row items-center">
-				<span class="hidden md:flex pl-2 pr-1">Send</span>
 				<SendIcon/>
 			</span>
 		</OneRowForm>
 	</div>
+	<TitleCount :lenght="members.length"><div class="opt-title">Other Members</div></TitleCount>
 	<div class="grid grid-cols-3 gap-3 overflow-auto max-h-24">
 		<div  v-for="(user, index) in members" :key="index">
 			<ParticipantPreview :user="user"></ParticipantPreview>
@@ -27,7 +28,7 @@
 </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .opt{
 	button {
 		color: $action;
@@ -54,7 +55,7 @@ import { Channel, ChannelMemberRole, Member_t } from "@/interfaces/Channel";
 import {API} from '@/scripts/auth';
 import router from '@/router';
 import ParticipantPreview from '@/components/chat/ParticipantPreview.vue';
-import { User } from "@/interfaces/Profile";
+import TitleCount from "../common/TitleCount.vue";
 
 export default defineComponent({
     name: "OptionChannelPanel",
@@ -77,7 +78,7 @@ export default defineComponent({
         leave_channel(): void {
             API.post('chat/leave', {channelId: this.channel?.id}).then((response) => {
                 router.push({name: 'chat'});
-            }).catch((error) => {console.log(error)})
+            })
 		},
         invitation(nickname: string) {
 			API.post('chat/invite', {channelId: this.channel?.id, invitedNick: nickname})
@@ -86,6 +87,6 @@ export default defineComponent({
 			(this.$refs['password_block'] as typeof PasswordModal).open()
 		},
     },
-    components: { OneRowForm, SendIcon, PasswordModal, ParticipantPreview }
+    components: { OneRowForm, SendIcon, PasswordModal, ParticipantPreview, TitleCount }
 })
 </script>

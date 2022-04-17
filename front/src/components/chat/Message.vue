@@ -3,14 +3,14 @@
         <div v-if="message.photo">
             <div v-if="!message.self">
                 <button class="flex-shrink-0 h-10 w-10" v-s-dropdown-toggle:[messageId]>
-                    <img class="h-10 w-10" src="@/assets/blank-avatar.jpg" alt="">
+                    <img class="h-10 w-10" :src="'http://localhost:3000/' + message.from.avatarPath" alt="">
                 </button>
                 <s-dropdown :name="messageId" position="top" align="right" :offset="30">
                     <UserPanel :channelId="channelId" :user="message.from" :role="role" :owner="owner" :target_role="role"></UserPanel>
                 </s-dropdown>
             </div>
             <div v-else>
-                <img class="h-10 w-10" src="@/assets/blank-avatar.jpg" alt="">
+                <img class="h-10 w-10" :src="'http://localhost:3000/' + message.from.avatarPath" alt="">
             </div>
         </div>
         <div v-else class="h-10 w-10">

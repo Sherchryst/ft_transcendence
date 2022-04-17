@@ -62,15 +62,15 @@ export const store = createStore<State>({
     },
     setProfile(state, _profile: Profile) {
       const profile : Profile = JSON.parse(localStorage.getItem('user') || '{}')
-      try {
-      for (let i = 0; i < _profile.friends.length; i++) {
-          _profile.friends[i].status = profile.friends[i].status
-          _profile.friends[i].message = profile.friends[i].message
+      if(profile.friends !== undefined)
+        try {
+        for (let i = 0; i < _profile.friends.length; i++) {
+            _profile.friends[i].status = profile.friends[i].status
+            _profile.friends[i].message = profile.friends[i].message
+          }
+        } catch (e) {
+          console.log('Catched', e)
         }
-      } catch (e) {
-        console.log(e)
-      }
-      console.log(_profile)
       localStorage.setItem("state", Statut.AUTH.toString())
       localStorage.setItem('user', JSON.stringify(_profile))
       //state.profile = _profile

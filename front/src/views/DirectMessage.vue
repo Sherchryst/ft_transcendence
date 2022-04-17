@@ -3,11 +3,8 @@
 		<template v-slot:title>
 			{{ member.friend.nickname }}
 		</template>
-		<template v-slot:info>
-			
-		</template>
 		<template v-slot:option>
-			
+			<ProfilePanelDM :user="member.friend"></ProfilePanelDM>
 		</template>
 		<template v-slot:messages>
 			<message v-for="(message, index) in history" :key="index" :message="message" :channelId="parseInt(userId)" :id="index" :role="message.from.role">
@@ -26,6 +23,8 @@ import { DirectMessage, Message_t } from '@/interfaces/Message';
 import { chatSocket } from '@/socket'
 import { ChannelMemberRole } from '@/interfaces/Channel';
 import { Profile, User } from '@/interfaces/Profile';
+import router from '@/router';
+import ProfilePanelDM from '@/components/chat/ProfilePanelDM.vue'
 
 export default defineComponent({
 	name: 'DirectMessage',
@@ -44,7 +43,6 @@ export default defineComponent({
 	},
 	methods: {
 		send(message: string): void {
-			console.log("direct message : ", message)
 			if (message != "") {
 				this.socket.emit('direct_message', {
 					towardId: parseInt(this.userId),
@@ -61,6 +59,8 @@ export default defineComponent({
 				}
 			}).then( async (response) => {
 				this.member.friend = response.data.user
+			}).catch( () => {
+				router.push({name: 'not-found', replace: true })
 			})
 			API.get('chat/direct-messages', {
 				params: {
@@ -89,7 +89,7 @@ export default defineComponent({
 	},
 	created(): void {
 		watch(
-			() => this.$route.params.id,
+			() => this.$route.params.userId,
 			(newId) => {
 				if (newId)
 					this.init(parseInt(String(newId)))
@@ -103,6 +103,6 @@ export default defineComponent({
 				this.recv(data)
 			})
 	},
-	components: { ChatViewWrapper, Message }
+	components: { ChatViewWrapper, Message, ProfilePanelDM }
 })
 </script>

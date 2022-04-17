@@ -26,7 +26,6 @@ import { key } from '@/store'
 import { Message_t, ServerMessage } from '@/interfaces/Message';
 import { Channel, ChannelMember_t, ChannelMemberRole } from '@/interfaces/Channel';
 import { chatSocket } from '@/socket'
-import InfoPanel from '@/components/chat/InfoPanel.vue';
 import OptionChannel from '../components/chat/OptionChannel.vue';
 import ChatViewWrapper from '@/components/chat/ChatViewWrapper.vue';
 import { API } from '@/scripts/auth';
@@ -79,9 +78,6 @@ export default defineComponent({
 	mounted() {
         this.getChannelInfo(parseInt(this.id))
         this.socket
-            .on('connect', () => {
-                console.log('connected', this.socket.id)
-            })
             .on('message', (data) => {
                 if (this.blocked_list.find((user) => {return user.id == data.channelMessage.message.from.id}))
                     return ;
@@ -90,6 +86,7 @@ export default defineComponent({
                 }
             })
             .on('joined', (data) => {
+                console.log('joined', data)
                 this.members.push(data);
             })
             .on('left', (id) => {
@@ -105,7 +102,6 @@ export default defineComponent({
 	},  
 	methods: {
         send(message: string): void {
-            console.log("message : ", message)
             if (message != "") {
                 this.socket.emit('message', {
                     chanId: parseInt(this.id),
@@ -114,7 +110,6 @@ export default defineComponent({
             }
 		},
 		getChannelInfo(chanId: number): void {
-            console.log(chanId);
 			API.get('chat/channel-info', {params: {channelId: chanId}})
             .then((response: AxiosResponse) => {
                 this.channel = response.data.channel
@@ -126,15 +121,12 @@ export default defineComponent({
                     if (response.data.members[i].user.id == this.$store.getters.getId)
                         this.role = response.data.members[i].role;
                 }
-            }).catch((error: Error) => {
+            }).catch(() => {
                 router.push({name: 'not-found', replace: true })
             })
             API.get('users/block-list').then((response) => {
-                console.log(response);
                 for (let i = 0; i < response.data.length; ++i)
                     this.blocked_list.push(response.data[i]);
-            }).catch((error) => {
-                console.log(error);
             })
 		},
         recv(data: ServerMessage ): void {

@@ -1,4 +1,4 @@
-import { getRepository, IsNull, Not } from 'typeorm';
+import { getManager, getRepository, IsNull, Not } from 'typeorm';
 import { Match, MatchType } from './entities/match.entity';
 import { GameMap } from './entities/game-map.entity';
 import { Injectable } from '@nestjs/common';
@@ -40,11 +40,27 @@ export class MatchService {
       level: level
     });
     await getRepository(MatchInvitation).save(matchInvitation);
-    return matchInvitation;
+    const invitation = await getRepository(MatchInvitation).findOne({
+      relations: [ 'from', 'to', 'map' ],
+      where: { 
+        from: { id: from },
+        to: { id: to },
+      }
+    })
+    return invitation;
   }
 
   async deleteMatch(matchId: number) {
     await getRepository(Match).delete({ id: matchId });
+  }
+
+  async deleteMatchInvitations(id: number) {
+    await getRepository(MatchInvitation).delete({
+      from: { id: id },
+    });
+    await getRepository(MatchInvitation).delete({
+      to: { id: id },
+    });
   }
 
   async deleteMatchInvitation(fromId: number, toId: number) {

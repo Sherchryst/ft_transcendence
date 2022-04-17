@@ -1,9 +1,9 @@
 <template>
 	<div class="flex flex-col">
-		<span class="font-accentuate font-semibold">{{ user.nickname }}</span> wants to become your friend
+		<span class="font-accentuate font-semibold">{{ request.from.nickname }}</span> wants to become your friend
 		<div class="grid grid-cols-2 gap-3 my-2">
 			<ButtonLink @click="accept">Accept</ButtonLink>
-			<ButtonLink @click="close" class="btn-neutral">Decline</ButtonLink>
+			<ButtonLink @click="decline" class="btn-neutral">Decline</ButtonLink>
 		</div>
 	</div>
 </template>
@@ -20,24 +20,30 @@ export default defineComponent({
 		data: { type: Object, required: true }
 	},
 	computed: {
-		user(): FriendRequest {
+		request(): FriendRequest {
 			return (this.data as FriendRequest)
 		}
 	},
 	components: { ButtonLink },
 	methods: {
 		accept() {
-			console.log(this.user)
 			API.post("users/accept-friend-request", {
-				fromId: this.user.id,
+				fromId: this.request.from.id,
 				toId: this.$store.getters.getId
 			}).then( () => {
 				this.$store.dispatch("connection");
 				this.close()
 			})
 		},
+		decline() {
+			API.post("users/decline-friend", {
+				fromId: this.request.from.id 
+			}).then( () => {
+				this.close()
+			})
+		},
 		close(){
-			this.$emit("close", this.user)
+			this.$emit("close", this.request)
 		}
 	}
 })

@@ -8,7 +8,7 @@
 				<discussion-preview v-for="(friend, index) in friends" :route="{name: 'direct-message', params: {userId: friend.id}}" :key="index" >
 					<template v-slot:image>
 						<div class="mr-5">
-							<img class="h-10 w-10" src="@/assets/blank-avatar.jpg" alt="_profile">
+							<img class="h-10 w-10" :src="'http://localhost:3000/' + friend.avatarPath" alt="_profile">
 						</div>
 					</template>
 					<p class="username text-lg">{{friend.nickname}}</p>
@@ -16,7 +16,6 @@
 			</div>
 			<div v-else>
 				No direct message.
-				<!-- <ButtonLink class="my-3">New conversation</ButtonLink> -->
 			</div>
 			<title-count :lenght="listChannel.length" class="mt-4">
 				<h4 class="text-left font-bold text-xl" >Channels</h4>
@@ -91,18 +90,14 @@ export default defineComponent({
 	mounted() {
 		chatSocket.on('joined', (data) => {
 			this.members.push(data);
-			console.log('this one just joined', data);
 		})
 		API.get('users/profile').then( (response: {data : Profile} ) => {
 			this.friends = response.data.friends
-			console.log("Frends", this.friends)
 		})
 		API.get('chat/join-list').then((response) => {
 			this.listChannel = response.data
-			console.log("list", this.listChannel)
 		}).catch((error) => {
 			this.listChannel = []
-			console.log(error)
 		})
 	},
 })
