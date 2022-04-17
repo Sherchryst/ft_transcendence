@@ -126,7 +126,7 @@ export default defineComponent({
                     if (response.data.members[i].user.id == this.$store.getters.getId)
                         this.role = response.data.members[i].role;
                 }
-            }).catch((error: Error) => {
+            }).catch(() => {
                 router.push({name: 'not-found', replace: true })
             })
             API.get('users/block-list').then((response) => {

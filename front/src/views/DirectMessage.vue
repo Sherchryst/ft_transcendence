@@ -26,6 +26,7 @@ import { DirectMessage, Message_t } from '@/interfaces/Message';
 import { chatSocket } from '@/socket'
 import { ChannelMemberRole } from '@/interfaces/Channel';
 import { Profile, User } from '@/interfaces/Profile';
+import router from '@/router';
 
 export default defineComponent({
 	name: 'DirectMessage',
@@ -61,6 +62,8 @@ export default defineComponent({
 				}
 			}).then( async (response) => {
 				this.member.friend = response.data.user
+			}).catch( () => {
+				router.push({name: 'not-found', replace: true })
 			})
 			API.get('chat/direct-messages', {
 				params: {
