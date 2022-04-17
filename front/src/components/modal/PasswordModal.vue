@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
 import Modal from "../Modal.vue";
 import ButtonLink from "../ButtonLink.vue";
 import ModInput from "../form/ModInput.vue";
@@ -43,8 +43,8 @@ export default defineComponent({
 		},
 		send(){
 			API.post('chat/set-password', {channelId: this.channelId, password: this.FormData.password}).then(() => {
-			this.close(); }).catch((err) => {
-				console.log(err);
+			this.close(); }).catch(() => {
+				//console.log(err);
 			})
 		}
 	}

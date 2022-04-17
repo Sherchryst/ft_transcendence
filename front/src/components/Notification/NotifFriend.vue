@@ -33,8 +33,8 @@ export default defineComponent({
 			}).then( () => {
 				this.$store.dispatch("connection");
 				this.close()
-			}).catch( err => {
-				console.log(err)
+			}).catch( () => {
+				//console.log(err)
 			})
 		},
 		decline() {
@@ -42,8 +42,8 @@ export default defineComponent({
 				fromId: this.request.from.id 
 			}).then( () => {
 				this.close()
-			}).catch( err => {
-				console.log(err)
+			}).catch( () => {
+				//console.log(err)
 			})
 		},
 		close(){

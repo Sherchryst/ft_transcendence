@@ -85,10 +85,9 @@ import { useStore } from 'vuex'
 import { key } from '@/store/index'
 import { API } from '@/scripts/auth';
 import router from '@/router';
-import { SocketMessage } from '@/interfaces/Message';
 import { chatSocket, gameSocket, statusSocket } from '@/socket'
 import NotifPanel from '@/components/Notification/NotifPanel.vue';
-import { Statut, User } from '@/interfaces/Profile';
+import { Statut } from '@/interfaces/Profile';
 import BadgeNotif from '@/components/Notification/BadgeNotif.vue'; 
 import { Notification, FriendRequest, GameStart, GameInvitation, ChannelInvitation } from "@/interfaces/Notification";
 import { useToast } from "vue-toastification";
@@ -132,7 +131,7 @@ export default defineComponent({
 		gameSocket.on("warning", (err : string) => {
 			toast.warning(err);
 		})
-		statusSocket.on("new_friend", (id : number) => {
+		statusSocket.on("new_friend", () => {
 			this.$store.dispatch('connection')
 		})
 		statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
@@ -173,8 +172,8 @@ export default defineComponent({
 				localStorage.setItem("state", Statut.NOTLOGIN.toString())
 				localStorage.removeItem('user')
 				router.push({name: "login"})
-			}).catch( (err) => {
-				console.log(err)
+			}).catch( () => {
+				//console.log(err)
 			})
 		},
 		getNotif(): void {
@@ -186,8 +185,8 @@ export default defineComponent({
 				response.data.forEach( (element: FriendRequest) => {
 					this.addFriendRequest(element)
 				});
-			}).catch( (err) => {
-				console.log(err)
+			}).catch( () => {
+				//console.log(err)
 			})
 			API.get('chat/invite-list', {
 				params: {
@@ -197,8 +196,8 @@ export default defineComponent({
 				response.data.forEach( (element: ChannelInvitation) => {
 					this.addChannelInivtation(element)
 				})
-			}).catch( (err) => {
-				console.log(err)
+			}).catch( () => {
+				//console.log(err)
 			})
 		},
 		addFriendRequest(data: FriendRequest): void {

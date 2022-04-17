@@ -79,8 +79,8 @@ export default defineComponent ({
                     if (this.listChannel[i].id == response.data.id)
                         return ;
                 this.listChannel.push(response.data);
-            }).catch((error) => {
-                console.log(error)
+            }).catch(() => {
+               // console.log(error)
             })
         },
         switchVisibility(): void {

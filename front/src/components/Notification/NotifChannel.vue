@@ -24,13 +24,13 @@ export default defineComponent({
 			.then(()=> {
 				this.close()
 				router.push({name: 'unique-chat', params: {id: this.data.channel.id}})
-			}).catch((err)=>{
-				console.log(err)
+			}).catch(()=>{
+				//console.log(err)
 			})
 		},
 		close(){
-			API.post("chat/delete-invitation", {channelId: this.data.channel.id, fromId: this.data.from.id, toId: this.$store.getters.getId}).catch((err)=>{
-				console.log(err)
+			API.post("chat/delete-invitation", {channelId: this.data.channel.id, fromId: this.data.from.id, toId: this.$store.getters.getId}).catch(()=>{
+				//console.log(err)
 			})
 			this.$emit("close", this.invitation)
 		}

@@ -18,7 +18,7 @@
 <script lang="ts">
 
 import { User } from '@/interfaces/Profile'
-import { defineComponent, computed, watch, provide } from 'vue';
+import { defineComponent, computed, watch } from 'vue';
 import Message from '@/components/chat/Message.vue'
 import { useMeta } from 'vue-meta'
 import { useStore } from 'vuex'
@@ -90,10 +90,8 @@ export default defineComponent({
                 this.members.push(data);
             })
             .on('left', (id) => {
-                let member = {} as ChannelMember_t;
                 for (let i = 0; i != this.members.length; ++i)
                     if (this.members[i].id == id) {
-                        member = this.members[i];
                         this.members.splice(i);
                         break ;
                     }
@@ -127,8 +125,8 @@ export default defineComponent({
             API.get('users/block-list').then((response) => {
                 for (let i = 0; i < response.data.length; ++i)
                     this.blocked_list.push(response.data[i]);
-            }).catch(err => {
-                console.log(err)
+            }).catch(() => {
+                //console.log(err)
             })
 		},
         recv(data: ServerMessage ): void {

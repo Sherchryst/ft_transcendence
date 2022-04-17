@@ -46,10 +46,10 @@ export default defineComponent({
 		send(){
 			API.post("chat/join", 
 				this.formData
-			).then((res)=>{
+			).then(()=>{
 				router.push({ name: 'unique-chat', params: { id: this.channelId }});
-			}).catch((err)=>{
-				console.log(err)
+			}).catch(()=>{
+				//console.log(err)
 			})
 		}
 	}

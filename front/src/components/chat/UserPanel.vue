@@ -75,13 +75,13 @@ export default defineComponent({
             // API.post("chat/moderation", {channelId: this.channelId, toId: this.user.id, reason: null, duration: null, moderation: 'ban'})
         },
         promote() {
-            API.post('chat/promote', {channelId: this.channelId, targetId: this.user.id}).catch( (err) => {
-                console.log(err)
+            API.post('chat/promote', {channelId: this.channelId, targetId: this.user.id}).catch( () => {
+               // console.log(err)
             })
         },
         demote() {
-            API.post('chat/demote', {channelId: this.channelId, targetId: this.user.id}).catch( (err) => {
-                console.log(err)
+            API.post('chat/demote', {channelId: this.channelId, targetId: this.user.id}).catch( () => {
+               // console.log(err)
             })
         }
     },

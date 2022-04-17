@@ -86,8 +86,8 @@ export default defineComponent({
     this.friends = this.$store.getters.getFriends
     API.get('users/top-ten').then((res) => {
       this.topPlayer = res.data
-    }).catch((err) => {
-      console.log(err)
+    }).catch(() => {
+      //console.log(err)
     })
     API.get('match/get-winrate', {
       params: {
@@ -95,8 +95,8 @@ export default defineComponent({
       }
     }).then((res) => {
       this.winrate = parseInt(res.data.winrate) ;
-    }).catch((err) => {
-      console.log(err)
+    }).catch(() => {
+      //console.log(err)
     })
     API.get('match/get-history', {
       params: {
@@ -105,8 +105,8 @@ export default defineComponent({
       }
     }).then((res) => {
       this.history = res.data;
-    }).catch((err) => {
-      console.log(err)
+    }).catch(() => {
+      //console.log(err)
     })
   },
 })
