@@ -140,7 +140,9 @@ export class UsersController {
     if (!request)
       throw new UnauthorizedException();
     request.from = req.user
-    this.usersService.WsClients.get(dto.toId).emit("friend-request", instanceToPlain(request));
+    try {
+      this.usersService.WsClients.get(dto.toId).emit("friend-request", instanceToPlain(request));
+    } catch (error) {}
   }
 
   @Get('top-ten')
