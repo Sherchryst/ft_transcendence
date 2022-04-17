@@ -3,10 +3,10 @@
 		<template v-slot:title>
 			<slot>Set Password</slot>
 		</template>
-		<form>
+		<form @submit.prevent="send">
 			<div class="flex flex-col gap-4">
 				<ModInput type="password" class="mobile" v-model="FormData.password">Password</ModInput>
-				<ButtonLink @click="send">
+				<ButtonLink>
 					Send
 				</ButtonLink>
 			</div>

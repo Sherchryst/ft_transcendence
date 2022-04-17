@@ -126,6 +126,9 @@ export default defineComponent({
 		gameSocket.on("error", (err : string) => {
 			toast.error(err);
 		})
+		chatSocket.on("error", (err : string) => {
+			toast.error(err);
+		})
 		gameSocket.on("warning", (err : string) => {
 			toast.warning(err);
 		})

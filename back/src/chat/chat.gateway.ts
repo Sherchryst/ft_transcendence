@@ -45,13 +45,19 @@ export class ChatGateway implements OnGatewayConnection{
     @SubscribeMessage('message')
     async handleMsg(@Req() req, @ConnectedSocket() client, @MessageBody() data: {chanId: number, msg: string}) {
         try {
-        if (await this.chatService.isMuted(req.user, data.chanId) || await this.chatService.isBanned(req.user, data.chanId))
-            return  
+        if (await this.chatService.isMuted(req.user, data.chanId))
+            throw "You're muted";
+        if (await this.chatService.isBanned(req.user, data.chanId))
+            throw "You're banned!";
+        if (!await this.chatService.findChannel(data.chanId))
+            throw "Channel doesn't exist";
+        if (!await this.chatService.getChannelMember(data.chanId, req.user.id))
+            throw "Not a channel member";
         const message = await this.chatService.createMessage(req.user, data.msg);
         const channelMessage = await this.chatService.createChannelMessage(data.chanId, message);
         this.server.in("channel:" + data.chanId).emit("message", { channelMessage: instanceToPlain(channelMessage) });
         } catch (error) {
-            client.send("error", error)
+            client.emit("error", error)
         }
     }
 
