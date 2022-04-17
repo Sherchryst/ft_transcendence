@@ -42,10 +42,9 @@ export default defineComponent({
 			(this.$refs['modal'] as typeof Modal).close()
 		},
 		send(){
-			console.log('SEND PASSWORD:', this.FormData.password)
-			API.post('chat/set-password', {channelId: this.channelId, password: this.FormData.password})
-			.then(() => {
-				this.close();
+			API.post('chat/set-password', {channelId: this.channelId, password: this.FormData.password}).then(() => {
+			this.close(); }).catch((err) => {
+				console.log(err);
 			})
 		}
 	}

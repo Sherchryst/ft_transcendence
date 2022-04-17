@@ -85,6 +85,8 @@ export default defineComponent({
 					this.$store.dispatch('connection').then( () => {
 						router.push({name: "home"})
 					})
+				}).catch(err => {
+					console.log(err);
 				})
 		}
 	}

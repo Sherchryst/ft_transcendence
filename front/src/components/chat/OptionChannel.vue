@@ -72,16 +72,22 @@ export default defineComponent({
 	mounted() {
 		API.get('chat/channel-info', {params: {channelId: this.channel?.id}}).then(res => {
 			this.members = (res.data.members as Member_t[]).filter(m => m.user.id != this.$store.getters.getId);
+		}).catch(err => {
+			console.log(err)
 		})
 	},
     methods: {
         leave_channel(): void {
             API.post('chat/leave', {channelId: this.channel?.id}).then((response) => {
                 router.push({name: 'chat'});
-            })
+            }).catch((err) => {
+				console.log(err)
+			})
 		},
         invitation(nickname: string) {
-			API.post('chat/invite', {channelId: this.channel?.id, invitedNick: nickname})
+			API.post('chat/invite', {channelId: this.channel?.id, invitedNick: nickname}).catch(err => {
+				console.log(err)
+			})
 		},
 		openPassword() : void {
 			(this.$refs['password_block'] as typeof PasswordModal).open()

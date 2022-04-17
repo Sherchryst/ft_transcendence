@@ -173,6 +173,8 @@ export default defineComponent({
 				localStorage.setItem("state", Statut.NOTLOGIN.toString())
 				localStorage.removeItem('user')
 				router.push({name: "login"})
+			}).catch( (err) => {
+				console.log(err)
 			})
 		},
 		getNotif(): void {
@@ -184,6 +186,8 @@ export default defineComponent({
 				response.data.forEach( (element: FriendRequest) => {
 					this.addFriendRequest(element)
 				});
+			}).catch( (err) => {
+				console.log(err)
 			})
 			API.get('chat/invite-list', {
 				params: {
@@ -193,6 +197,8 @@ export default defineComponent({
 				response.data.forEach( (element: ChannelInvitation) => {
 					this.addChannelInivtation(element)
 				})
+			}).catch( (err) => {
+				console.log(err)
 			})
 		},
 		addFriendRequest(data: FriendRequest): void {
