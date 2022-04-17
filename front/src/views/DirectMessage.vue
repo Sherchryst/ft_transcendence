@@ -70,6 +70,8 @@ export default defineComponent({
 				let messages: DirectMessage[] = response.data
 				for (let i = 0; i < messages.length; ++i)
 					this.recv(messages[i])
+			}).catch( (err) => {
+				console.log(err)
 			})
 		},
 		recv(data: DirectMessage): void {

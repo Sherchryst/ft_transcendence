@@ -67,6 +67,8 @@ export default defineComponent({
 			this.formData.duration = this.calcDuration
 			API.post("chat/moderation", this.formData).then( () => {
 				this.close();
+			}).catch( (err) => {
+				console.log(err)
 			})
 			
 		}

@@ -56,7 +56,9 @@ export default defineComponent({
 				toId: this.user.id
 			}).then( () => {
 				//this.statut = 'WAIT'
-			})
+			}).catch( (err) => {
+                console.log(err)
+            })
         },
         block(): void {
             (this.$refs["modal_block"] as typeof BlockModal).open();
@@ -73,10 +75,14 @@ export default defineComponent({
             // API.post("chat/moderation", {channelId: this.channelId, toId: this.user.id, reason: null, duration: null, moderation: 'ban'})
         },
         promote() {
-            API.post('chat/promote', {channelId: this.channelId, targetId: this.user.id})
+            API.post('chat/promote', {channelId: this.channelId, targetId: this.user.id}).catch( (err) => {
+                console.log(err)
+            })
         },
         demote() {
-            API.post('chat/demote', {channelId: this.channelId, targetId: this.user.id})
+            API.post('chat/demote', {channelId: this.channelId, targetId: this.user.id}).catch( (err) => {
+                console.log(err)
+            })
         }
     },
     components: { BlockModal, ChallengeModal, AdminModal }

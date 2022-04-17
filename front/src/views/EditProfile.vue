@@ -118,7 +118,9 @@ export default defineComponent({
             var bytes = new Uint8Array(response.data);
             var binary = bytes.reduce((data, b) => data += String.fromCharCode(b), '');
             this.qrcode = "data:image/png;base64," + btoa(binary);
-        })
+        }).catch((error) => {
+            console.log(error);
+        });
         },
         send_digit_code(path: string): void {
         API.post('2fa' + path, {twoFactorAuthenticationCode: this.digits}).then((response) => {
@@ -128,7 +130,9 @@ export default defineComponent({
             this.SwitchOn = false
             this.$store.dispatch('connection');
             this.Is2fa = this.$store.getters.is2FA;
-        })
+        }).catch((error) => {
+            console.log(error);
+        });
         },
         inputImage(image: File) {
             this.avatar = image;
@@ -147,12 +151,16 @@ export default defineComponent({
                 await API.post('users/update-nickname', {
                     id: this.$store.getters.getId,
                     nickname: this.nickname
-                })
+                }).catch((error) => {
+                    console.log(error);
+                });
             if(this.avatar.size > 0)
                 await API.post('users/update-avatar', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
-                    }})
+                    }}).catch((error) => {
+                    console.log(error);
+                });
             this.$store.dispatch('connection').then(() => {
                 router.push({name: "profile", params: {username: this.$store.getters.getLogin}});
             });

@@ -43,7 +43,9 @@ export default defineComponent({
 		},
 		send(){
 			API.post('chat/set-password', {channelId: this.channelId, password: this.FormData.password}).then(() => {
-			this.close(); })
+			this.close(); }).catch((err) => {
+				console.log(err);
+			})
 		}
 	}
 })

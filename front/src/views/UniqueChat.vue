@@ -127,6 +127,8 @@ export default defineComponent({
             API.get('users/block-list').then((response) => {
                 for (let i = 0; i < response.data.length; ++i)
                     this.blocked_list.push(response.data[i]);
+            }).catch(err => {
+                console.log(err)
             })
 		},
         recv(data: ServerMessage ): void {
