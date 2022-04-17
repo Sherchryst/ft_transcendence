@@ -30,7 +30,7 @@ export class UsersController {
     if (!dto.fromId)
       throw new BadRequestException('No fromId provided');
     const r = await this.usersService.hasSentFriendRequest(dto.fromId, req.user.id);
-    console.log(r);
+    //console.log(r);
     if (!r)
       throw new UnauthorizedException('User has not sent friend request');
     await this.usersService.acceptFriendRequest(dto.fromId, req.user.id);
@@ -71,7 +71,7 @@ export class UsersController {
 
   @Get('profile')
   async profile(@Req() req : any) {
-    console.log('profile');
+    //.log('profile');
     const user = await this.usersService.findOne(req.user.id);
     const achievements = await this.usersService.getUserAchievements(req.user.id);
     const friends = await this.usersService.getFriends(req.user.id)

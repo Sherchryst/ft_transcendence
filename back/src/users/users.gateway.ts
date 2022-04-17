@@ -43,7 +43,7 @@ export class StatusGateway implements OnGatewayConnection {
       socket.disconnect(false);
       return;
     }
-    console.log("Status : New connection to socket");
+    //console.log("Status : New connection to socket");
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {
@@ -57,9 +57,9 @@ export class StatusGateway implements OnGatewayConnection {
           this.usersService.WsClients.delete(key);
         }
       });
-      console.log("Status : disconnection from socket");
+      //console.log("Status : disconnection from socket");
     } catch (e) {
-      console.log("Status : Error while disconnecting");
+      //console.log("Status : Error while disconnecting");
     }
   }
 }

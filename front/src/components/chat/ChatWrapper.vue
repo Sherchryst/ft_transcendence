@@ -98,6 +98,8 @@ export default defineComponent({
 			this.listChannel = response.data
 		}).catch(() => {
 			this.listChannel = []
+		}).catch((error) => {
+			console.log(error)
 		})
 	},
 })

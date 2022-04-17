@@ -35,11 +35,11 @@ export class ChatGateway implements OnGatewayConnection{
             });
         }
         catch {
-            console.log("Chat: Unauthorized connection")
+            //console.log("Chat: Unauthorized connection")
             socket.disconnect(false)
             return
         }
-        console.log("connected to chat...")
+        //console.log("connected to chat...")
     }
 
     @SubscribeMessage('message')
@@ -63,7 +63,7 @@ export class ChatGateway implements OnGatewayConnection{
 
     @SubscribeMessage('direct_message')
     async direct_message(@Req() req, @ConnectedSocket() client, @MessageBody() data: {towardId: number, content: string}) {
-        console.log("direct message", data)
+        //console.log("direct message", data)
         try {
             const to = await this.usersService.findOne(data.towardId);
             const message = await this.chatService.createMessage(req.user, data.content)
