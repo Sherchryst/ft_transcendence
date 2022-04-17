@@ -1,7 +1,7 @@
 import { Channel } from 'src/chat/entities/channel.entity';
 import { ChannelMember } from 'src/chat/entities/channel-member.entity';
 import { createWriteStream } from 'fs';
-import { getManager, getRepository, IsNull, Not } from 'typeorm';
+import { getManager, getRepository, IsNull, Like, Not } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { UserAchievement } from './entities/user-achievement.entity';
@@ -37,6 +37,13 @@ export class UsersService {
     this.WsClients.get(fromUserId).emit('new_friend', toUserId);
     this.WsClients.get(toUserId).emit('new_friend', fromUserId);
     this.sendNewFriendStatus(fromUserId, toUserId);
+  }
+
+  async declineFriend(fromUserId: number, toUserId: number) {
+    await getRepository(UserRelationship).delete({
+      from: { id: fromUserId },
+      to: { id: toUserId }
+    })
   }
 
   async inMatch(userId: number): Promise<Match> {
@@ -129,11 +136,11 @@ export class UsersService {
     return await this.getRelationships(userId, UserRelationshipType.FRIEND);
   }
 
-  async getFriendRequests(userId: number): Promise<User[]> {
+  async getFriendRequests(userId: number): Promise<UserRelationship[]> {
     return await getRepository(UserRelationship).find({
       relations: ['from'],
       where: { to: { id: userId }, type: UserRelationshipType.PENDING }
-    }).then(relations => relations.map(r => r.from));
+    })
   }
 
   async getOneRelationship(fromUserId: number, toUserId: number): Promise<UserRelationship> {
@@ -171,6 +178,12 @@ export class UsersService {
     return await getRepository(UserRelationship).findOne({
       where: { from: fromUserId, to: toUserId, type: UserRelationshipType.BLOCK }
     }) != null;
+  }
+
+  async search(expr : string) : Promise<User[]> {
+    return await getRepository(User).find({
+      nickname: Like('%' + expr + '%')
+    });
   }
 
   async sendFriendRequest(fromUserId: number, toUserId: number): Promise<UserRelationship> {

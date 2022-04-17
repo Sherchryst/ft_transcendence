@@ -28,16 +28,26 @@ export class UsersController {
 
   @Post('accept-friend-request')
   async acceptFriendRequest(@Req() req, @Body() dto: { fromId: number }) {
-    console.log(dto)
+    if (!dto.fromId)
+      throw new BadRequestException('No fromId provided');
     const r = await this.usersService.hasSentFriendRequest(dto.fromId, req.user.id);
-    console.log(r);
+    //console.log(r);
     if (!r)
       throw new UnauthorizedException('User has not sent friend request');
     await this.usersService.acceptFriendRequest(dto.fromId, req.user.id);
   }
 
+  @Post('decline-friend')
+  async decline(@Req() req, @Body() dto: { fromId: number }) {
+    if (!dto.fromId)
+      throw new BadRequestException('No fromId provided');
+    this.usersService.declineFriend(dto.fromId, req.user.id)
+  }
+
   @Post('block-user')
   async blockUser(@Req() req, @Body() dto: { toId: number }) {
+    if (!dto.toId)
+      throw new BadRequestException('No toId provided');
     try {
       await this.usersService.blockUser(req.user.id, dto.toId);
     } catch (error) {
@@ -46,7 +56,7 @@ export class UsersController {
   }
 
   @Get('block-list')
-  async block_list(@Req() req) {
+  async blockList(@Req() req) {
     return await this.usersService.getBlockedUsers(req.user.id);
   }
 
@@ -55,14 +65,18 @@ export class UsersController {
     if (!id)
       throw new BadRequestException('No id provided');
     const requests = await this.usersService.getFriendRequests(id);
-    return JSON.stringify(requests.map(({ id, nickname }) => ({ id, nickname })));
+    return (requests)
+    // console.log("REQUEST", requests)
+    // return JSON.stringify(requests.map(({ id, nickname }) => ({ id, nickname })));
   }
 
   @Get('profile')
-  async profile(@Req() req) {
+  async profile(@Req() req : any) {
+    //.log('profile');
+    const user = await this.usersService.findOne(req.user.id);
     const achievements = await this.usersService.getUserAchievements(req.user.id);
     const friends = await this.usersService.getFriends(req.user.id)
-    return {user: req.user, friends: friends, achievements: achievements}
+    return {user: { ...user, twofa: user.twofa } , friends: friends, achievements: achievements}
   }
 
   @Get('get-profile')
@@ -105,8 +119,19 @@ export class UsersController {
     return relation;
   }
 
+  @Get('search')
+  async search(@Query('expr') expr : string) : Promise<User[]> {
+    if (!expr)
+      throw new BadRequestException('No expr provided');
+    if (expr.includes('%'))
+      throw new BadRequestException('Wildcards are forbidden');
+    return await this.usersService.search(expr);
+  } 
+
   @Post('send-friend-request')
   async sendFriendRequest(@Req() req, @Body() dto: { toId: number }) {
+    if (!dto.toId)
+      throw new BadRequestException('No toId provided');
     if (await this.usersService.isBlockedBy(dto.toId, req.user.id))
       throw new UnauthorizedException();
     const rel = await this.usersService.getOneRelationship(req.user.id, dto.toId);
@@ -115,7 +140,10 @@ export class UsersController {
     const request = await this.usersService.sendFriendRequest(req.user.id, dto.toId);
     if (!request)
       throw new UnauthorizedException();
-    this.usersService.WsClients.get(dto.toId).emit("friend-request", instanceToPlain(req.user));
+    request.from = req.user
+    try {
+      this.usersService.WsClients.get(dto.toId).emit("friend-request", instanceToPlain(request));
+    } catch (error) {}
   }
 
   @Get('top-ten')
@@ -125,6 +153,8 @@ export class UsersController {
 
   @Post('unblock-user')
   async unblockUser(@Req() req, @Body() dto: { toId: number }) {
+    if (!dto.toId)
+      throw new BadRequestException('No toId provided');
     try {
       await this.usersService.unblockUser(req.user.id, dto.toId);
     } catch (error) {
@@ -146,10 +176,10 @@ export class UsersController {
 
   @Post('update-avatar')
   @UseInterceptors(FileInterceptor('file', { fileFilter: imageFilter }))
-  async updateAvatar(@UploadedFile() file: Multer.File, @Body() body: { id : number }) {
+  async updateAvatar(@Req() req : any, @UploadedFile() file: Multer.File, @Body() body: { id : number }) {
     if (!file)
       throw new BadRequestException('No file uploaded');
-    const user = await this.usersService.findOne(body.id);
+    const user = await this.usersService.findOne(req.user.id);
     if (!user)
       throw new NotFoundException('User not found');
     let buffer = await sharp(file.buffer)

@@ -35,35 +35,44 @@ export class ChatGateway implements OnGatewayConnection{
             });
         }
         catch {
-            console.log("Chat: Unauthorized connection")
+            //console.log("Chat: Unauthorized connection")
             socket.disconnect(false)
             return
         }
-        console.log("connected to chat...")
+        //console.log("connected to chat...")
     }
 
     @SubscribeMessage('message')
     async handleMsg(@Req() req, @ConnectedSocket() client, @MessageBody() data: {chanId: number, msg: string}) {
         try {
         if (await this.chatService.isMuted(req.user, data.chanId))
-            return  
+            throw "You're muted";
+        if (await this.chatService.isBanned(req.user, data.chanId))
+            throw "You're banned!";
+        if (!await this.chatService.findChannel(data.chanId))
+            throw "Channel doesn't exist";
+        if (!await this.chatService.getChannelMember(data.chanId, req.user.id))
+            throw "Not a channel member";
         const message = await this.chatService.createMessage(req.user, data.msg);
         const channelMessage = await this.chatService.createChannelMessage(data.chanId, message);
         this.server.in("channel:" + data.chanId).emit("message", { channelMessage: instanceToPlain(channelMessage) });
         } catch (error) {
-            client.send("error", error)
+            client.emit("error", error)
         }
     }
 
     @SubscribeMessage('direct_message')
     async direct_message(@Req() req, @ConnectedSocket() client, @MessageBody() data: {towardId: number, content: string}) {
+        //console.log("direct message", data)
         try {
             const to = await this.usersService.findOne(data.towardId);
             const message = await this.chatService.createMessage(req.user, data.content)
-            this.wsClients.get(to.id).send(instanceToPlain(await this.chatService.createDirectMessage(to, message)));
+            const direct_message = await this.chatService.createDirectMessage(to, message)
+            client.emit("direct_message", instanceToPlain(direct_message));
+            this.wsClients.get(to.id).emit("direct_message", instanceToPlain(direct_message));
         }
         catch (error) {
-            client.send("error", error);
+            client.emit("error", error);
         }
     }
 }

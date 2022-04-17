@@ -1,6 +1,7 @@
 <template>
     <div>
         <div class="flex flex-col gap-4">
+            <div class="text-lg font-bold">{{ user.nickname }}</div>
             <router-link :to="{name: 'profile', params: { username: user?.login }}">View profile</router-link>
             <button class="text-left" @click="challenge">
                 Challenge
@@ -17,10 +18,10 @@
             <button class="text-left" v-if="role=='admin'" @click="ban">
                 ban user
             </button>
-            <button v-if="owner" class="text-left" @click="promote">
+            <button v-if="owner && role=='admin'" class="text-left" @click="promote">
                 Promote admin
             </button>
-            <button v-if="owner" class="text-left" @click="demote">
+            <button v-if="owner && role=='admin'" class="text-left" @click="demote">
                 Demote admin
             </button>
         </div>
@@ -48,10 +49,6 @@ export default defineComponent({
         role: { type: String as PropType<ChannelMemberRole>, default: 'member'},
         owner: { type: Boolean, default: true }
     },
-    created() {
-        console.log("User", this.user);
-        console.log("Channel", this.channelId);
-    },
     methods: {
         requestFriend() {
 			API.post('users/send-friend-request', {
@@ -59,7 +56,9 @@ export default defineComponent({
 				toId: this.user.id
 			}).then( () => {
 				//this.statut = 'WAIT'
-			})
+			}).catch( (err) => {
+                console.log(err)
+            })
         },
         block(): void {
             (this.$refs["modal_block"] as typeof BlockModal).open();
@@ -76,10 +75,14 @@ export default defineComponent({
             // API.post("chat/moderation", {channelId: this.channelId, toId: this.user.id, reason: null, duration: null, moderation: 'ban'})
         },
         promote() {
-            API.post('chat/promote', {channelId: this.channelId, targetId: this.user.id})
+            API.post('chat/promote', {channelId: this.channelId, targetId: this.user.id}).catch( () => {
+               // console.log(err)
+            })
         },
         demote() {
-            API.post('chat/demote', {channelId: this.channelId, targetId: this.user.id})
+            API.post('chat/demote', {channelId: this.channelId, targetId: this.user.id}).catch( () => {
+               // console.log(err)
+            })
         }
     },
     components: { BlockModal, ChallengeModal, AdminModal }

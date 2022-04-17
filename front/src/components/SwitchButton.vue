@@ -23,7 +23,6 @@ export default defineComponent({
 	},
 	methods: {
 		onSwitch(event: Event) {
-			console.log(event);
 			this.checked = (event.target as HTMLInputElement).checked;
 			this.$emit('onSwitched', this.checked);
 		}

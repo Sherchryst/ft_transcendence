@@ -1,12 +1,12 @@
 <template>
-    <div class="chat">
+    <div class="chat mr-5">
         <router-link :to="{name: 'profile', params: {username: user.user.login}}">
-            <div class="mr-5">
-                <img class="h-16 w-16" :src="'http://localhost:3000/' + user.user.avatarPath" alt="_profile">
+            <div>
+                <img class="h-16 w-16 rounded-full" :src="'http://localhost:3000/' + user.user.avatarPath" alt="_profile">
             </div>
         </router-link>
         <div class="text-left">
-            <p class="username text-lg">{{user.user.nickname}}</p>
+            <p class="username text-md">{{user.user.nickname}}</p>
         </div>
     </div>
 </template>
@@ -22,9 +22,6 @@ export default defineComponent({
             type: Object as () => Member_t,
             default: () => ({}),
         },
-    },
-    mounted() {
-        console.log(this.user)
     },
 })
 </script>

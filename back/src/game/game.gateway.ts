@@ -97,7 +97,7 @@ export class GameGateway implements OnGatewayConnection {
       socket.disconnect(false);
       return;
     }
-    console.log("Game : New connection to socket");
+    //console.log("Game : New connection to socket");
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {
@@ -110,6 +110,7 @@ export class GameGateway implements OnGatewayConnection {
           if (pending_player.includes(key)) {
             pending_player.splice(pending_player.indexOf(key), 1);
           }
+          await this.matchService.deleteMatchInvitations(key);
           boards.forEach((board, match_id) => {
             if (!board.end) {
               this.server.to(`game:${match_id}`).emit("warning", "A player has disconnected");
@@ -131,7 +132,7 @@ export class GameGateway implements OnGatewayConnection {
           this.gameService.WsClients.delete(key);
         }
       });
-      console.log("Game : Disconnection from socket");
+      //console.log("Game : Disconnection from socket");
     } catch (e) {}
   }
   
@@ -191,7 +192,7 @@ export class GameGateway implements OnGatewayConnection {
           data.level
         );
         this.gameService.WsClients.get(to_user.id).emit("invited", instanceToPlain(invitation));
-        console.log("Game : Invitation sent to", to_user.nickname);
+        //console.log("Game : Invitation sent to", to_user.nickname);
       } catch (e) {
         socket.emit("error", "Unknown error");
       }
@@ -238,7 +239,7 @@ export class GameGateway implements OnGatewayConnection {
     this.usersService.sendOwnStatus(player1, "in game", `${match.id}`);
     this.usersService.sendOwnStatus(player2, "in game", `${match.id}`);
     this.server.to(`game:${match.id}`).emit("gameStart", match.id);
-    console.log("Game : Sending users to game");
+    //console.log("Game : Sending users to game");
     return match;
   }
 
@@ -320,9 +321,9 @@ export class GameGateway implements OnGatewayConnection {
   }
 
   @SubscribeMessage("declineInvit")
-  async handleDeclineInvit(@MessageBody() data: MatchInvitation) {
+  async handleDeclineInvit(@MessageBody() data: MatchInvitation, @Req() req: any) {
     try {
-      await this.matchService.deleteMatchInvitation(data.from.id, data.to.id);
+      await this.matchService.deleteMatchInvitation(data.from.id, req.user.id);
     } catch (e) {}
   }
 
@@ -351,7 +352,7 @@ export class GameGateway implements OnGatewayConnection {
         board.ready++;
       }
       else {
-        console.log("Game : Spectator connected");
+        //console.log("Game : Spectator connected");
         socket.join(`game:${id}`);
       }
     } catch (e) {
@@ -367,7 +368,7 @@ export class GameGateway implements OnGatewayConnection {
     try {
       this.gameService.WsClients.forEach((value, key) => {
         if (value == socket && pending_player.includes(key)) {
-          console.log("Game : Player", key, "left matchmaking");
+          //console.log("Game : Player", key, "left matchmaking");
           pending_player.splice(pending_player.indexOf(key), 1);
         }
       });

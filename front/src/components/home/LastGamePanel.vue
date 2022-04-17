@@ -4,11 +4,11 @@
             <img v-if="$store.getters.getId == match.player1.id" class="image mr-4 h-14 w-14" :src="'http://localhost:3000/' + match.player2.avatarPath">
             <img v-else class="image mr-4 h-14 w-14" :src="'http://localhost:3000/' + match.player1.avatarPath">
             <div v-if="$store.getters.getId == match.player1.id" class="flex flex-col place-items-start">
-                <p class='pt-2 font-medium'>{{match.player2.nickname}}</p>
+                <p class='pt-2 font-bold m-bold'>{{match.player2.nickname}}</p>
                 <p>{{match.player2.login}}</p>
             </div>
             <div v-else class="flex flex-col place-items-start">
-                <p class='pt-2 font-medium'>{{match.player1.nickname}}</p>
+                <p class='pt-2 font-bold m-bold'>{{match.player1.nickname}}</p>
                 <p>{{match.player1.login}}</p>
             </div>
         </div>
@@ -46,5 +46,8 @@ export default defineComponent({
 .result {
     background-color: $panel-color;
     border-radius: 25px;
+}
+.m-bold{
+    color: $text-title;
 }
 </style>

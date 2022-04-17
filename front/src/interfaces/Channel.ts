@@ -13,12 +13,14 @@ export interface ChannelMember_t{
 	id: number,
 	nickname: string,
 	role: ChannelMemberRole
+	avatarPath: string
 }
 
 export interface Member_t {
-	last_read_at: Date,
-	role: string,
+	channel: Channel,
 	user: User
+	role: ChannelMemberRole,
+	last_read_at: Date,
 }
 
 export enum ChannelMemberRole {

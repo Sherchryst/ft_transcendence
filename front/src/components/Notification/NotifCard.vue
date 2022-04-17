@@ -1,6 +1,6 @@
 <template>
 	<div v-if="display" class="notif-card flex py-3">
-		<img class="w-10 h-10" src="@/assets/blank-avatar.jpg" alt="test">
+		<!-- <img class="w-10 h-10" :src="'http://localhost:3000/' + from.avatarPath" alt="test"> -->
 		<div class="w-64 ml-3 flex flex-col">
 			<div class="notif-message" @close="hidden">
 				<slot></slot>
@@ -36,7 +36,6 @@ export default defineComponent({
 	},
 	methods: {
 		hidden() {
-			console.log("niques")
 			this.display = false
 		}
 	}

@@ -3,11 +3,11 @@
 		<div class="chan flex flex-row justify-between px-4 py-3">
 				<div class="flex flex-col items-start">
 					<span class="title font-bold text-xl">#-{{channel?.name}}</span>
-					<span class="font-light">Username</span>
+					<span class="font-light">{{ channel.owner?.nickname }}</span>
 				</div>
 				<button @click="join">join</button>
 		</div>
-		<ChannelModal v-if="channel.password" :channel-id="channel.id" :ref="index"></ChannelModal>
+		<ChannelModal v-if="channel.isPasswordSet" :channel-id="channel.id" :ref="index"></ChannelModal>
 	</div>
 </template>
 
@@ -41,13 +41,16 @@ export default defineComponent({
 			if (this.channel.isPasswordSet){
 				this.open()
 			}
-			API.post("chat/join", {
-				channelId: this.channel?.id,
-				password: ""
-			}).then((res)=>{
-				console.log(res);
-				router.push({ name: 'unique-chat', params: { id: this.channel?.id }});
-			}).catch((error) => {console.log(error)})
+			else {
+				API.post("chat/join", {
+					channelId: this.channel?.id,
+					password: ""
+				}).then(()=>{
+					router.push({ name: 'unique-chat', params: { id: this.channel?.id }});
+				}).catch(()=>{
+					//console.log(err)
+				})
+			}
 		}
 	},
 	components: {ChannelModal, }
@@ -62,6 +65,9 @@ export default defineComponent({
     }
     &:hover{
         background: $panel-color;
+    }
+    button {
+        color: $action;
     }
 }
 </style>

@@ -33,7 +33,7 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy) {
       const user = await this.usersService.findOne(Number(payload.sub))
       return user;
     } catch (err) {
-      console.log("Corrupted database");
+      //console.log("Corrupted database");
     }
   }
 }
@@ -55,7 +55,7 @@ export class Jwt2faStrategy extends PassportStrategy(Strategy, 'jwt-2fa') {
         return user;
       }
     } catch (err) {
-      console.log("Corrupted database");
+      //console.log("Corrupted database");
     }
   }
 }
@@ -77,7 +77,7 @@ export class WsJwt2faStrategy extends PassportStrategy(Strategy, 'ws-jwt-2fa') {
         return user;
       }
     } catch (err) {
-      console.log("Corrupted database");
+      //console.log("Corrupted database");
     }
   }
 }

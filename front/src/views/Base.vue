@@ -6,9 +6,9 @@
 					<CrewMateIcon/>
 				</nav-button>
 			</div>
-			<one-row-form class="lg:hidden mb-6 mobile" placeholder="Search">
+			<!-- <one-row-form class="lg:hidden mb-6 mobile" v-model="search_expr" placeholder="Search" @change="search">
 				<SearchIcon />
-			</one-row-form>
+			</one-row-form> -->
 			<div class="flex flex-col w-full lg:w-min">
 				<nav-button text="Home" :route="{name: 'home'}">
 					<HomeIcon />
@@ -19,7 +19,7 @@
 				<nav-button text="Channels" :route="{name: 'channel'}">
 					<GroupIcon />
 				</nav-button>
-				<nav-button text="Chat" :route="{name: 'chat'}" class="chat-link" :notification="newMessage">
+				<nav-button text="Chat" :route="{name: 'chat'}" class="chat-link">
 					<ChatIcon />
 				</nav-button>
 				<ButtonLink @click="logout()" class="btn-neutral lg:hidden" text="Disconnect" />
@@ -34,9 +34,10 @@
 					<div class="flex flex-row justify-between w-full lg:w-min">
 						<div class="hidden lg:flex flex-row justify-between justify-items-center">
 							<div class="self-center">
-								<one-row-form placeholder="Search">
+								<OneRowForm placeholder="Search" @callback="search">
 									<SearchIcon />
-								</one-row-form>
+								</OneRowForm>
+								
 							</div>
 						</div>
 						<div class="flex flex-row items-center lg:mx-5">
@@ -60,7 +61,7 @@
 				</div>
 			</div>
 			<div class="">
-				<router-view @read-message="removeMessageFrom"/>
+				<router-view/>
 			</div>
 		</div>
 	</div>
@@ -84,10 +85,9 @@ import { useStore } from 'vuex'
 import { key } from '@/store/index'
 import { API } from '@/scripts/auth';
 import router from '@/router';
-import { SocketMessage } from '@/interfaces/Message';
 import { chatSocket, gameSocket, statusSocket } from '@/socket'
 import NotifPanel from '@/components/Notification/NotifPanel.vue';
-import { Statut, User } from '@/interfaces/Profile';
+import { Statut } from '@/interfaces/Profile';
 import BadgeNotif from '@/components/Notification/BadgeNotif.vue'; 
 import { Notification, FriendRequest, GameStart, GameInvitation, ChannelInvitation } from "@/interfaces/Notification";
 import { useToast } from "vue-toastification";
@@ -114,8 +114,8 @@ export default defineComponent({
 			chatSocket : chatSocket,
 			gameSocket : gameSocket,
 			statusSocket : statusSocket,
-			channelMessage: [] as SocketMessage[],
 			notifications: [] as Notification[],
+			search_expr: "",
 			avatarPath: '',
 			componentKey: 0,
 		}
@@ -124,18 +124,17 @@ export default defineComponent({
 		const toast = useToast();
 		gameSocket.on("error", (err : string) => {
 			toast.error(err);
-			// console.log("Game error :", err);
+		})
+		chatSocket.on("error", (err : string) => {
+			toast.error(err);
 		})
 		gameSocket.on("warning", (err : string) => {
 			toast.warning(err);
-			// console.log("Game warning :", err);
 		})
-		statusSocket.on("new_friend", (id : number) => {
-			console.log('NEW FRIEND IN YOUR LIFE bitch', id);
+		statusSocket.on("new_friend", () => {
 			this.$store.dispatch('connection')
 		})
 		statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
-			console.log('status data',data);
 			this.$store.dispatch("setStatus", {
 				userId: data.userId,
 				status: data.status,
@@ -145,12 +144,7 @@ export default defineComponent({
 		this.avatarPath = this.$store.getters.getAvatarPath;
 		this.getNotif()
 		this.chatSocket
-			.on('message', (data: {channelMessage: SocketMessage}) => {
-				if (data.channelMessage.message.from.id != this.$store.getters.getId)
-					this.channelMessage.push(data.channelMessage)
-			})
 			.on('invited', (data: ChannelInvitation) => {
-				console.log('invite', data)
 				this.addChannelInivtation(data);
 			})
 		this.gameSocket
@@ -158,12 +152,12 @@ export default defineComponent({
 				this.addGameInvitation(data)
 			})
 			.on('gameStart', (data: number) => {
-				toast.info("Transfered to game");
 				router.push({name: 'game', params: {match_id: data}})
 			})
 		this.statusSocket
-			.on('friend-request', (user: User) => {
-				this.addFriendRequest(user);
+			.on('friend-request', (request: FriendRequest) => {
+				console.log(request)
+				this.addFriendRequest(request);
 			})
 	},
 	methods: {
@@ -178,17 +172,9 @@ export default defineComponent({
 				localStorage.setItem("state", Statut.NOTLOGIN.toString())
 				localStorage.removeItem('user')
 				router.push({name: "login"})
+			}).catch( () => {
+				//console.log(err)
 			})
-		},
-		removeMessageFrom(id: number)
-		{
-			console.log("remove message from ", id);
-			for( let i = 0; i < this.channelMessage.length; i++){ 
-				if ( this.channelMessage[i].channel.id == id) { 
-					this.channelMessage.splice(i, 1); 
-					i--; 
-				}
-			}
 		},
 		getNotif(): void {
 			API.get("/users/get-friend-requests", {
@@ -199,26 +185,26 @@ export default defineComponent({
 				response.data.forEach( (element: FriendRequest) => {
 					this.addFriendRequest(element)
 				});
-				console.log("len", this.notifications.length)
+			}).catch( () => {
+				//console.log(err)
 			})
 			API.get('chat/invite-list', {
 				params: {
 					id: this.$store.getters.getId
 				}
 			}).then( (response) => {
-				console.log("data")
 				response.data.forEach( (element: ChannelInvitation) => {
 					this.addChannelInivtation(element)
 				})
+			}).catch( () => {
+				//console.log(err)
 			})
 		},
 		addFriendRequest(data: FriendRequest): void {
-			let friendRequest =  { nickname: data.nickname, id: data.id} as FriendRequest
-			let dateEvent = new Date()
 			this.notifications.push({
 				container: 'NotifFriend',
-				content: friendRequest,
-				date: dateEvent
+				content: data,
+				date: new Date(data.created_at)
 			} as Notification)
 		},
 		addGameInvitation(data: GameInvitation): void {
@@ -248,8 +234,11 @@ export default defineComponent({
 			let index = this.notifications.findIndex( (notif) => {
 				return (notif.content == data)
 			})
-			console.log("index", index)
-			this.notifications.splice(index)
+			this.notifications.splice(index, 1)
+		},
+		search(expr: string): void {
+			if (expr && expr.length)
+				router.push({name: 'search', params: {expr: expr}});
 		}
 	},
 	computed: {
@@ -257,9 +246,6 @@ export default defineComponent({
 			const store = useStore(key)
 			return store.getters.getLogin || 'unknown'
 		},
-		newMessage() : number {
-			return this.channelMessage.length
-		}
 	}
 })
 </script>
