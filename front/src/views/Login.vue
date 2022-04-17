@@ -36,8 +36,6 @@ import MainTitle from '@/components/MainTitle.vue';
 import { useMeta } from 'vue-meta'
 import router from '@/router';
 import { useRoute } from 'vue-router';
-import { useStore } from 'vuex'
-import { key } from '@/store/index'
 import { API } from '@/scripts/auth';
 import { Statut } from '@/interfaces/Profile';
 import ModInput from '@/components/form/ModInput.vue';
@@ -66,7 +64,6 @@ export default defineComponent({
     },
 	created() {
 		const route = useRoute()
-		const store = useStore(key)
 
 		if (route.query.is2fa !== undefined)
 		{
@@ -82,7 +79,7 @@ export default defineComponent({
 	methods: {
 		send_digit_code(): void {
 			API.post('2fa/authenticate', {twoFactorAuthenticationCode: this.digits})
-			.then((response) => {
+			.then(() => {
 				reload_socket();
 				this.connection()
 			}).catch( (error) => {
