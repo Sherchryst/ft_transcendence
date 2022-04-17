@@ -8,6 +8,7 @@ import { UpdateNicknameDto } from './dto/update-nickname.dto';
 import { instanceToPlain } from 'class-transformer';
 import { User } from './entities/user.entity';
 import { UserRelationshipType } from './entities/user-relationship.entity';
+import { Multer } from 'multer';
 
 export const imageFilter: any = (req: any, file: { mimetype: string, size: number }, callback: (arg0: any, arg1: boolean) => void): any =>
 {
@@ -175,7 +176,7 @@ export class UsersController {
 
   @Post('update-avatar')
   @UseInterceptors(FileInterceptor('file', { fileFilter: imageFilter }))
-  async updateAvatar(@Req() req : any, @UploadedFile() file: Express.Multer.File) {
+  async updateAvatar(@Req() req : any, @UploadedFile() file: Multer.File, @Body() body: { id : number }) {
     if (!file)
       throw new BadRequestException('No file uploaded');
     const user = await this.usersService.findOne(req.user.id);
