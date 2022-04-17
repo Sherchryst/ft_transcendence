@@ -203,7 +203,7 @@ export class ChatController {
 
   @Post('set-password')
   async setPassword(@Req() req, @Body() data: {channelId: number, password: string}) {
-    console.log(data)
+    //console.log(data)
     if (data.channelId == undefined || data.password == undefined)
       throw new BadRequestException('undefined parameters')
     const channel = await this.chatService.findChannel(data.channelId);
