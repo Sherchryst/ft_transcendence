@@ -3,8 +3,8 @@ import { GameMap } from "./game/gameMap.interface"
 import { User } from "./Profile"
 
 export interface FriendRequest {
-	nickname: string,
-	id: number
+	from: User,
+	created_at: Date;
 }
 
 export interface ChannelInvitation {

@@ -26,7 +26,6 @@ import { key } from '@/store'
 import { Message_t, ServerMessage } from '@/interfaces/Message';
 import { Channel, ChannelMember_t, ChannelMemberRole } from '@/interfaces/Channel';
 import { chatSocket } from '@/socket'
-import InfoPanel from '@/components/chat/InfoPanel.vue';
 import OptionChannel from '../components/chat/OptionChannel.vue';
 import ChatViewWrapper from '@/components/chat/ChatViewWrapper.vue';
 import { API } from '@/scripts/auth';
@@ -122,7 +121,7 @@ export default defineComponent({
                     if (response.data.members[i].user.id == this.$store.getters.getId)
                         this.role = response.data.members[i].role;
                 }
-            }).catch((error: Error) => {
+            }).catch(() => {
                 router.push({name: 'not-found', replace: true })
             })
             API.get('users/block-list').then((response) => {
