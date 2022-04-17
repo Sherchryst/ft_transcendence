@@ -3,11 +3,8 @@
 		<template v-slot:title>
 			{{ member.friend.nickname }}
 		</template>
-		<template v-slot:info>
-			
-		</template>
 		<template v-slot:option>
-			
+			<ProfilePanelDM :user="member.friend"></ProfilePanelDM>
 		</template>
 		<template v-slot:messages>
 			<message v-for="(message, index) in history" :key="index" :message="message" :channelId="parseInt(userId)" :id="index" :role="message.from.role">
@@ -27,6 +24,7 @@ import { chatSocket } from '@/socket'
 import { ChannelMemberRole } from '@/interfaces/Channel';
 import { Profile, User } from '@/interfaces/Profile';
 import router from '@/router';
+import ProfilePanelDM from '@/components/chat/ProfilePanelDM.vue'
 
 export default defineComponent({
 	name: 'DirectMessage',
@@ -105,6 +103,6 @@ export default defineComponent({
 				this.recv(data)
 			})
 	},
-	components: { ChatViewWrapper, Message }
+	components: { ChatViewWrapper, Message, ProfilePanelDM }
 })
 </script>
