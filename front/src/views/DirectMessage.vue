@@ -89,7 +89,7 @@ export default defineComponent({
 	},
 	created(): void {
 		watch(
-			() => this.$route.params.id,
+			() => this.$route.params.userId,
 			(newId) => {
 				if (newId)
 					this.init(parseInt(String(newId)))
