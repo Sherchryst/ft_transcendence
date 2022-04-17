@@ -57,12 +57,8 @@ export default defineComponent ({
     },
     mounted() {
         this.socket
-            .on("disconnect", (reason) => {
-                console.log("Disconnected", reason);
-            })
             .on("created", (data) => {
                 for (let i = 0; i != this.listChannel.length; ++i) {
-                    console.log(this.listChannel[i].id)
                     if (this.listChannel[i].id == data.channel.id)
                         return ;
                 }
@@ -72,7 +68,6 @@ export default defineComponent ({
         ;
         API.get('chat/list').then((response) => {
             this.listChannel = response.data
-            console.log(this.listChannel);
         }).catch((error) => {
             this.listChannel = [];
         })
@@ -84,12 +79,11 @@ export default defineComponent ({
                     if (this.listChannel[i].id == response.data.id)
                         return ;
                 this.listChannel.push(response.data);
-            }).catch((error) => {console.log(error)})
+            })
 		},
         switchVisibility(): void {
             let visibility =  this.formCreate.visibility
             this.formCreate.visibility =  visibility == "public" ? "private" : "public"
-            console.log(this.formCreate.visibility)
         }
     }
 })

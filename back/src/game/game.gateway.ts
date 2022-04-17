@@ -110,6 +110,7 @@ export class GameGateway implements OnGatewayConnection {
           if (pending_player.includes(key)) {
             pending_player.splice(pending_player.indexOf(key), 1);
           }
+          await this.matchService.deleteMatchInvitations(key);
           boards.forEach((board, match_id) => {
             if (!board.end) {
               this.server.to(`game:${match_id}`).emit("warning", "A player has disconnected");
@@ -320,9 +321,9 @@ export class GameGateway implements OnGatewayConnection {
   }
 
   @SubscribeMessage("declineInvit")
-  async handleDeclineInvit(@MessageBody() data: MatchInvitation) {
+  async handleDeclineInvit(@MessageBody() data: MatchInvitation, @Req() req: any) {
     try {
-      await this.matchService.deleteMatchInvitation(data.from.id, data.to.id);
+      await this.matchService.deleteMatchInvitation(data.from.id, req.user.id);
     } catch (e) {}
   }
 

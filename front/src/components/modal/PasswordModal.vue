@@ -42,9 +42,6 @@ export default defineComponent({
 			(this.$refs['modal'] as typeof Modal).close()
 		},
 		send(){
-			// doesn't work
-			// but i can't do anything about it
-			console.log("allo", this.channelId);
 			API.post('chat/set-password', {channelId: this.channelId, password: this.FormData.password}).then(() => {
 			this.close(); })
 		}

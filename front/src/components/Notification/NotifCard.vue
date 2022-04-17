@@ -36,7 +36,6 @@ export default defineComponent({
 	},
 	methods: {
 		hidden() {
-			console.log("niques")
 			this.display = false
 		}
 	}

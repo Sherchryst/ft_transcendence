@@ -125,18 +125,14 @@ export default defineComponent({
 		const toast = useToast();
 		gameSocket.on("error", (err : string) => {
 			toast.error(err);
-			// console.log("Game error :", err);
 		})
 		gameSocket.on("warning", (err : string) => {
 			toast.warning(err);
-			// console.log("Game warning :", err);
 		})
 		statusSocket.on("new_friend", (id : number) => {
-			console.log('NEW FRIEND IN YOUR LIFE bitch', id);
 			this.$store.dispatch('connection')
 		})
 		statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
-			console.log('status data',data);
 			this.$store.dispatch("setStatus", {
 				userId: data.userId,
 				status: data.status,
@@ -147,7 +143,6 @@ export default defineComponent({
 		this.getNotif()
 		this.chatSocket
 			.on('invited', (data: ChannelInvitation) => {
-				console.log('invite', data)
 				this.addChannelInivtation(data);
 			})
 		this.gameSocket
@@ -186,14 +181,12 @@ export default defineComponent({
 				response.data.forEach( (element: FriendRequest) => {
 					this.addFriendRequest(element)
 				});
-				console.log("len", this.notifications.length)
 			})
 			API.get('chat/invite-list', {
 				params: {
 					id: this.$store.getters.getId
 				}
 			}).then( (response) => {
-				console.log("data")
 				response.data.forEach( (element: ChannelInvitation) => {
 					this.addChannelInivtation(element)
 				})
@@ -235,8 +228,7 @@ export default defineComponent({
 			let index = this.notifications.findIndex( (notif) => {
 				return (notif.content == data)
 			})
-			console.log("index", index)
-			this.notifications.splice(index)
+			this.notifications.splice(index, 1)
 		},
 		search(expr: string): void {
 			if (expr && expr.length)

@@ -44,14 +44,10 @@ export default defineComponent({
 			(this.$refs['modal'] as typeof Modal).close()
 		},
 		send(){
-			console.log("chan id", this.formData.channelId)
 			API.post("chat/join", 
 				this.formData
 			).then((res)=>{
-				console.log(res);
 				router.push({ name: 'unique-chat', params: { id: this.channelId }});
-			}).catch((error) => {
-				console.log(error)
 			})
 		}
 	}

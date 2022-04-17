@@ -25,7 +25,6 @@ export default defineComponent({
         },
         onFileChange(event: any) {
             const file = event.target.files[0];
-            console.log(file);
             if (file && file instanceof File) {
                 this.$emit('onInputImage', file);
             }

@@ -46,9 +46,8 @@ export default defineComponent({
 					channelId: this.channel?.id,
 					password: ""
 				}).then((res)=>{
-					console.log(res);
 					router.push({ name: 'unique-chat', params: { id: this.channel?.id }});
-				}).catch((error) => {console.log(error)})
+				})
 			}
 		}
 	},

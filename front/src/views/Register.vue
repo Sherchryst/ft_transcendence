@@ -76,7 +76,6 @@ export default defineComponent({
 					headers: {
 						'Content-Type': 'multipart/form-data'
 					}}).catch(err => {
-						console.log(err);
 						this.$store.commit('setError', err.response.data.message);
 					})
 			API.post('users/update-nickname', {
@@ -85,12 +84,8 @@ export default defineComponent({
 			}).then( () => {
 					this.$store.dispatch('connection').then( () => {
 						router.push({name: "home"})
-					}).catch(function(error) {
-					console.log("update failed", error);
 					})
-				}).catch(function(error) {
-				console.log(error);
-			});
+				})
 		}
 	}
 	})

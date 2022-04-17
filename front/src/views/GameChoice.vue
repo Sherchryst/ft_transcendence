@@ -28,17 +28,6 @@ export default defineComponent({
     GamePanel,
     ChallengeModal
 },
-	mounted() {
-			statusSocket.on("status", (data: { userId : number, status : string, message : string}) => {
-			console.log("match status : ", data);
-		});
-	},
-	beforeUnmount() {
-		//   gameSocket.off("invited");
-		//   gameSocket.off("gameStart");
-		// const removed = document.removeEventListener("mousemove", this.moveRackets);
-		console.log("before destroy in gamechoice");
-	},
 	methods: {
 		sendInvite() {
 			(this.$refs["modal_challenge"] as typeof ChallengeModal).open()
@@ -46,7 +35,6 @@ export default defineComponent({
 		},
 		requestGame() {
 			router.push({ name: "game", params: { match_id: `bot` } })
-			console.log("BOT");
 		},
 		matchmaking() {
 			gameSocket.emit("matchmaking");

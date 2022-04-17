@@ -79,9 +79,6 @@ export default defineComponent({
 	mounted() {
         this.getChannelInfo(parseInt(this.id))
         this.socket
-            .on('connect', () => {
-                console.log('connected', this.socket.id)
-            })
             .on('message', (data) => {
                 if (this.blocked_list.find((user) => {return user.id == data.channelMessage.message.from.id}))
                     return ;
@@ -105,7 +102,6 @@ export default defineComponent({
 	},  
 	methods: {
         send(message: string): void {
-            console.log("message : ", message)
             if (message != "") {
                 this.socket.emit('message', {
                     chanId: parseInt(this.id),
@@ -114,7 +110,6 @@ export default defineComponent({
             }
 		},
 		getChannelInfo(chanId: number): void {
-            console.log(chanId);
 			API.get('chat/channel-info', {params: {channelId: chanId}})
             .then((response: AxiosResponse) => {
                 this.channel = response.data.channel
@@ -130,11 +125,8 @@ export default defineComponent({
                 router.push({name: 'not-found', replace: true })
             })
             API.get('users/block-list').then((response) => {
-                console.log(response);
                 for (let i = 0; i < response.data.length; ++i)
                     this.blocked_list.push(response.data[i]);
-            }).catch((error) => {
-                console.log(error);
             })
 		},
         recv(data: ServerMessage ): void {

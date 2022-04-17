@@ -122,7 +122,6 @@
         () => this.$route.params.match_id,
         (newId, oldId) => {
           if (oldId){
-            console.log("leaving", oldId);
             if (oldId != 'bot') {
               gameSocket.emit('leave', { match_id : oldId, id : this.id });
               gameSocket.off("board");
@@ -132,7 +131,6 @@
             window.removeEventListener("resize", this.resizeCanvas);
           }
           if (newId) {
-            console.log("joining", newId);
             this.initGame(newId.toString());
           }
         }
@@ -141,13 +139,11 @@
     mounted() {
       this.initGame(this.$props.match_id);
       // this.dimX = this.game_ctx.canvas.width / 100;
-      console.log("mounted", this.game_ctx, this.$props);
       // this.dimY = this.game_ctx.canvas.height / 100;
     },
     beforeRouteLeave(to, from, next) {
 
       if (!this.board.end && this.$props.match_id != "bot" && (this.id == 0 || this.id == 1)) {
-        console.log("leaving");
         gameSocket.emit('leave', { match_id : this.$props.match_id, id : this.id });
       }
       next();
@@ -180,18 +176,13 @@
             id : number
           }) => {
             this.map = { ...this.map, ...data.map };
-            console.log(" my map :", this.map);
             this.login = { ...this.login, ...data.login };
-            console.log(" logins :", this.login);
             this.nickname = { ...this.nickname, ...data.nickname };
-            console.log(" nicknames :", this.nickname);
             this.id = data.id;
             this.gameStart = true;
             this.resizeCanvas();
-            console.log(" id :", this.id);
             // this.drawBackground();
             document.addEventListener(this.move, this.moveRackets);
-            // console.log(setuped, 'socket connected');
           });
           gameSocket.on("board", (data : Board) => {
             this.board = { ...this.board, ...data }
@@ -200,14 +191,11 @@
         }
         else
         {
-          console.log("bot");
           this.gameStart = true;
           this.resizeCanvas();
           // this.reset(true);
           // this.drawBackground();
-          console.log(this.game_ctx);
           document.addEventListener(this.move, this.moveRackets);
-          // console.log(setuped, 'evts', this.evts);
           this.game_loop();
         }
       },
@@ -216,7 +204,6 @@
         let containerRect : DOMRect = container.getBoundingClientRect();
         const width = containerRect.right - containerRect.left;
         const height = containerRect.bottom - containerRect.top;
-        console.log(width, height, this.$refs.container); // logs 0
         const margin = 20;
         if ((width - margin) * (3/4)  < height - margin) {
           this.game_canvas.width = (width - margin);
@@ -247,7 +234,6 @@
       {
         var ctx = this.bg_ctx;
         ctx.fillStyle = color;
-        // console.log('color', color);
         ctx.beginPath();
         // ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
         ctx.arc(x - radius, y - radius, radius, 0, Math.PI / 2, false);
@@ -275,7 +261,6 @@
           const lineColor = `#${this.map.racketColor.toString(16).padStart(6, '0')}`;
           const bgColor = `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`;
           ctx.fillStyle = bgColor;
-          // console.log("background color", `#${this.map.backgroundColor.toString(16).padStart(6, '0')}`);
           ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
           // ctx.fillStyle = "white";
           if (starColor != bgColor)
@@ -378,7 +363,6 @@
       },
       addObjects()
       {
-        // console.log("end : ", this.board.end);
         var ctx = this.game_ctx;
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         if (this.board.end)
@@ -394,13 +378,11 @@
       },
       moveRackets(evt : any)
       {
-        // console.log("Evt: ", evt);
         if (this.id > 1)
           return ;
         if (this.move == "touchmove")
           evt = evt.touches[0];
         let rect : DOMRect = this.game_ctx.canvas.getBoundingClientRect();
-        // console.log("id :", this.id, this.match_id);
         if (this.$props.match_id != "bot")
           gameSocket.emit('player', {match_id : this.$props.match_id, id : this.id, y : (evt.clientY - rect.top) / this.dimY})
         else

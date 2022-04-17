@@ -49,10 +49,6 @@ export default defineComponent({
         role: { type: String as PropType<ChannelMemberRole>, default: 'member'},
         owner: { type: Boolean, default: true }
     },
-    created() {
-        console.log("User", this.user);
-        console.log("Channel", this.channelId);
-    },
     methods: {
         requestFriend() {
 			API.post('users/send-friend-request', {
